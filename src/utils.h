@@ -1,11 +1,8 @@
-
 #define STATUS_BUZZER 27
 #define dataPin 14
 #define latchPin 27
 #define clockPin 26
-#define WIFI_SSID_ADDR 0
-#define WIFI_PASS_ADDR 100
-#define EEPROM_SIZE 512
+
 
 uint8_t outputState = 0; 
 
@@ -44,12 +41,12 @@ void clearOutput(uint8_t pin) {
 }
 
 
-void trigerTTP223(Device &device)
-{
-    Serial.println("-----------------------");
-    Serial.println("Trigerring TTP223 sensor...");
-    digitalWrite(device.controlPin, HIGH);
-    delay(100);
-    digitalWrite(device.controlPin, LOW);
-    Serial.println("TTP223 sensor triggered");
-}
+// void trigerTTP223(Device &device)
+// {
+//     Serial.println("-----------------------");
+//     Serial.println("Trigerring TTP223 sensor...");
+//     digitalWrite(device.controlPin, HIGH);
+//     delay(100);
+//     digitalWrite(device.controlPin, LOW);
+//     Serial.println("TTP223 sensor triggered");
+// }
