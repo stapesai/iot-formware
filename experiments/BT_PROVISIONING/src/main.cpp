@@ -8,13 +8,15 @@
 #include <BLEServer.h>
 #include <Preferences.h>
 #include <nvs_flash.h>
+#include <esp_system.h> // Include the header for restarting
 
-// Define UUIDs
+// Define UUIDs for BLE service and characteristic
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
 Preferences preferences;
 
+// Define a structure to hold configuration data
 struct Config
 {
   char ssid[32];
@@ -24,26 +26,28 @@ struct Config
   char mqtt_user[32];
   char mqtt_password[32];
   char mqtt_topic[32];
-  char *fields[7] = {ssid, password, mqtt_server, mqtt_port,
-                     mqtt_user, mqtt_password, mqtt_topic};
+  char* fields[7] = {ssid, password, mqtt_server, mqtt_port, mqtt_user, mqtt_password, mqtt_topic};
 } config;
 
+const char *keys[7] = {"ssid", "password", "mqtt_server", "mqtt_port", "mqtt_user", "mqtt_password", "mqtt_topic"};
+
+// Function to write configuration data to NVS
 void writeConfig()
 {
   nvs_handle_t my_handle;
   esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
   if (err != ESP_OK)
   {
-    Serial.println("Error (opening NVS handle)");
+    Serial.println("Error opening NVS handle");
   }
   else
   {
     for (int i = 0; i < 7; ++i)
     {
-      err = nvs_set_str(my_handle, config.fields[i], config.fields[i]);
+      err = nvs_set_str(my_handle, keys[i], config.fields[i]);
       if (err != ESP_OK)
       {
-        Serial.println("Error (writing to NVS)");
+        Serial.printf("Error writing to NVS for field %d (%s)\n", i, keys[i]);
       }
     }
     nvs_commit(my_handle);
@@ -51,44 +55,43 @@ void writeConfig()
   }
 }
 
+// Function to read configuration data from NVS
 void readConfig()
 {
   nvs_handle_t my_handle;
   esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
   if (err != ESP_OK)
   {
-    Serial.println("Error (opening NVS handle)");
+    Serial.println("Error opening NVS handle");
   }
   else
   {
     for (int i = 0; i < 7; ++i)
     {
       size_t required_size;
-      err = nvs_get_str(my_handle, config.fields[i], NULL, &required_size);
+      err = nvs_get_str(my_handle, keys[i], NULL, &required_size);
       if (err != ESP_OK)
       {
-        Serial.println("Error (reading from NVS)");
+        Serial.printf("Error reading size from NVS for field %d (%s)\n", i, keys[i]);
       }
       else
       {
-        char *value = (char *)malloc(required_size);
-        err = nvs_get_str(my_handle, config.fields[i], value, &required_size);
+        err = nvs_get_str(my_handle, keys[i], config.fields[i], &required_size);
         if (err != ESP_OK)
         {
-          Serial.println("Error (reading from NVS)");
+          Serial.printf("Error reading value from NVS for field %d (%s)\n", i, keys[i]);
         }
         else
         {
-          Serial.printf("Read from NVS: %s\n", value);
-          // strncpy(config.fields[i], value, sizeof(config.fields[i]));
+          Serial.printf("Read from NVS: %s = %s\n", keys[i], config.fields[i]);
         }
-        free(value);
       }
     }
     nvs_close(my_handle);
   }
 }
 
+// Helper function to split a string into tokens based on a delimiter
 std::vector<std::string> splitString(const std::string &str, char delim)
 {
   std::vector<std::string> tokens;
@@ -109,27 +112,22 @@ public:
   {
     char delim = ';';
     std::string value = pCharacteristic->getValue();
-    std::string str = value;
-    std::vector<std::string> tokens = splitString(str, delim);
+    std::vector<std::string> tokens = splitString(value, delim);
 
     if (tokens.size() == 7)
     {
-      // for (int i = 0; i < 7; ++i)
-      // {
-      //   strncpy(config.fields[i], tokens[i].c_str(), sizeof(config.fields[i]));
-      //   Serial.printf("Received by ble: %s\n", config.fields[i]);
-
-      // }
-
-      strncpy(config.ssid, tokens[0].c_str(), sizeof(config.ssid));
-      strncpy(config.password, tokens[1].c_str(), sizeof(config.password));
-      strncpy(config.mqtt_server, tokens[2].c_str(), sizeof(config.mqtt_server));
-      strncpy(config.mqtt_port, tokens[3].c_str(), sizeof(config.mqtt_port));
-      strncpy(config.mqtt_user, tokens[4].c_str(), sizeof(config.mqtt_user));
-      strncpy(config.mqtt_password, tokens[5].c_str(), sizeof(config.mqtt_password));
-      strncpy(config.mqtt_topic, tokens[6].c_str(), sizeof(config.mqtt_topic));
+      for (int i = 0; i < 7; ++i)
+      {
+        strncpy(config.fields[i], tokens[i].c_str(), sizeof(config.fields[i]) - 1);
+        config.fields[i][sizeof(config.fields[i]) - 1] = '\0';
+        Serial.printf("Received by BLE: %s\n", config.fields[i]);
+      }
       writeConfig();
       Serial.println("Data written to NVS");
+
+      Serial.println("Restarting ESP32...");
+      delay(1000);
+      esp_restart();
     }
     else
     {
@@ -137,8 +135,6 @@ public:
     }
   }
 };
-
-// function to write and read config to nvs
 
 void setup()
 {
@@ -152,27 +148,24 @@ void setup()
   }
   ESP_ERROR_CHECK(err);
 
-  BLEDevice::init("PROV_123"); // Initialize BLE
+  BLEDevice::init("PROV_123");
 
-  BLEServer *pServer = BLEDevice::createServer();              // Create BLE server
-  BLEService *pService = pServer->createService(SERVICE_UUID); // Create BLE service
+  BLEServer *pServer = BLEDevice::createServer();
+  BLEService *pService = pServer->createService(SERVICE_UUID);
   BLECharacteristic *pCharacteristic = pService->createCharacteristic(
-      CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE); // Create BLE characteristic
+      CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE);
 
   pCharacteristic->setCallbacks(new MyCallbacks());
-  pService->start(); // Start the service
+  pService->start();
   BLEAdvertising *pAdvertising = pServer->getAdvertising();
   pAdvertising->start();
 
   readConfig();
 
-  preferences.begin("storage", true);
-  if (preferences.getBytesLength("ssid") > 0)
+  if (strlen(config.ssid) > 0)
   {
     Serial.println("Data present in NVS");
-    readConfig();
 
-    // Stop BLE service and advertising
     pService->stop();
     pAdvertising->stop();
 
@@ -183,32 +176,34 @@ void setup()
     Serial.println("Waiting for a client connection to notify...");
     Serial.println("The device started, now you can pair it with BLE Scanner!");
   }
+
+  pinMode(16, OUTPUT);
+  pinMode(0, INPUT_PULLUP);
 }
 
-
-
 void loop()
-
 {
   digitalWrite(16, HIGH);
   delay(1000);
   digitalWrite(16, LOW);
   delay(1000);
+
   if (digitalRead(0) == LOW)
   {
-
-    Serial.println("Resetting nvs");
-
+    Serial.println("Resetting NVS");
     delay(5000);
 
     if (nvs_flash_erase() == ESP_OK)
     {
-      Serial.println("Resetting nvs");
-      Serial.println("Erased nvs");
+      Serial.println("NVS erased");
     }
     else
     {
-      Serial.println("Error erasing nvs");
+      Serial.println("Error erasing NVS");
     }
+
+    Serial.println("Restarting ESP32...");
+    delay(1000);
+    esp_restart();
   }
 }
