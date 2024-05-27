@@ -16,128 +16,179 @@
 
 Preferences preferences;
 
-// Define a structure to hold configuration data
-struct Config
+class ManageConfig
 {
-  char ssid[32];
-  char password[32];
-  char mqtt_server[32];
-  char mqtt_port[6];
-  char mqtt_user[32];
-  char mqtt_password[32];
-  char mqtt_topic[32];
-  char *fields[7] = {ssid, password, mqtt_server, mqtt_port, mqtt_user, mqtt_password, mqtt_topic};
-} config;
+private:
+  std::string ssid;
+  std::string password;
+  std::string mqtt_server;
+  std::string mqtt_port;
+  std::string mqtt_user;
+  std::string mqtt_password;
+  std::string mqtt_topic;
+  std::array<std::string *, 7> fields;
+  const char *keys[7] = {"ssid", "password", "mqtt_server", "mqtt_port", "mqtt_user", "mqtt_password", "mqtt_topic"};
 
-const char *keys[7] = {"ssid", "password", "mqtt_server", "mqtt_port", "mqtt_user", "mqtt_password", "mqtt_topic"};
+public:
+  ManageConfig() { fields = {&ssid, &password, &mqtt_server, &mqtt_port, &mqtt_user, &mqtt_password, &mqtt_topic}; }
 
-// Function to write configuration data to NVS
-void writeConfig()
-{
-  nvs_handle_t my_handle;
-  esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
-  if (err != ESP_OK)
+  const std::string &getSSID() const { return ssid; }
+  const std::string &getPassword() const { return password; }
+  const std::string &getMQTTServer() const { return mqtt_server; }
+  const std::string &getMQTTPort() const { return mqtt_port; }
+  const std::string &getMQTTUser() const { return mqtt_user; }
+  const std::string &getMQTTPassword() const { return mqtt_password; }
+  const std::string &getMQTTTopic() const { return mqtt_topic; }
+
+  void setSSID(const std::string &value) { ssid = value; }
+  void setPassword(const std::string &value) { password = value; }
+  void setMQTTServer(const std::string &value) { mqtt_server = value; }
+  void setMQTTPort(const std::string &value) { mqtt_port = value; }
+  void setMQTTUser(const std::string &value) { mqtt_user = value; }
+  void setMQTTPassword(const std::string &value) { mqtt_password = value; }
+  void setMQTTTopic(const std::string &value) { mqtt_topic = value; }
+
+  std::vector<std::string> splitString(const std::string &str, char delim)
   {
-    Serial.println("Error opening NVS handle");
-  }
-  else
-  {
-    for (int i = 0; i < 7; ++i)
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(str);
+    while (std::getline(tokenStream, token, delim))
     {
-      // Write the configuration field to NVS
-      err = nvs_set_str(my_handle, keys[i], config.fields[i]);
-      if (err != ESP_OK)
-      {
-        Serial.printf("Error writing to NVS for field %d (%s)\n", i, keys[i]);
-      }
+      tokens.push_back(token);
     }
-    // Commit the changes to NVS
-    nvs_commit(my_handle);
-    nvs_close(my_handle);
+    return tokens;
   }
-}
 
-// Function to read configuration data from NVS
-void readConfig()
-{
-  nvs_handle_t my_handle;
-  esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
-  if (err != ESP_OK)
+  void writeConfig()
   {
-    Serial.println("Error opening NVS handle");
-  }
-  else
-  {
-    for (int i = 0; i < 7; ++i)
+    nvs_handle_t my_handle;
+    esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
+    if (err != ESP_OK)
     {
-      size_t required_size;
-      // Get the size of the configuration field
-      err = nvs_get_str(my_handle, keys[i], NULL, &required_size);
-      if (err != ESP_OK)
+      Serial.println("Error opening NVS handle");
+    }
+    else
+    {
+      for (int i = 0; i < 7; ++i)
       {
-        Serial.printf("Error reading size from NVS for field %d (%s)\n", i, keys[i]);
-      }
-      else
-      {
-        // Allocate memory to store the configuration field
-        char *value = (char *)malloc(required_size);
-        // Read the configuration field from NVS
-        err = nvs_get_str(my_handle, keys[i], value, &required_size);
+        // Write the configuration field to NVS
+        err = nvs_set_str(my_handle, keys[i], fields[i]->c_str());
         if (err != ESP_OK)
         {
-          Serial.printf("Error reading value from NVS for field %d (%s)\n", i, keys[i]);
+          Serial.printf("Error writing to NVS for field %d (%s)\n", i, keys[i]);
+        }
+      }
+      // Commit the changes to NVS
+      nvs_commit(my_handle);
+      nvs_close(my_handle);
+    }
+  }
+
+  void readConfig()
+  {
+    nvs_handle_t my_handle;
+    esp_err_t err = nvs_open("storage", NVS_READONLY, &my_handle);
+    if (err != ESP_OK)
+    {
+      Serial.println("Error opening NVS handle");
+    }
+    else
+    {
+      for (int i = 0; i < 7; ++i)
+      {
+        size_t required_size;
+        // Get the size of the configuration field
+        err = nvs_get_str(my_handle, keys[i], NULL, &required_size);
+        if (err != ESP_OK)
+        {
+          Serial.printf("Error reading size from NVS for field %d (%s)\n", i, keys[i]);
         }
         else
         {
-          // Copy the value to the configuration field
-          strncpy(config.fields[i], value, sizeof(config.fields[i]) - 1);
-          config.fields[i][sizeof(config.fields[i]) - 1] = '\0';
-          Serial.printf("Read from NVS: %s = %s\n", keys[i], config.fields[i]);
+          // Allocate memory to store the configuration field
+          char *value = (char *)malloc(required_size);
+          // Read the configuration field from NVS
+          err = nvs_get_str(my_handle, keys[i], value, &required_size);
+          if (err != ESP_OK)
+          {
+            Serial.printf("Error reading value from NVS for field %d (%s)\n", i, keys[i]);
+          }
+          else
+          {
+            // Copy the value to the configuration field
+            *fields[i] = std::string(value); // Convert char* to std::string
+            std::cout << "Read from NVS: " << keys[i] << " = " << *(fields[i]) << std::endl;
+          }
+          free(value); // Free the allocated memory
         }
-        free(value); // Free the allocated memory
       }
+      nvs_close(my_handle);
     }
-    nvs_close(my_handle);
   }
-}
-
-
-// Helper function to split a string into tokens based on a delimiter
-std::vector<std::string> splitString(const std::string &str, char delim)
-{
-  std::vector<std::string> tokens;
-  std::string token;
-  std::istringstream tokenStream(str);
-  while (std::getline(tokenStream, token, delim))
+  // Method to print all fields
+  void printFields() const
   {
-    tokens.push_back(token);
+    for (const auto &field : fields)
+    {
+      std::cout << *field << std::endl;
+    }
   }
-  return tokens;
-}
+};
+ManageConfig config;
 
-// Callbacks for BLE characteristic
-class MyCallbacks : public BLECharacteristicCallbacks
+class MyCallbacks : public BLECharacteristicCallbacks,
+                    public ManageConfig
 {
 public:
   void onWrite(BLECharacteristic *pCharacteristic)
   {
     char delim = ';';
     std::string value = pCharacteristic->getValue();
-    std::vector<std::string> tokens = splitString(value, delim);
+    std::vector<std::string> tokens = config.splitString(value, delim);
 
     if (tokens.size() == 7)
     {
       for (int i = 0; i < 7; ++i)
       {
-        // Copy the received string into the configuration field
-        strncpy(config.fields[i], tokens[i].c_str(), sizeof(config.fields[i]) - 1);
-        // Ensure null termination
-        config.fields[i][sizeof(config.fields[i]) - 1] = '\0';
-        Serial.printf("Received by BLE: %s\n", config.fields[i]);
+        switch (i)
+        {
+        case 0:
+          config.setSSID(tokens[i]);
+          std::cout << "SSID: " << config.getSSID() << std::endl;
+          break;
+        case 1:
+          config.setPassword(tokens[i]);
+          std::cout << "Password: " << config.getPassword() << std::endl;
+          break;
+        case 2:
+          config.setMQTTServer(tokens[i]);
+          std::cout << "MQTT Server: " << config.getMQTTServer() << std::endl;
+          break;
+        case 3:
+          config.setMQTTPort(tokens[i]);
+          std::cout << "MQTT Port: " << config.getMQTTPort() << std::endl;
+
+          break;
+        case 4:
+          config.setMQTTUser(tokens[i]);
+          std::cout << "MQTT User: " << config.getMQTTUser() << std::endl;
+          break;
+        case 5:
+          config.setMQTTPassword(tokens[i]);
+          std::cout << "MQTT Password: " << config.getMQTTPassword() << std::endl;
+          break;
+        case 6:
+          config.setMQTTTopic(tokens[i]);
+          std::cout << "MQTT Topic: " << config.getMQTTTopic() << std::endl;
+          break;
+        default:
+          break;
+        }
       }
 
       // Write the configuration to NVS
-      writeConfig();
+      config.writeConfig();
       Serial.println("Data written to NVS");
 
       Serial.println("Restarting ESP32...");
@@ -175,9 +226,9 @@ void setup()
   BLEAdvertising *pAdvertising = pServer->getAdvertising();
   pAdvertising->start();
 
-  readConfig();
+  // readConfig();
 
-  if (strlen(config.ssid) > 0)
+  if (strlen(config.getSSID().c_str()) > 0)
   {
     Serial.println("Data present in NVS");
 
@@ -193,20 +244,25 @@ void setup()
   }
 
   pinMode(16, OUTPUT);
-  pinMode(0, INPUT_PULLUP);
 }
 
 void loop()
 {
-  digitalWrite(16, HIGH);
-  delay(1000);
-  digitalWrite(16, LOW);
-  delay(1000);
 
   if (digitalRead(0) == LOW)
   {
+    unsigned long startTime = millis(); // Record the start time
+
     Serial.println("Resetting NVS");
-    delay(5000);
+
+    while (millis() - startTime < 5000)
+    {
+      digitalWrite(16, HIGH);
+      delay(100);
+      digitalWrite(16, LOW);
+      delay(100);
+    }
+    delay(1000);
 
     if (nvs_flash_erase() == ESP_OK)
     {
