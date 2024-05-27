@@ -71,6 +71,7 @@ void readConfig()
     for (int i = 0; i < 7; ++i)
     {
       size_t required_size;
+      // Get the size of the configuration field
       err = nvs_get_str(my_handle, keys[i], NULL, &required_size);
       if (err != ESP_OK)
       {
@@ -78,20 +79,28 @@ void readConfig()
       }
       else
       {
-        err = nvs_get_str(my_handle, keys[i], config.fields[i], &required_size);
+        // Allocate memory to store the configuration field
+        char *value = (char *)malloc(required_size);
+        // Read the configuration field from NVS
+        err = nvs_get_str(my_handle, keys[i], value, &required_size);
         if (err != ESP_OK)
         {
           Serial.printf("Error reading value from NVS for field %d (%s)\n", i, keys[i]);
         }
         else
         {
+          // Copy the value to the configuration field
+          strncpy(config.fields[i], value, sizeof(config.fields[i]) - 1);
+          config.fields[i][sizeof(config.fields[i]) - 1] = '\0';
           Serial.printf("Read from NVS: %s = %s\n", keys[i], config.fields[i]);
         }
+        free(value); // Free the allocated memory
       }
     }
     nvs_close(my_handle);
   }
 }
+
 
 // Helper function to split a string into tokens based on a delimiter
 std::vector<std::string> splitString(const std::string &str, char delim)
