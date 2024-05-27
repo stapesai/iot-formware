@@ -26,7 +26,7 @@ struct Config
   char mqtt_user[32];
   char mqtt_password[32];
   char mqtt_topic[32];
-  char* fields[7] = {ssid, password, mqtt_server, mqtt_port, mqtt_user, mqtt_password, mqtt_topic};
+  char *fields[7] = {ssid, password, mqtt_server, mqtt_port, mqtt_user, mqtt_password, mqtt_topic};
 } config;
 
 const char *keys[7] = {"ssid", "password", "mqtt_server", "mqtt_port", "mqtt_user", "mqtt_password", "mqtt_topic"};
@@ -44,12 +44,14 @@ void writeConfig()
   {
     for (int i = 0; i < 7; ++i)
     {
+      // Write the configuration field to NVS
       err = nvs_set_str(my_handle, keys[i], config.fields[i]);
       if (err != ESP_OK)
       {
         Serial.printf("Error writing to NVS for field %d (%s)\n", i, keys[i]);
       }
     }
+    // Commit the changes to NVS
     nvs_commit(my_handle);
     nvs_close(my_handle);
   }
@@ -118,10 +120,14 @@ public:
     {
       for (int i = 0; i < 7; ++i)
       {
+        // Copy the received string into the configuration field
         strncpy(config.fields[i], tokens[i].c_str(), sizeof(config.fields[i]) - 1);
+        // Ensure null termination
         config.fields[i][sizeof(config.fields[i]) - 1] = '\0';
         Serial.printf("Received by BLE: %s\n", config.fields[i]);
       }
+
+      // Write the configuration to NVS
       writeConfig();
       Serial.println("Data written to NVS");
 
