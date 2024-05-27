@@ -88,7 +88,7 @@ public:
   void readConfig()
   {
     nvs_handle_t my_handle;
-    esp_err_t err = nvs_open("storage", NVS_READONLY, &my_handle);
+    esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
     if (err != ESP_OK)
     {
       Serial.println("Error opening NVS handle");
@@ -127,13 +127,13 @@ public:
     }
   }
   // Method to print all fields
-  void printFields() const
-  {
-    for (const auto &field : fields)
-    {
-      std::cout << *field << std::endl;
-    }
-  }
+  // void printFields() const
+  // {
+  //   for (const auto &field : fields)
+  //   {
+  //     std::cout << *field << std::endl;
+  //   }
+  // }
 };
 ManageConfig config;
 
@@ -214,6 +214,7 @@ void setup()
   }
   ESP_ERROR_CHECK(err);
 
+  // Initialize BLE
   BLEDevice::init("PROV_123");
 
   BLEServer *pServer = BLEDevice::createServer();
@@ -226,12 +227,13 @@ void setup()
   BLEAdvertising *pAdvertising = pServer->getAdvertising();
   pAdvertising->start();
 
-  // readConfig();
+  // Read configuration from NVS
+  config.readConfig();
 
   if (strlen(config.getSSID().c_str()) > 0)
   {
     Serial.println("Data present in NVS");
-
+    // config.printFields();
     pService->stop();
     pAdvertising->stop();
 
@@ -248,33 +250,47 @@ void setup()
 
 void loop()
 {
+  static unsigned long buttonPressStartTime = 0;
+  bool buttonPressed = digitalRead(0) == LOW;
 
-  if (digitalRead(0) == LOW)
+  if (buttonPressed)
   {
-    unsigned long startTime = millis(); // Record the start time
-
-    Serial.println("Resetting NVS");
-
-    while (millis() - startTime < 5000)
+    if (buttonPressStartTime == 0)
     {
-      digitalWrite(16, HIGH);
-      delay(100);
-      digitalWrite(16, LOW);
-      delay(100);
+      // Button just pressed, record the start time
+      buttonPressStartTime = millis();
     }
-    delay(1000);
-
-    if (nvs_flash_erase() == ESP_OK)
+    else if (millis() - buttonPressStartTime >= 5000)
     {
-      Serial.println("NVS erased");
-    }
-    else
-    {
-      Serial.println("Error erasing NVS");
-    }
+      // Button has been pressed for 5 seconds, reset NVS
+      Serial.println("Resetting NVS");
 
-    Serial.println("Restarting ESP32...");
-    delay(1000);
-    esp_restart();
+      for (int i = 0; i < 25; i++)
+      {
+        digitalWrite(16, HIGH);
+        delay(100);
+        digitalWrite(16, LOW);
+        delay(100);
+      }
+      delay(1000);
+
+      if (nvs_flash_erase() == ESP_OK)
+      {
+        Serial.println("NVS erased");
+      }
+      else
+      {
+        Serial.println("Error erasing NVS");
+      }
+
+      Serial.println("Restarting ESP32...");
+      delay(1000);
+      esp_restart();
+    }
+  }
+  else
+  {
+    // Button not pressed, reset the start time
+    buttonPressStartTime = 0;
   }
 }
