@@ -34,7 +34,6 @@ void setup()
     pService->start();
     BLEAdvertising *pAdvertising = pServer->getAdvertising();
     pAdvertising->start();
-
     config.readConfig();
 
     if (!config.getSSID().empty())
