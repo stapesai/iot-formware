@@ -5,3 +5,4 @@ src/pinConfig.h
 test*
 temp*
 **/.DS_Store
+generated_ble_qr_code.png

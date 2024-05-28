@@ -59,8 +59,20 @@ void setup()
   }
   ESP_ERROR_CHECK(err);
 
-  BLEDevice::init("PROV_123");
+  // Retrieve the MAC address
+  String macAddress = WiFi.macAddress();
+  Serial.print("Device MAC Address: ");
+  Serial.println(macAddress);
 
+  // Create a unique device name by prefixing with a string
+  String deviceName = "JarvisHomeIoTController_" + macAddress;
+  Serial.print("Device Name: ");
+  Serial.println(deviceName);
+
+  // Initialize BLE with the unique device name
+  BLEDevice::init(deviceName.c_str());
+
+  // Create BLE Server
   BLEServer *pServer = BLEDevice::createServer();
   BLEService *pService = pServer->createService(SERVICE_UUID);
   BLECharacteristic *pCharacteristic = pService->createCharacteristic(
@@ -68,10 +80,16 @@ void setup()
 
   pCharacteristic->setCallbacks(new BLEConfigCallbacks(config));
   pService->start();
-  BLEAdvertising *pAdvertising = pServer->getAdvertising();
-  pAdvertising->start();
-  config.readConfig();
 
+  // Set up advertising
+  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+  pAdvertising->addServiceUUID(SERVICE_UUID);
+  pAdvertising->setScanResponse(false);
+  pAdvertising->setMinPreferred(0x06); // Functions that help with iPhone connections issue
+  pAdvertising->setMinPreferred(0x12);
+  BLEDevice::startAdvertising();
+
+  config.readConfig();
   if (!config.getSSID().empty())
   {
     Serial.println("Data present in NVS");
@@ -80,14 +98,12 @@ void setup()
     BLEDevice::deinit(true);
     Serial.println("BLE service stopped.");
     initaliseWiFi();
-
   }
   else
   {
     Serial.println("Waiting for a client connection to notify...");
     Serial.println("The device started, now you can pair it with BLE Scanner!");
   }
-
 
   pinMode(16, OUTPUT);
 
@@ -101,18 +117,15 @@ void setup()
   updateShiftRegister();
   log_d("Shift Register Initialized");
 
-  
   // mqttManager.connectToMQTT(config, config.getMQTTServer(), config.getMQTTPort(), config.getMQTTUser(), config.getMQTTPassword(), config.getMQTTTopic());
-  
 }
 void loop()
 {
-  
 
   static unsigned long buttonPressStartTime = 0;
   bool buttonPressed = digitalRead(0) == LOW;
 
-    if (buttonPressed)
+  if (buttonPressed)
   {
     if (buttonPressStartTime == 0)
     {
