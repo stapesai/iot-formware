@@ -24,6 +24,9 @@ void initaliseWiFi()
   {
   case WL_CONNECTED:
     Serial.println("Connected to the WiFi network");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
+
     break;
   case WL_NO_SSID_AVAIL:
     Serial.println("No SSID available");

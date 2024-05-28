@@ -37,7 +37,7 @@ public:
     void setMQTTPassword(const std::string &value);
     void setMQTTTopic(const std::string &value);
 
-    std::vector<std::string>formatString(const std::string &str, char delim);
+    std::vector<std::string> formatString(const std::string &str, char delim);
 
     void writeConfig();
     void readConfig();

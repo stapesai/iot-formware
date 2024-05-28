@@ -7,60 +7,56 @@ PubSubClient mqttclient(wifiClient);
 
 class MQTTManager
 {
-    private:
-        const char *client_mac_id;
-        const char *mqtt_broker;
-        const char *mqtt_port;
-        const char *mqtt_username;
-        const char *mqtt_password;
-        const char *user_uuid;
-        const char *mqtt_topic;
+private:
+    const char *client_mac_id;
+    const char *mqtt_broker;
+    const char *mqtt_port;
+    const char *mqtt_username;
+    const char *mqtt_password;
+    const char *user_uuid;
+    const char *mqtt_topic;
 
-    public:
-        const char *validate() const
+public:
+    const char *validate() const
+    {
+        if (client_mac_id == nullptr || strlen(client_mac_id) == 0)
+            return "clientID";
+        if (mqtt_broker == nullptr || strlen(mqtt_broker) == 0)
+            return "mqtt_broker";
+        if (mqtt_port == nullptr || strlen(mqtt_port) == 0)
+            return "mqtt_port";
+        if (mqtt_username == nullptr || strlen(mqtt_username) == 0)
+            return "mqtt_username";
+        if (mqtt_password == nullptr || strlen(mqtt_password) == 0)
+            return "mqtt_password";
+        if (user_uuid == nullptr || strlen(user_uuid) == 0)
+            return "user_uuid";
+        return nullptr; // All fields are valid
+    }
+    void connectToMQTT(void (*callback)(char *, byte *, unsigned short int))
+    {
+        const char *server = mqtt_broker;
+        int port = atoi(mqtt_port);
+        mqttclient.setServer(server, port);
+        mqttclient.setKeepAlive(60);
+        mqttclient.setCallback(callback);
+
+        if (mqttclient.connect(client_mac_id, mqtt_username, mqtt_password))
         {
-            if (client_mac_id == nullptr || strlen(client_mac_id) == 0)
-                return "clientID";
-            if (mqtt_broker == nullptr || strlen(mqtt_broker) == 0)
-                return "mqtt_broker";
-            if (mqtt_port == nullptr || strlen(mqtt_port) == 0)
-                return "mqtt_port";
-            if (mqtt_username == nullptr || strlen(mqtt_username) == 0)
-                return "mqtt_username";
-            if (mqtt_password == nullptr || strlen(mqtt_password) == 0)
-                return "mqtt_password";
-            if (user_uuid == nullptr || strlen(user_uuid) == 0)
-                return "user_uuid";
-            return nullptr; // All fields are valid
+            mqttclient.subscribe(mqtt_topic);
+            Serial.println("Connected to MQTT Broker");
+            Serial.print("Subscribed to topic: ");
+            Serial.println(mqtt_topic);
         }
-        void connectToMQTT(void (*callback)(char *, byte *, unsigned short int))
+        else
         {
-            const char *server = mqtt_broker;
-            int port = atoi(mqtt_port);
-            mqttclient.setServer(server, port);
-            mqttclient.setKeepAlive(60);
-            mqttclient.setCallback(callback);
+            Serial.println("MQTT connection failed");
+            Serial.print("Error code: ");
+            Serial.println(mqttclient.state());
 
-            if (mqttclient.connect(client_mac_id, mqtt_username, mqtt_password))
-            {
-                mqttclient.subscribe(mqtt_topic);
-                Serial.println("Connected to MQTT Broker");
-                Serial.print("Subscribed to topic: ");
-                Serial.println(mqtt_topic);
-            }
-            else
-            {
-                Serial.println("MQTT connection failed");
-                Serial.print("Error code: ");
-                Serial.println(mqttclient.state());
-                
-                
-                
-                
-                // statusBuzzer(5, 100);
-            }
+            // statusBuzzer(5, 100);
         }
-
+    }
 };
 
 // void publish_keep_alive_message(unsigned long &keep_alive_counter)

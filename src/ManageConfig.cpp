@@ -30,7 +30,6 @@ void ManageConfig::setMQTTPassword(const std::string &value) { mqtt_password = v
 void ManageConfig::setMQTTTopic(const std::string &value) { mqtt_topic = value; }
 
 // formatString method implementation
-
 std::vector<std::string> ManageConfig::formatString(const std::string &str, char delim)
 {
     std::vector<std::string> tokens;
@@ -40,20 +39,18 @@ std::vector<std::string> ManageConfig::formatString(const std::string &str, char
     // Splitting the string by the delimiter
     while (std::getline(ss, token, delim))
     {
-        // Replace spaces with "//"
-        size_t pos = 0;
-        while ((pos = token.find(' ', pos)) != std::string::npos)
-        {
-            token.replace(pos, 1, "_");
-            pos += 2; // Move past the "//" we just inserted
-        }
-        tokens.push_back(token);
+        // Replace spaces with "\"
+        // size_t pos = 0;
+        // while ((pos = token.find(' ', pos)) != std::string::npos)
+        // {
+        //     token.replace(pos, 1, "\\ ");
+        //     pos += 2; // Move past the "\" we just inserted
+        // }
+        // tokens.push_back(token);
     }
 
     return tokens;
 }
-
-
 
 void ManageConfig::writeConfig()
 {
