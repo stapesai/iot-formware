@@ -35,20 +35,10 @@ std::vector<std::string> ManageConfig::formatString(const std::string &str, char
     std::vector<std::string> tokens;
     std::stringstream ss(str);
     std::string token;
-
-    // Splitting the string by the delimiter
     while (std::getline(ss, token, delim))
     {
-        // Replace spaces with "\"
-        // size_t pos = 0;
-        // while ((pos = token.find(' ', pos)) != std::string::npos)
-        // {
-        //     token.replace(pos, 1, "\\ ");
-        //     pos += 2; // Move past the "\" we just inserted
-        // }
-        // tokens.push_back(token);
+        tokens.push_back(token);
     }
-
     return tokens;
 }
 

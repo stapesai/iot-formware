@@ -19,38 +19,29 @@ MQTTManager mqttManager;
 
 void initaliseWiFi()
 {
+  Serial.print("Connecting to SSID: ");
+  Serial.println(config.getSSID().c_str());
+  Serial.print("With password: ");
+  Serial.println(config.getPassword().c_str());
+
   WiFi.begin(config.getSSID().c_str(), config.getPassword().c_str());
-  switch (WiFi.waitForConnectResult())
+  int attemptCount = 0;
+  while (WiFi.status() != WL_CONNECTED && attemptCount < 10)
   {
-  case WL_CONNECTED:
+    delay(1000);
+    Serial.print(".");
+    attemptCount++;
+  }
+  Serial.println();
+  if (WiFi.status() == WL_CONNECTED)
+  {
     Serial.println("Connected to the WiFi network");
     Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());
-
-    break;
-  case WL_NO_SSID_AVAIL:
-    Serial.println("No SSID available");
-    WiFi.begin(config.getSSID().c_str(), config.getPassword().c_str());
-
-    break;
-  case WL_CONNECT_FAILED:
-    Serial.println("Connection failed");
-    WiFi.begin(config.getSSID().c_str(), config.getPassword().c_str());
-
-    break;
-  case WL_DISCONNECTED:
-    Serial.println("Disconnected");
-    WiFi.begin(config.getSSID().c_str(), config.getPassword().c_str());
-
-    break;
-  case WL_CONNECTION_LOST:
-    Serial.println("Connection lost");
-    WiFi.begin(config.getSSID().c_str(), config.getPassword().c_str());
-
-    break;
-
-  default:
-    break;
+  }
+  else
+  {
+    Serial.println("Failed to connect to WiFi");
   }
 }
 
