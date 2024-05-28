@@ -1,4 +1,5 @@
 #define STATUS_BUZZER 27
+#define RESET_LED 16
 #define dataPin 14
 #define latchPin 27
 #define clockPin 26

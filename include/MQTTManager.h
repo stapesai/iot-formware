@@ -53,7 +53,11 @@ class MQTTManager
                 Serial.println("MQTT connection failed");
                 Serial.print("Error code: ");
                 Serial.println(mqttclient.state());
-                statusBuzzer(5, 100);
+                
+                
+                
+                
+                // statusBuzzer(5, 100);
             }
         }
 
