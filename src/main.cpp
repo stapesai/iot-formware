@@ -8,14 +8,14 @@
 #include <BLEConfigCallbacks.h>
 #include <MQTTManager.h>
 
+unsigned long previousMillis = 0;
+unsigned long keep_alive_counter = 1;
+
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
-
 MQTTManager mqttManager;
 
-unsigned long previousMillis = 0;
-unsigned long keep_alive_counter = 1;
 
 void initaliseWiFi()
 {
@@ -60,10 +60,10 @@ void setup()
   ESP_ERROR_CHECK(err);
 
   // Retrieve the MAC address
-  String macAddress = WiFi.macAddress();
+  
   Serial.print("Device MAC Address: ");
   Serial.println(macAddress);
-
+  
   // Create a unique device name by prefixing with a string
   String deviceName = "Jarvis_" + macAddress;
   Serial.print("Device Name: ");

@@ -7,12 +7,13 @@
 ManageConfig config;
 WiFiClient wifiClient;
 PubSubClient mqttclient(wifiClient);
+String macAddress = WiFi.macAddress().c_str();
 
 class MQTTManager
 {
 private:
     int mqtt_port = 1883;
-    const char *mqtt_client_id="ESP32";
+    const char *mqtt_client_id = formatClientID();
     const char *mqtt_broker = "192.168.29.245";
     const char *mqtt_username = "test";
     const char *mqtt_password = "test";
@@ -20,6 +21,11 @@ private:
     const char *mqtt_topic = config.getMQTTTopic().c_str();
 
 public:
+    const char *formatClientID()
+    {
+        std::replace(macAddress.begin(), macAddress.end(), ':', '_'); // Replace all ':' characters with '_'
+        return macAddress.c_str();
+    }
     const char *validate() const
     {
         if (mqtt_client_id == nullptr || strlen(mqtt_client_id) == 0)
