@@ -2,7 +2,6 @@
 #include <Arduino.h>
 #include <utils.h>
 #include <nvs_flash.h>
-#include <WiFi.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
@@ -12,8 +11,11 @@
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
-WiFiClient wificlient;
+
 MQTTManager mqttManager;
+
+unsigned long previousMillis = 0;
+unsigned long keep_alive_counter = 1;
 
 void initaliseWiFi()
 {
@@ -67,15 +69,13 @@ void setup()
   Serial.print("Device Name: ");
   Serial.println(deviceName);
 
-  // Initialize BLE with the unique device name
-  BLEDevice::init(deviceName.c_str());
+  // // Initialize BLE with the unique device name
+    BLEDevice::init(deviceName.c_str());
 
   // Create BLE Server
   BLEServer *pServer = BLEDevice::createServer();
   BLEService *pService = pServer->createService(SERVICE_UUID);
-  BLECharacteristic *pCharacteristic = pService->createCharacteristic(
-      CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE);
-
+  BLECharacteristic *pCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE);
   pCharacteristic->setCallbacks(new BLEConfigCallbacks(config));
   pService->start();
 
@@ -96,6 +96,7 @@ void setup()
     BLEDevice::deinit(true);
     Serial.println("BLE service stopped.");
     initaliseWiFi();
+    mqttManager.connectToMQTT();
   }
   else
   {
@@ -114,11 +115,11 @@ void setup()
   pinMode(latchPin, OUTPUT);
   updateShiftRegister();
   log_d("Shift Register Initialized");
-  mqttManager.connectToMQTT();
 
 }
 void loop()
 {
+  unsigned long currentMillis = millis();
 
   static unsigned long buttonPressStartTime = 0;
   bool buttonPressed = digitalRead(0) == LOW;
@@ -159,5 +160,31 @@ void loop()
   else
   {
     buttonPressStartTime = 0;
+  }
+  if (WiFi.status() != WL_CONNECTED )
+
+  {
+ 
+    Serial.println("Connecting to Wifi...");
+    statusBuzzer(2, 100);
+    initaliseWiFi();
+  }
+   
+
+  if (currentMillis - previousMillis > 50000)
+  {
+    previousMillis = currentMillis;
+    if (mqttclient.connected())
+    {
+      Serial.println("Publishing keep alive message");
+      mqttManager.publish_keep_alive_message(keep_alive_counter);
+      keep_alive_counter++;
+    }
+    else
+    {
+      Serial.println("-----------------------");
+      Serial.println("MQTT Connection lost.. Reconnecting..");
+      mqttManager.connectToMQTT();
+    }
   }
 }
