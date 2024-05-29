@@ -1,7 +1,9 @@
-#include <PubSubClient.h>
 #include <vector>
 #include <WiFi.h>
+#include <PubSubClient.h>
+#include <ManageConfig.h>
 
+ManageConfig config;
 WiFiClient wifiClient;
 PubSubClient mqttclient(wifiClient);
 
@@ -66,7 +68,7 @@ public:
             Serial.println("MQTT connection failed");
             Serial.print("Error code: ");
             Serial.println(mqttclient.state());
-            // statusBuzzer(5, 100);
+            statusBuzzer(5, 100);
         }
     }
 };

@@ -1,19 +1,17 @@
 // Default header files
 #include <Arduino.h>
+#include <utils.h>
+#include <nvs_flash.h>
+#include <WiFi.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
-#include <WiFi.h>
-#include "BLEConfigCallbacks.h"
-#include "ManageConfig.h"
-#include "MQTTManager.h"
-#include <nvs_flash.h>
-#include <utils.h>
+#include <BLEConfigCallbacks.h>
+#include <MQTTManager.h>
 
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
-ManageConfig config;
 WiFiClient wificlient;
 MQTTManager mqttManager;
 
@@ -65,7 +63,7 @@ void setup()
   Serial.println(macAddress);
 
   // Create a unique device name by prefixing with a string
-  String deviceName = "JarvisHomeIoTController_" + macAddress;
+  String deviceName = "Jarvis_" + macAddress;
   Serial.print("Device Name: ");
   Serial.println(deviceName);
 
@@ -116,8 +114,8 @@ void setup()
   pinMode(latchPin, OUTPUT);
   updateShiftRegister();
   log_d("Shift Register Initialized");
+  mqttManager.connectToMQTT();
 
-  // mqttManager.connectToMQTT(config, config.getMQTTServer(), config.getMQTTPort(), config.getMQTTUser(), config.getMQTTPassword(), config.getMQTTTopic());
 }
 void loop()
 {
