@@ -12,9 +12,9 @@ String macAddress = WiFi.macAddress().c_str();
 class MQTTManager
 {
 private:
-    int mqtt_port = 1883;
+    const char *mqtt_port = config.getMQTTPort().c_str();
     const char *mqtt_client_id = formatClientID();
-    const char *mqtt_broker = "192.168.29.245";
+    const char *mqtt_broker = config.getMQTTServer().c_str();
     const char *mqtt_username = config.getMQTTUser().c_str();
     const char *mqtt_password = config.getMQTTPassword().c_str();
     const char *user_uuid;
@@ -26,6 +26,7 @@ public:
         std::replace(macAddress.begin(), macAddress.end(), ':', '_'); // Replace all ':' characters with '_'
         return macAddress.c_str();
     }
+    
     const char *validate() const
     {
         if (mqtt_client_id == nullptr || strlen(mqtt_client_id) == 0)
@@ -104,7 +105,7 @@ public:
         Serial.println("Connecting to MQTT Broker");
         Serial.println("Broker: " + String(mqtt_broker) + " Port: " + String(mqtt_port) + " ClientID: " + String(mqtt_client_id) + " Username: " + String(mqtt_username) + " Password: " + String(mqtt_password));
 
-        mqttclient.setServer(mqtt_broker, mqtt_port);
+        mqttclient.setServer(mqtt_broker, atoi(mqtt_port) );
         mqttclient.setKeepAlive(60);
         mqttclient.setCallback(std::bind(&MQTTManager::mqttCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
