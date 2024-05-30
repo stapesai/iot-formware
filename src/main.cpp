@@ -104,7 +104,7 @@ void setup()
     Serial.println("The device started, now you can pair it with BLE Scanner!");
   }
 
-  pinMode(16, OUTPUT);
+  pinMode(RESET_LED, OUTPUT);
 
   // Initialize Buzzer and In-Built LED
   pinMode(STATUS_BUZZER, OUTPUT);
@@ -161,14 +161,7 @@ void loop()
   {
     buttonPressStartTime = 0;
   }
-  if (WiFi.status() != WL_CONNECTED )
 
-  {
- 
-    Serial.println("Connecting to Wifi...");
-    statusBuzzer(2, 100);
-    initaliseWiFi();
-  }
    
 
   if (currentMillis - previousMillis > 50000)

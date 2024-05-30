@@ -15,8 +15,8 @@ private:
     int mqtt_port = 1883;
     const char *mqtt_client_id = formatClientID();
     const char *mqtt_broker = "192.168.29.245";
-    const char *mqtt_username = "test";
-    const char *mqtt_password = "test";
+    const char *mqtt_username = config.getMQTTUser().c_str();
+    const char *mqtt_password = config.getMQTTPassword().c_str();
     const char *user_uuid;
     const char *mqtt_topic = config.getMQTTTopic().c_str();
 

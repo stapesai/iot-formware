@@ -42,6 +42,9 @@ void clearOutput(uint8_t pin)
   }
 }
 
+
+
+
 // void trigerTTP223(Device &device)
 // {
 //     Serial.println("-----------------------");
