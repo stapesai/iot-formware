@@ -1,10 +1,6 @@
 #define STATUS_BUZZER 27
 #define RESET_LED 16
-#define dataPin 14
-#define latchPin 27
-#define clockPin 26
-
-uint8_t outputState = 0;
+#define RESET_PIN 0
 
 void statusBuzzer(int times, int delayTime)
 {
@@ -16,41 +12,3 @@ void statusBuzzer(int times, int delayTime)
     delay(delayTime);
   }
 }
-
-void updateShiftRegister()
-{
-  digitalWrite(latchPin, LOW);
-  shiftOut(dataPin, clockPin, MSBFIRST, outputState);
-  digitalWrite(latchPin, HIGH);
-}
-
-void setOutput(uint8_t pin)
-{
-  if (pin < 8)
-  {
-    bitSet(outputState, pin); // Set the bit corresponding to the pin
-    updateShiftRegister();    // Update the shift register with the new state
-  }
-}
-
-void clearOutput(uint8_t pin)
-{
-  if (pin < 8)
-  {
-    bitClear(outputState, pin); // Clear the bit corresponding to the pin
-    updateShiftRegister();      // Update the shift register with the new state
-  }
-}
-
-
-
-
-// void trigerTTP223(Device &device)
-// {
-//     Serial.println("-----------------------");
-//     Serial.println("Trigerring TTP223 sensor...");
-//     digitalWrite(device.controlPin, HIGH);
-//     delay(100);
-//     digitalWrite(device.controlPin, LOW);
-//     Serial.println("TTP223 sensor triggered");
-// }

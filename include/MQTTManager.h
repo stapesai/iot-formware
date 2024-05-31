@@ -27,23 +27,6 @@ public:
         return macAddress.c_str();
     }
     
-    const char *validate() const
-    {
-        if (mqtt_client_id == nullptr || strlen(mqtt_client_id) == 0)
-            return "clientID";
-        if (mqtt_broker == nullptr || strlen(mqtt_broker) == 0)
-            return "mqtt_broker";
-        if (mqtt_port == 0)
-            return "mqtt_port";
-        if (mqtt_username == nullptr || strlen(mqtt_username) == 0)
-            return "mqtt_username";
-        if (mqtt_password == nullptr || strlen(mqtt_password) == 0)
-            return "mqtt_password";
-        if (user_uuid == nullptr || strlen(user_uuid) == 0)
-            return "user_uuid";
-        return nullptr; // All fields are valid
-    }
-
     void publish_keep_alive_message(unsigned long &keep_alive_counter)
     {
         StaticJsonDocument<256> doc;
@@ -57,48 +40,7 @@ public:
         mqttclient.publish(mqtt_topic, docString.c_str());
     }
 
-    void publish_current_state_message(int8_t statusPin, int8_t state, String deviceName)
-    {
-        StaticJsonDocument<256> doc;
-        doc["origin"] = mqtt_client_id;
-        doc["messageType"] = "current_state";
-        doc["message"]["device_id"] = deviceName;
-        if (state == -1)
-            doc["message"]["state"] = digitalRead(statusPin) ? "ON" : "OFF";
-        else
-            doc["message"]["state"] = state ? "ON" : "OFF";
-
-        String docString;
-        serializeJson(doc, docString);
-        Serial.println("Response: " + docString);
-        mqttclient.publish(mqtt_topic, docString.c_str());
-    }
-
-    void publish_error_message(String message)
-    {
-        StaticJsonDocument<256> doc;
-        doc["origin"] = mqtt_client_id;
-        doc["messageType"] = "error";
-        doc["message"]["message"] = message;
-
-        String docString;
-        serializeJson(doc, docString);
-        Serial.println("Response: " + docString);
-        mqttclient.publish(mqtt_topic, docString.c_str());
-    }
-
-    void mqttCallback(char *topic, byte *payload, unsigned short int length)
-    {
-
-        Serial.print("Message arrived in topic: ");
-        Serial.println(topic);
-        Serial.print("Message:");
-        for (int i = 0; i < length; i++)
-        {
-            Serial.print((char)payload[i]);
-        }
-        Serial.println();
-    };
+    void mqttCallback(char *topic, byte *payload, unsigned short int length){};
 
     void connectToMQTT()
     {

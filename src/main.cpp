@@ -16,7 +16,6 @@ unsigned long keep_alive_counter = 1;
 
 MQTTManager mqttManager;
 
-
 void initaliseWiFi()
 {
   Serial.print("Connecting to SSID: ");
@@ -25,15 +24,9 @@ void initaliseWiFi()
   Serial.println(config.getPassword().c_str());
 
   WiFi.begin(config.getSSID().c_str(), config.getPassword().c_str());
-  int attemptCount = 0;
-  while (WiFi.status() != WL_CONNECTED && attemptCount < 10)
-  {
-    delay(1000);
-    Serial.print(".");
-    attemptCount++;
-  }
+  
   Serial.println();
-  if (WiFi.status() == WL_CONNECTED)
+  if (WiFi.isConnected() == WL_CONNECTED)
   {
     Serial.println("Connected to the WiFi network");
     Serial.print("IP Address: ");
@@ -43,6 +36,34 @@ void initaliseWiFi()
   {
     Serial.println("Failed to connect to WiFi");
   }
+}
+
+
+// create reset interrupt
+
+void IRAM_ATTR resetModule()
+{
+  for (int i = 0; i < 25; i++)
+  {
+    digitalWrite(16, HIGH);
+    delay(100);
+    digitalWrite(16, LOW);
+    delay(100);
+  }
+  delay(1000);
+
+  if (nvs_flash_erase() == ESP_OK)
+  {
+    Serial.println("NVS erased");
+  }
+  else
+  {
+    Serial.println("Error erasing NVS");
+  }
+
+  Serial.println("Restarting ESP32...");
+  delay(1000);
+  esp_restart();
 }
 
 void setup()
@@ -60,17 +81,19 @@ void setup()
   ESP_ERROR_CHECK(err);
 
   // Retrieve the MAC address
-  
+
   Serial.print("Device MAC Address: ");
   Serial.println(macAddress);
-  
+
   // Create a unique device name by prefixing with a string
   String deviceName = "Jarvis_" + macAddress;
   Serial.print("Device Name: ");
   Serial.println(deviceName);
+  attachInterrupt(digitalPinToInterrupt(RESET_PIN), resetModule, FALLING);
+
 
   // // Initialize BLE with the unique device name
-    BLEDevice::init(deviceName.c_str());
+  BLEDevice::init(deviceName.c_str());
 
   // Create BLE Server
   BLEServer *pServer = BLEDevice::createServer();
@@ -104,67 +127,26 @@ void setup()
     Serial.println("The device started, now you can pair it with BLE Scanner!");
   }
 
-  pinMode(RESET_LED, OUTPUT);
 
   // Initialize Buzzer and In-Built LED
   pinMode(STATUS_BUZZER, OUTPUT);
-  pinMode(LED_BUILTIN, OUTPUT);
-  // Initialize Shift Register
-  pinMode(dataPin, OUTPUT);
-  pinMode(clockPin, OUTPUT);
-  pinMode(latchPin, OUTPUT);
-  updateShiftRegister();
-  log_d("Shift Register Initialized");
+  pinMode(RESET_LED, OUTPUT);
+
+
 
 }
 void loop()
 {
   unsigned long currentMillis = millis();
-
-  static unsigned long buttonPressStartTime = 0;
-  bool buttonPressed = digitalRead(0) == LOW;
-
-  if (buttonPressed)
+// WiFi
+ if (WiFi.status() != WL_CONNECTED )
   {
-    if (buttonPressStartTime == 0)
-    {
-      buttonPressStartTime = millis();
-    }
-    else if (millis() - buttonPressStartTime == 5000)
-    {
-      Serial.println("Resetting NVS");
-
-      for (int i = 0; i < 25; i++)
-      {
-        digitalWrite(16, HIGH);
-        delay(100);
-        digitalWrite(16, LOW);
-        delay(100);
-      }
-      delay(1000);
-
-      if (nvs_flash_erase() == ESP_OK)
-      {
-        Serial.println("NVS erased");
-      }
-      else
-      {
-        Serial.println("Error erasing NVS");
-      }
-
-      Serial.println("Restarting ESP32...");
-      delay(1000);
-      esp_restart();
-    }
+    Serial.println("Connecting to Wifi...");
+    previousMillis = currentMillis;
+    statusBuzzer(2, 100);
+    initaliseWiFi();
   }
-  else
-  {
-    buttonPressStartTime = 0;
-  }
-
-   
-
-  if (currentMillis - previousMillis > 50000)
+  if (currentMillis - previousMillis >= 50000)
   {
     previousMillis = currentMillis;
     if (mqttclient.connected())
