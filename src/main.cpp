@@ -28,9 +28,16 @@ void initaliseWiFi()
   Serial.println(config.getPassword().c_str());
 
   WiFi.begin(config.getSSID().c_str(), config.getPassword().c_str());
+  u_int8_t attemptCount = 0;
+  while (WiFi.status() != WL_CONNECTED && attemptCount < 10)
+  {
+    delay(1000);
+    Serial.print(".");
+    attemptCount++;
+  }
 
   Serial.println();
-  if (WiFi.isConnected() == WL_CONNECTED)
+  if (WiFi.status() == WL_CONNECTED)
   {
     Serial.println("Connected to the WiFi network");
     Serial.print("IP Address: ");
@@ -45,27 +52,24 @@ void initaliseWiFi()
 // Interrupt handler to reset the module
 void IRAM_ATTR resetNVS()
 {
-  for (int i = 0; i < 25; i++)
-  {
-    digitalWrite(16, HIGH);
-    delay(100);
-    digitalWrite(16, LOW);
-    delay(100);
-  }
-  delay(1000);
+  const unsigned long LONG_PRESS_DURATION = 5000; // 5 seconds in milliseconds
+  static unsigned long buttonPressStartTime = 0;  // Static to retain value between function calls
 
-  if (nvs_flash_erase() == ESP_OK)
+  if (digitalRead(RESET_PIN) == LOW)
   {
-    Serial.println("NVS erased");
-  }
-  else
-  {
-    Serial.println("Error erasing NVS");
-  }
+    if (nvs_flash_erase() == ESP_OK)
+    {
+      Serial.println("NVS erased");
+    }
+    else
+    {
+      Serial.println("Error erasing NVS");
+    }
 
-  Serial.println("Restarting ESP32...");
-  delay(1000);
-  esp_restart();
+    Serial.println("Restarting ESP32...");
+    delay(1000);
+    esp_restart();
+  }
 }
 
 void setup()
@@ -73,6 +77,11 @@ void setup()
   // Initialize Serial
   Serial.begin(115200);
   Serial.println("Serial Initialized");
+
+  // Initialize Buzzer and Reset LED
+  pinMode(STATUS_BUZZER, OUTPUT);
+  pinMode(RESET_LED, OUTPUT);
+  pinMode(NVS_RESET_PIN, INPUT);
 
   // Initialize NVS flash storage and store the result in 'err'
   esp_err_t err = nvs_flash_init();
@@ -92,10 +101,7 @@ void setup()
   ESP_ERROR_CHECK(err);
   // TODO: what if NVS is not initialized successfully after erasure and re-initialization?
 
-  // Attach an interrupt to the reset pin for resetting NVS
-  attachInterrupt(digitalPinToInterrupt(NVS_RESET_PIN), resetNVS, FALLING);
-
-  // Retrieve the MAC address of the ESP32
+  // Print the MAC address of the device
   Serial.print("Device MAC Address: ");
   Serial.println(macAddress);
 
@@ -103,6 +109,7 @@ void setup()
   String deviceName = "Jarvis_IoT_Connector_" + macAddress;
   Serial.print("Device Name: ");
   Serial.println(deviceName);
+  attachInterrupt(digitalPinToInterrupt(NVS_RESET_PIN), resetNVS, FALLING);
 
   // Initialize BLE with the unique device name
   BLEDevice::init(deviceName.c_str());
@@ -143,10 +150,6 @@ void setup()
     initaliseWiFi();
     mqttManager.connectToMQTT();
   }
-
-  // Initialize Buzzer and Reset LED
-  pinMode(STATUS_BUZZER, OUTPUT);
-  pinMode(RESET_LED, OUTPUT);
 }
 
 void loop()
