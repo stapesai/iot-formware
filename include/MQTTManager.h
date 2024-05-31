@@ -14,21 +14,25 @@ String macAddress = WiFi.macAddress().c_str();
 class MQTTManager
 {
 private:
+    // TODO: Do not take the values from the config object directly, instead take pointers to the values.
+    const char *mqtt_broker = config.getMQTTServer().c_str();
     const char *mqtt_port = config.getMQTTPort().c_str();
     const char *mqtt_client_id = formatClientID();
-    const char *mqtt_broker = config.getMQTTServer().c_str();
     const char *mqtt_username = config.getMQTTUser().c_str();
     const char *mqtt_password = config.getMQTTPassword().c_str();
-    const char *user_uuid;
+    // const char *user_uuid;
+    // TODO: Remove MQTT topic and user user's UUID
     const char *mqtt_topic = config.getMQTTTopic().c_str();
 
 public:
+    // TODO: Move this function to utils.h
     const char *formatClientID()
     {
         std::replace(macAddress.begin(), macAddress.end(), ':', '_'); // Replace all ':' characters with '_'
         return macAddress.c_str();
     }
 
+    // TODO: Idiot, this is a header file and you are defining a function here. Move this to the source file.
     void publish_keep_alive_message(unsigned long &keep_alive_counter)
     {
         StaticJsonDocument<256> doc;
@@ -44,6 +48,11 @@ public:
 
     void mqttCallback(char *topic, byte *payload, unsigned short int length) {};
 
+    // TODO: Idiotcy repeated. Move this to the source file.
+    // TODO: Make diffrent funcs for:
+    // 1. Initlialize MQTT
+    // 2. Connect to MQTT
+    // 3. Reconnect to MQTT
     void connectToMQTT()
     {
         Serial.println("Connecting to MQTT Broker");

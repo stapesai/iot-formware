@@ -31,7 +31,8 @@ void ManageConfig::setMQTTUser(const std::string &value) { mqtt_user = value; }
 void ManageConfig::setMQTTPassword(const std::string &value) { mqtt_password = value; }
 void ManageConfig::setMQTTTopic(const std::string &value) { mqtt_topic = value; }
 
-// formatString method implementation
+// This method is used to split the string received from the BLE by the delimiter (in this case, ';')
+// and then make a vector of strings from the split string
 std::vector<std::string> ManageConfig::formatString(const std::string &str, char delim)
 {
     std::vector<std::string> tokens;

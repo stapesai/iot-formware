@@ -10,12 +10,12 @@
 
 class BLEConfigCallbacks : public BLECharacteristicCallbacks
 {
+private:
+    ManageConfig &config;
+
 public:
     BLEConfigCallbacks(ManageConfig &config);
     void onWrite(BLECharacteristic *pCharacteristic) override;
-
-private:
-    ManageConfig &config;
 };
 
 #endif // BLECONFIGCALLBACKS_H

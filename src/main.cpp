@@ -1,18 +1,22 @@
 // Path: src/main.cpp
+// Main file that contains the setup and loop functions.
+
+// Include the necessary libraries
+#include <WiFi.h>
 #include <Arduino.h>
-#include <utils.h>
-#include <nvs_flash.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
+#include <nvs_flash.h>
+#include <BLEServer.h>
+
+// Include the custom header files
+#include <utils.h>
 #include <BLEConfigCallbacks.h>
 #include <MQTTManager.h>
 
 unsigned long previousMillis = 0;
 unsigned long keep_alive_counter = 1;
-
-#define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
-#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
 MQTTManager mqttManager;
 
