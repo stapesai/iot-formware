@@ -38,9 +38,8 @@ void initaliseWiFi()
   }
 }
 
-// create reset interrupt
-
-void IRAM_ATTR resetModule()
+// Interrupt handler to reset the module
+void IRAM_ATTR resetNVS()
 {
   for (int i = 0; i < 25; i++)
   {
@@ -67,32 +66,44 @@ void IRAM_ATTR resetModule()
 
 void setup()
 {
-
+  // Initialize Serial
   Serial.begin(115200);
-  log_d("Serial Initialized");
+  Serial.println("Serial Initialized");
 
+  // Initialize NVS flash storage and store the result in 'err'
   esp_err_t err = nvs_flash_init();
+
+  // Check if initialization encountered specific errors
   if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
   {
+    // If NVS initialization encountered errors related to free pages or new version found,
+    // erase the entire NVS partition to resolve these issues
     ESP_ERROR_CHECK(nvs_flash_erase());
+
+    // Re-initialize NVS after erasing the partition
     err = nvs_flash_init();
   }
+
+  // Check if NVS initialization was successful after potential erasure and re-initialization
   ESP_ERROR_CHECK(err);
+  // TODO: what if NVS is not initialized successfully after erasure and re-initialization?
 
-  // Retrieve the MAC address
+  // Attach an interrupt to the reset pin for resetting NVS
+  attachInterrupt(digitalPinToInterrupt(NVS_RESET_PIN), resetNVS, FALLING);
 
+  // Retrieve the MAC address of the ESP32
   Serial.print("Device MAC Address: ");
   Serial.println(macAddress);
 
   // Create a unique device name by prefixing with a string
-  String deviceName = "Jarvis_" + macAddress;
+  String deviceName = "Jarvis_IoT_Connector_" + macAddress;
   Serial.print("Device Name: ");
   Serial.println(deviceName);
-  attachInterrupt(digitalPinToInterrupt(RESET_PIN), resetModule, FALLING);
 
-  // // Initialize BLE with the unique device name
+  // Initialize BLE with the unique device name
   BLEDevice::init(deviceName.c_str());
 
+  // TODO: Add BLE security, Make device only visible to `JarvisHome` app.
   // Create BLE Server
   BLEServer *pServer = BLEDevice::createServer();
   BLEService *pService = pServer->createService(SERVICE_UUID);
@@ -108,10 +119,19 @@ void setup()
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
 
+  // Read the configuration from NVS, if it exists
   config.readConfig();
-  if (!config.getSSID().empty())
+
+  // Check if the SSID is empty
+  // TODO: This is a temporary solution to check if the SSID is empty, and should be replaced with a better solution
+  if (config.getSSID().empty())
   {
-    Serial.println("Data present in NVS");
+    Serial.println("Waiting for a client connection to notify...");
+    Serial.println("The device started, now you can pair it with BLE Scanner!");
+  }
+  else
+  {
+    Serial.println("Data is present in NVS");
     pService->stop();
     pAdvertising->stop();
     BLEDevice::deinit(true);
@@ -119,41 +139,37 @@ void setup()
     initaliseWiFi();
     mqttManager.connectToMQTT();
   }
-  else
-  {
-    Serial.println("Waiting for a client connection to notify...");
-    Serial.println("The device started, now you can pair it with BLE Scanner!");
-  }
 
-  // Initialize Buzzer and In-Built LED
+  // Initialize Buzzer and Reset LED
   pinMode(STATUS_BUZZER, OUTPUT);
   pinMode(RESET_LED, OUTPUT);
 }
+
 void loop()
 {
   unsigned long currentMillis = millis();
-  // WiFi
+  previousMillis = currentMillis;
+
+  // WiFi connection check
   if (WiFi.status() != WL_CONNECTED)
   {
     Serial.println("Connecting to Wifi...");
-    previousMillis = currentMillis;
     statusBuzzer(2, 100);
     initaliseWiFi();
   }
-  if (currentMillis - previousMillis >= 50000)
+
+  // MQTT connection check
+  if (!mqttclient.connected())
   {
-    previousMillis = currentMillis;
-    if (mqttclient.connected())
-    {
-      Serial.println("Publishing keep alive message");
-      mqttManager.publish_keep_alive_message(keep_alive_counter);
-      keep_alive_counter++;
-    }
-    else
-    {
-      Serial.println("-----------------------");
-      Serial.println("MQTT Connection lost.. Reconnecting..");
-      mqttManager.connectToMQTT();
-    }
+    Serial.println("MQTT Connection lost.. Reconnecting..");
+    mqttManager.connectToMQTT();
+  }
+
+  // Keep alive message
+  if (currentMillis - previousMillis >= 50000 && mqttclient.connected())
+  {
+    Serial.println("Publishing keep alive message");
+    mqttManager.publish_keep_alive_message(keep_alive_counter);
+    keep_alive_counter++;
   }
 }

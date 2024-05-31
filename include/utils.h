@@ -1,8 +1,8 @@
 // Path: include/utils.h
 
 #define STATUS_BUZZER 27
-#define RESET_LED 16
-#define RESET_PIN 0
+#define RESET_LED 2
+#define NVS_RESET_PIN 0
 
 void statusBuzzer(int times, int delayTime)
 {
