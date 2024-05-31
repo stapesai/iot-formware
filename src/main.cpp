@@ -55,7 +55,7 @@ void IRAM_ATTR resetNVS()
   const unsigned long LONG_PRESS_DURATION = 5000; // 5 seconds in milliseconds
   static unsigned long buttonPressStartTime = 0;  // Static to retain value between function calls
 
-  if (digitalRead(RESET_PIN) == LOW)
+  if (digitalRead(NVS_RESET_PIN) == LOW)
   {
     if (nvs_flash_erase() == ESP_OK)
     {
