@@ -48,7 +48,7 @@ public:
 
     void mqttCallback(char *topic, byte *payload, unsigned short int length) {};
 
-    // TODO: Idiotcy repeated. Move this to the source file.
+    // TODO:  Move this to the source file.
     // TODO: Make diffrent funcs for:
     // 1. Initlialize MQTT
     // 2. Connect to MQTT
