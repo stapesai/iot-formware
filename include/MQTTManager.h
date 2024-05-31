@@ -32,7 +32,7 @@ public:
         return macAddress.c_str();
     }
 
-    // TODO: Idiot, this is a header file and you are defining a function here. Move this to the source file.
+    // TODO: This is a header file and you should not have the implementation here.
     void publish_keep_alive_message(unsigned long &keep_alive_counter)
     {
         StaticJsonDocument<256> doc;
