@@ -1,4 +1,4 @@
-// Path: src/main.cpp
+// Default header files
 #include <Arduino.h>
 #include <utils.h>
 #include <nvs_flash.h>
@@ -24,9 +24,16 @@ void initaliseWiFi()
   Serial.println(config.getPassword().c_str());
 
   WiFi.begin(config.getSSID().c_str(), config.getPassword().c_str());
+  u_int8_t attemptCount = 0;
+  while (WiFi.status() != WL_CONNECTED && attemptCount < 10)
+  {
+    delay(1000);
+    Serial.print(".");
+    attemptCount++;
+  }
 
   Serial.println();
-  if (WiFi.isConnected() == WL_CONNECTED)
+  if (WiFi.status() == WL_CONNECTED)
   {
     Serial.println("Connected to the WiFi network");
     Serial.print("IP Address: ");
@@ -42,33 +49,34 @@ void initaliseWiFi()
 
 void IRAM_ATTR resetModule()
 {
-  for (int i = 0; i < 25; i++)
-  {
-    digitalWrite(16, HIGH);
-    delay(100);
-    digitalWrite(16, LOW);
-    delay(100);
-  }
-  delay(1000);
+  const unsigned long LONG_PRESS_DURATION = 5000; // 5 seconds in milliseconds
+  static unsigned long buttonPressStartTime = 0; // Static to retain value between function calls
 
-  if (nvs_flash_erase() == ESP_OK)
+  if (digitalRead(RESET_PIN) == LOW)
   {
-    Serial.println("NVS erased");
-  }
-  else
-  {
-    Serial.println("Error erasing NVS");
-  }
+    if (nvs_flash_erase() == ESP_OK)
+        {
+          Serial.println("NVS erased");
+        }
+        else
+        {
+          Serial.println("Error erasing NVS");
+        }
 
-  Serial.println("Restarting ESP32...");
-  delay(1000);
-  esp_restart();
+        Serial.println("Restarting ESP32...");
+        delay(1000);
+        esp_restart();
+  }
 }
+
 
 void setup()
 {
 
   Serial.begin(115200);
+  pinMode(STATUS_BUZZER, OUTPUT);
+  pinMode(RESET_LED, OUTPUT);
+  pinMode(RESET_PIN, INPUT);
   log_d("Serial Initialized");
 
   esp_err_t err = nvs_flash_init();
@@ -80,17 +88,16 @@ void setup()
   ESP_ERROR_CHECK(err);
 
   // Retrieve the MAC address
-
-  Serial.print("Device MAC Address: ");
-  Serial.println(macAddress);
+  String deviceName = "Jarvis_" + macAddress;
+  // Serial.print("Device Name: ");
+  // Serial.println(deviceName);
+  // Serial.print("Device MAC Address: ");
+  // Serial.println(macAddress);
 
   // Create a unique device name by prefixing with a string
-  String deviceName = "Jarvis_" + macAddress;
-  Serial.print("Device Name: ");
-  Serial.println(deviceName);
+
   attachInterrupt(digitalPinToInterrupt(RESET_PIN), resetModule, FALLING);
 
-  // // Initialize BLE with the unique device name
   BLEDevice::init(deviceName.c_str());
 
   // Create BLE Server
@@ -126,21 +133,21 @@ void setup()
   }
 
   // Initialize Buzzer and In-Built LED
-  pinMode(STATUS_BUZZER, OUTPUT);
-  pinMode(RESET_LED, OUTPUT);
 }
 void loop()
 {
   unsigned long currentMillis = millis();
-  // WiFi
-  if (WiFi.status() != WL_CONNECTED)
+  if (!config.getSSID().empty())
   {
-    Serial.println("Connecting to Wifi...");
-    previousMillis = currentMillis;
-    statusBuzzer(2, 100);
-    initaliseWiFi();
-  }
-  if (currentMillis - previousMillis >= 50000)
+    while (WiFi.status() != WL_CONNECTED && currentMillis - previousMillis >= 5000)
+    {
+      Serial.println("Connecting to Wifi...");
+      previousMillis = currentMillis;
+      statusBuzzer(2, 100);
+      initaliseWiFi();
+    }
+
+    if (currentMillis - previousMillis >= 50000)
   {
     previousMillis = currentMillis;
     if (mqttclient.connected())
@@ -156,4 +163,9 @@ void loop()
       mqttManager.connectToMQTT();
     }
   }
+  }
+
+
+
+  
 }
