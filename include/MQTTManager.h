@@ -1,3 +1,5 @@
+// Path: include/MQTTManager.h
+
 #include <vector>
 #include <WiFi.h>
 #include <PubSubClient.h>
@@ -26,7 +28,7 @@ public:
         std::replace(macAddress.begin(), macAddress.end(), ':', '_'); // Replace all ':' characters with '_'
         return macAddress.c_str();
     }
-    
+
     void publish_keep_alive_message(unsigned long &keep_alive_counter)
     {
         StaticJsonDocument<256> doc;
@@ -40,14 +42,14 @@ public:
         mqttclient.publish(mqtt_topic, docString.c_str());
     }
 
-    void mqttCallback(char *topic, byte *payload, unsigned short int length){};
+    void mqttCallback(char *topic, byte *payload, unsigned short int length) {};
 
     void connectToMQTT()
     {
         Serial.println("Connecting to MQTT Broker");
         Serial.println("Broker: " + String(mqtt_broker) + " Port: " + String(mqtt_port) + " ClientID: " + String(mqtt_client_id) + " Username: " + String(mqtt_username) + " Password: " + String(mqtt_password));
 
-        mqttclient.setServer(mqtt_broker, atoi(mqtt_port) );
+        mqttclient.setServer(mqtt_broker, atoi(mqtt_port));
         mqttclient.setKeepAlive(60);
         mqttclient.setCallback(std::bind(&MQTTManager::mqttCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 

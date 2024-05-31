@@ -1,4 +1,4 @@
-// Default header files
+// Path: src/main.cpp
 #include <Arduino.h>
 #include <utils.h>
 #include <nvs_flash.h>
@@ -24,7 +24,7 @@ void initaliseWiFi()
   Serial.println(config.getPassword().c_str());
 
   WiFi.begin(config.getSSID().c_str(), config.getPassword().c_str());
-  
+
   Serial.println();
   if (WiFi.isConnected() == WL_CONNECTED)
   {
@@ -37,7 +37,6 @@ void initaliseWiFi()
     Serial.println("Failed to connect to WiFi");
   }
 }
-
 
 // create reset interrupt
 
@@ -91,7 +90,6 @@ void setup()
   Serial.println(deviceName);
   attachInterrupt(digitalPinToInterrupt(RESET_PIN), resetModule, FALLING);
 
-
   // // Initialize BLE with the unique device name
   BLEDevice::init(deviceName.c_str());
 
@@ -127,19 +125,15 @@ void setup()
     Serial.println("The device started, now you can pair it with BLE Scanner!");
   }
 
-
   // Initialize Buzzer and In-Built LED
   pinMode(STATUS_BUZZER, OUTPUT);
   pinMode(RESET_LED, OUTPUT);
-
-
-
 }
 void loop()
 {
   unsigned long currentMillis = millis();
-// WiFi
- if (WiFi.status() != WL_CONNECTED )
+  // WiFi
+  if (WiFi.status() != WL_CONNECTED)
   {
     Serial.println("Connecting to Wifi...");
     previousMillis = currentMillis;

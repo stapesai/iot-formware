@@ -1,3 +1,5 @@
+// Path: include/ManageConfig.h
+
 #ifndef MANAGECONFIG_H
 #define MANAGECONFIG_H
 
