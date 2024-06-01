@@ -1,5 +1,3 @@
-// Path: include/BLEConfigCallbacks.h
-
 #ifndef BLECONFIGCALLBACKS_H
 #define BLECONFIGCALLBACKS_H
 
@@ -11,7 +9,7 @@
 class BLEConfigCallbacks : public BLECharacteristicCallbacks
 {
 private:
-    ManageConfig &config;
+    ManageConfig &config; // Reference to ManageConfig
 
 public:
     BLEConfigCallbacks(ManageConfig &config);

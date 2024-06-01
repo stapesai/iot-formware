@@ -9,8 +9,7 @@
 #include <BLEServer.h>
 #include <nvs_flash.h>
 #include <BLEServer.h>
-
-// Include the custom header files
+#include <PubSubClient.h>
 #include <utils.h>
 #include <BLEConfigCallbacks.h>
 #include <MQTTManager.h>
@@ -18,16 +17,21 @@
 unsigned long previousMillis = 0;
 unsigned long keep_alive_counter = 1;
 
-MQTTManager mqttManager;
+ManageConfig config;
+WiFiClient wifiClient;
+PubSubClient mqttclient(wifiClient);
+MQTTManager mqttManager(&mqttclient,&config);
+Utils utils;
 
 void initaliseWiFi()
 {
   Serial.print("Connecting to SSID: ");
-  Serial.println(config.getSSID().c_str());
+  Serial.println(config.getWiFiSSID());
   Serial.print("With password: ");
-  Serial.println(config.getPassword().c_str());
+  Serial.println(config.getWiFiPassword());
 
-  WiFi.begin(config.getSSID().c_str(), config.getPassword().c_str());
+  WiFi.begin(config.getWiFiSSID(), config.getWiFiPassword());
+
   u_int8_t attemptCount = 0;
   while (WiFi.status() != WL_CONNECTED && attemptCount < 10)
   {
@@ -101,18 +105,21 @@ void setup()
   ESP_ERROR_CHECK(err);
   // TODO: what if NVS is not initialized successfully after erasure and re-initialization?
 
+
+  // Get the MAC address of the device
+  const char *macAddress = WiFi.macAddress().c_str();
   // Print the MAC address of the device
   Serial.print("Device MAC Address: ");
   Serial.println(macAddress);
 
   // Create a unique device name by prefixing with a string
-  String deviceName = "Jarvis_IoT_Connector_" + macAddress;
+  const char *deviceName = "Jarvis_" + *macAddress;
   Serial.print("Device Name: ");
   Serial.println(deviceName);
   attachInterrupt(digitalPinToInterrupt(NVS_RESET_PIN), resetNVS, FALLING);
 
   // Initialize BLE with the unique device name
-  BLEDevice::init(deviceName.c_str());
+  BLEDevice::init(deviceName);
 
   // TODO: Add BLE security, Make device only visible to `JarvisHome` app.
   // Create BLE Server
@@ -135,7 +142,7 @@ void setup()
 
   // Check if the SSID is empty
   // TODO: This is a temporary solution to check if the SSID is empty, and should be replaced with a better solution
-  if (config.getSSID().empty())
+  if (utils.isNVSEmpty())
   {
     Serial.println("Waiting for a client connection to notify...");
     Serial.println("The device started, now you can pair it with BLE Scanner!");
@@ -155,28 +162,28 @@ void setup()
 void loop()
 {
   unsigned long currentMillis = millis();
-  previousMillis = currentMillis;
-
-  // WiFi connection check
-  if (WiFi.status() != WL_CONNECTED)
+  if (utils.isNVSEmpty())
   {
-    Serial.println("Connecting to Wifi...");
-    statusBuzzer(2, 100);
-    initaliseWiFi();
-  }
+    while (WiFi.status() != WL_CONNECTED && currentMillis - previousMillis >= 5000)
+    {
+      Serial.println("Connecting to Wifi...");
+      previousMillis = currentMillis;
+      utils.statusBuzzer(STATUS_BUZZER, 100);
+      initaliseWiFi();
+    }
 
-  // MQTT connection check
-  if (!mqttclient.connected())
-  {
-    Serial.println("MQTT Connection lost.. Reconnecting..");
-    mqttManager.connectToMQTT();
-  }
+    if (!mqttclient.connected())
+    {
+      Serial.println("MQTT Connection lost.. Reconnecting..");
+      mqttManager.connectToMQTT();
+    }
 
-  // Keep alive message
-  if (currentMillis - previousMillis >= 50000 && mqttclient.connected())
-  {
-    Serial.println("Publishing keep alive message");
-    mqttManager.publish_keep_alive_message(keep_alive_counter);
-    keep_alive_counter++;
+    // Keep alive message
+    if (currentMillis - previousMillis >= 50000 && mqttclient.connected())
+    {
+      Serial.println("Publishing keep alive message");
+      mqttManager.publish_keep_alive_message(keep_alive_counter);
+      keep_alive_counter++;
+    }
   }
 }

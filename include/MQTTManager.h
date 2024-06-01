@@ -1,80 +1,32 @@
 // Path: include/MQTTManager.h
 
-#include <vector>
-#include <WiFi.h>
+
+
+
 #include <PubSubClient.h>
-#include <ArduinoJson.h>
-#include <ManageConfig.h>
-
-ManageConfig config;
-WiFiClient wifiClient;
-PubSubClient mqttclient(wifiClient);
-String macAddress = WiFi.macAddress().c_str();
-
+#include <ManageConfig.h>   
 class MQTTManager
 {
 private:
     // TODO: Do not take the values from the config object directly, instead take pointers to the values.
-    const char *mqtt_broker = config.getMQTTServer().c_str();
-    const char *mqtt_port = config.getMQTTPort().c_str();
-    const char *mqtt_client_id = formatClientID();
-    const char *mqtt_username = config.getMQTTUser().c_str();
-    const char *mqtt_password = config.getMQTTPassword().c_str();
+    PubSubClient *mqttclient;
+    ManageConfig *manage_config;
+    const char *mqtt_broker ;
+    const char *mqtt_port ;
+    const char *mqtt_client_id ;
+    const char *mqtt_username ;
+    const char *mqtt_password;
     // const char *user_uuid;
     // TODO: Remove MQTT topic and user user's UUID
-    const char *mqtt_topic = config.getMQTTTopic().c_str();
+    const char *mqtt_topic ;
 
 public:
     // TODO: Move this function to utils.h
-    const char *formatClientID()
-    {
-        std::replace(macAddress.begin(), macAddress.end(), ':', '_'); // Replace all ':' characters with '_'
-        return macAddress.c_str();
-    }
+    MQTTManager(PubSubClient *client,ManageConfig *config);
+    // format client function it defintion should be in the source file
+    std::string formatClientID(std::string &macAddress);
+    void publish_keep_alive_message(unsigned long &keep_alive_counter);
+    void mqttCallback(char *topic, byte *payload, unsigned short int length);
+    void connectToMQTT();
 
-    // TODO: This is a header file and you should not have the implementation here.
-    void publish_keep_alive_message(unsigned long &keep_alive_counter)
-    {
-        StaticJsonDocument<256> doc;
-        doc["origin"] = mqtt_client_id;
-        doc["messageType"] = "keep_alive";
-        doc["message"]["keep_alive_counter"] = keep_alive_counter;
-        doc["message"]["uptime"] = millis() / 1000; // uptime in seconds
-
-        String docString;
-        serializeJson(doc, docString);
-        mqttclient.publish(mqtt_topic, docString.c_str());
-    }
-
-    void mqttCallback(char *topic, byte *payload, unsigned short int length) {};
-
-    // TODO:  Move this to the source file.
-    // TODO: Make diffrent funcs for:
-    // 1. Initlialize MQTT
-    // 2. Connect to MQTT
-    // 3. Reconnect to MQTT
-    void connectToMQTT()
-    {
-        Serial.println("Connecting to MQTT Broker");
-        Serial.println("Broker: " + String(mqtt_broker) + " Port: " + String(mqtt_port) + " ClientID: " + String(mqtt_client_id) + " Username: " + String(mqtt_username) + " Password: " + String(mqtt_password));
-
-        mqttclient.setServer(mqtt_broker, atoi(mqtt_port));
-        mqttclient.setKeepAlive(60);
-        mqttclient.setCallback(std::bind(&MQTTManager::mqttCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-
-        if (mqttclient.connect(mqtt_client_id, mqtt_username, mqtt_password))
-        {
-            mqttclient.subscribe(mqtt_topic);
-            Serial.println("Connected to MQTT Broker");
-            Serial.print("Subscribed to topic: ");
-            Serial.println(mqtt_topic);
-        }
-        else
-        {
-            Serial.println("MQTT connection failed");
-            Serial.print("Error code: ");
-            Serial.println(mqttclient.state());
-            statusBuzzer(5, 100);
-        }
-    }
 };

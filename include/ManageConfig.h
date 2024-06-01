@@ -10,36 +10,36 @@
 class ManageConfig
 {
 private:
-    std::string ssid;
-    std::string password;
-    std::string mqtt_server;
-    std::string mqtt_port;
-    std::string mqtt_user;
-    std::string mqtt_password;
-    std::string mqtt_topic;
-    std::array<std::string *, 7> fields;
-    const char *keys[7] = {"ssid", "password", "mqtt_server", "mqtt_port", "mqtt_user", "mqtt_password", "mqtt_topic"};
+    const char *wifi_ssid;
+    const char *wifi_password;
+    const char *mqtt_server;
+    const char *mqtt_port;
+    const char *mqtt_user;
+    const char *mqtt_password;
+    const char *mqtt_topic;
+    std::array<const char *, 7> fields;
+    const char *keys[7] = {"wifi_ssid", "wifi_password", "mqtt_server", "mqtt_port", "mqtt_user", "mqtt_password", "mqtt_topic"};
 
 public:
     ManageConfig();
 
-    const std::string &getSSID() const;
-    const std::string &getPassword() const;
-    const std::string &getMQTTServer() const;
-    const std::string &getMQTTPort() const;
-    const std::string &getMQTTUser() const;
-    const std::string &getMQTTPassword() const;
-    const std::string &getMQTTTopic() const;
+    const char * getWiFiSSID() const;
+    const char * getWiFiPassword() const;
+    const char * getMQTTServer() const;
+    const char * getMQTTPort() const;
+    const char * getMQTTUser() const;
+    const char * getMQTTPassword() const;
+    const char * getMQTTTopic() const;
 
-    void setSSID(const std::string &value);
-    void setPassword(const std::string &value);
-    void setMQTTServer(const std::string &value);
-    void setMQTTPort(const std::string &value);
-    void setMQTTUser(const std::string &value);
-    void setMQTTPassword(const std::string &value);
-    void setMQTTTopic(const std::string &value);
+    void setWiFiSSID(const char * value);
+    void setWiFiPassword(const char * value);
+    void setMQTTServer(const char * value);
+    void setMQTTPort(const char * value);
+    void setMQTTUser(const char * value);
+    void setMQTTPassword(const char * value);
+    void setMQTTTopic(const char * value);
 
-    std::vector<std::string> formatString(const std::string &str, char delim);
+    std::vector<char *> formatString(const char * str, char delim);
 
     void writeConfig();
     void readConfig();
