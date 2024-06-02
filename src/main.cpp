@@ -85,7 +85,7 @@ void setup()
   // Create BLE Server
   BLEServer *pServer = BLEDevice::createServer();
   BLEService *pService = pServer->createService(SERVICE_UUID);
-  BLECharacteristic *pCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE_NR);
+  BLECharacteristic *pCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE);
   pCharacteristic->setCallbacks(new BLEConfigCallbacks(config));
   pService->start();
 

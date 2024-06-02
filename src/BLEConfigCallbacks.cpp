@@ -11,8 +11,7 @@ void BLEConfigCallbacks::onWrite(BLECharacteristic *pCharacteristic)
     std::string value = pCharacteristic->getValue();
     char delim = ';';
     std::vector<std::string> tokens = config.formatString(value, delim);
-
-    if (tokens.size()<=7)
+    if (tokens.size() == 7)
     {
         config.setWiFiSSID(tokens[0]);
         std::cout << "SSID: " << config.getWiFiSSID() << std::endl;
