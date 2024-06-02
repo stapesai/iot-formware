@@ -95,8 +95,6 @@ void setup()
   pAdvertising->setScanResponse(false);
   pAdvertising->setMinPreferred(0x06); // Functions that help with iPhone connections issue
   pAdvertising->setMinPreferred(0x12);
-
-
   BLEDevice::startAdvertising();
   // BLEDevice::setEncryptionLevel(ESP_BLE_SEC_ENCRYPT);
 
