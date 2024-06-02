@@ -12,6 +12,12 @@
 #include <BLEConfigCallbacks.h>
 #include <MQTTManager.h>
 
+
+unsigned long previousMillisWiFi = 0;
+unsigned long previousMillisMQTT = 0;
+unsigned long previousMillisKeepAlive = 0;
+unsigned long keepAliveInterval = 50000; // 50 seconds
+unsigned long wifiCheckInterval = 5000;  // 5 seconds
 unsigned long previousMillis = 0;
 unsigned long keep_alive_counter = 1;
 
@@ -85,7 +91,7 @@ void setup()
   // Create BLE Server
   BLEServer *pServer = BLEDevice::createServer();
   BLEService *pService = pServer->createService(SERVICE_UUID);
-  BLECharacteristic *pCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE);
+  BLECharacteristic *pCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_NOTIFY);
   pCharacteristic->setCallbacks(new BLEConfigCallbacks(config));
   pService->start();
 
@@ -97,8 +103,6 @@ void setup()
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
   // BLEDevice::setEncryptionLevel(ESP_BLE_SEC_ENCRYPT);
-
-
 
   // Read the configuration from NVS, if it exists
   config.readConfig();
@@ -125,25 +129,41 @@ void setup()
 void loop()
 {
   unsigned long currentMillis = millis();
-  if (!config.getWiFiSSID().empty())
+
+  if (currentMillis - previousMillisWiFi >= wifiCheckInterval)
   {
-    while (WiFi.status() != WL_CONNECTED && currentMillis - previousMillis >= 5000)
+    previousMillisWiFi = currentMillis;
+
+    if (!config.getWiFiSSID().empty())
     {
-      Serial.println("Connecting to Wifi...");
-      previousMillis = currentMillis;
-      utils.statusBuzzer(STATUS_BUZZER, 100);
-      utils.initialiseWiFi(&config);
-      if (!mqttclient.connected())
+      if (WiFi.status() != WL_CONNECTED)
       {
-        Serial.println("MQTT Connection lost.. Reconnecting..");
-        mqttManager.connectToMQTT();
-      }// Keep alive message
-      else if (currentMillis - previousMillis >= 50000 && mqttclient.connected())
-      {
-        Serial.println("Publishing keep alive message");
-        mqttManager.publish_keep_alive_message(keep_alive_counter);
-        keep_alive_counter++;
+        Serial.println("Connecting to WiFi...");
+        utils.statusBuzzer(STATUS_BUZZER, 100);
+        utils.initialiseWiFi(&config);
       }
     }
+  }
+
+  // Check MQTT connection if WiFi is connected
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    if (!mqttclient.connected())
+    {
+      Serial.println("MQTT Connection lost.. Reconnecting..");
+      mqttManager.connectToMQTT();
+    }
+  }
+
+  // Send keep-alive message every 50 seconds if MQTT is connected
+  if (currentMillis - previousMillisKeepAlive >= keepAliveInterval)
+  {
+    if (mqttclient.connected())
+    {
+      Serial.println("Publishing keep alive message");
+      mqttManager.publish_keep_alive_message(keep_alive_counter);
+      keep_alive_counter++;
+    }
+    previousMillisKeepAlive = currentMillis;
   }
 }
