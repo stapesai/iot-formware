@@ -1,33 +1,23 @@
 // Path: src/MQTTManager.cpp
 // Description: This file contains the implementation of the MQTTManager class.
 
-// TODO: Remove code from `MQTTManager.h` and implement the methods here
-#include <vector>
-
 #include <ArduinoJson.h>
 #include <MQTTManager.h>
 
-
 // Constructor
-MQTTManager::MQTTManager(PubSubClient *client, ManageConfig *config)
+MQTTManager::MQTTManager(PubSubClient *client, ManageConfig *config, Utils *utils)
 {
     mqttclient = client;
     manage_config = config;
-    mqtt_broker = manage_config->getMQTTServer();
-    mqtt_port = manage_config->getMQTTPort();
-    // mqtt_client_id = manage_config->getMQTTClientID();
-    mqtt_username = manage_config->getMQTTUser();
-    mqtt_password = manage_config->getMQTTPassword();
-    mqtt_topic = manage_config->getMQTTTopic();
+    generate_client_id = utils;
+    mqtt_client_id = generate_client_id->generateName();
+    mqtt_broker = &manage_config->getMQTTBroker();
+    mqtt_port = &manage_config->getMQTTPort();
+    mqtt_username = &manage_config->getMQTTUser();
+    mqtt_password = &manage_config->getMQTTPassword();
+    mqtt_topic = &manage_config->getMQTTTopic();
 }
 
-std::string MQTTManager::formatClientID(std::string &macAddress)
-{
-    std::replace(macAddress.begin(), macAddress.end(), ':', '_');
-    return macAddress.c_str();
-}
-
-// TODO: This is a header file and you should not have the implementation here.
 void MQTTManager::publish_keep_alive_message(unsigned long &keep_alive_counter)
 {
     StaticJsonDocument<256> doc;
@@ -38,7 +28,7 @@ void MQTTManager::publish_keep_alive_message(unsigned long &keep_alive_counter)
 
     String docString;
     serializeJson(doc, docString);
-    mqttclient->publish(mqtt_topic, docString.c_str());
+    mqttclient->publish(mqtt_topic->c_str(), docString.c_str());
 }
 void MQTTManager::mqttCallback(char *topic, byte *payload, unsigned short int length) {};
 
@@ -50,19 +40,19 @@ void MQTTManager::mqttCallback(char *topic, byte *payload, unsigned short int le
 void MQTTManager::connectToMQTT()
 {
     Serial.println("Connecting to MQTT Broker");
-    Serial.println("Broker: " + String(mqtt_broker) + " Port: " + String(mqtt_port) + " ClientID: " + String(mqtt_client_id) + " Username: " + String(mqtt_username) + " Password: " + String(mqtt_password));
+    Serial.println("Broker: " + String(mqtt_broker->c_str()) + "\n Port: " + String(atoi(mqtt_port->c_str())) +"\n ClientID: " + String(mqtt_client_id.c_str()) + "\n Username: " + String(mqtt_username->c_str()) + "\n Password: " + String(mqtt_password->c_str()) + "\n Topic: " + String(mqtt_topic->c_str()));
 
-    mqttclient->setServer(mqtt_broker, atoi(mqtt_port));
+    mqttclient->setServer(mqtt_broker->c_str(), atoi(mqtt_port->c_str()));
     mqttclient->setKeepAlive(60);
     mqttclient->setCallback([this](char *topic, uint8_t *payload, unsigned int length)
-                           { this->mqttCallback(topic, payload, length); });
+                            { this->mqttCallback(topic, payload, length); });
 
-    if (mqttclient->connect(mqtt_client_id, mqtt_username, mqtt_password))
+    if (mqttclient->connect(mqtt_client_id.c_str(), mqtt_username->c_str(), mqtt_password->c_str()))
     {
-        mqttclient->subscribe(mqtt_topic);
+        mqttclient->subscribe(mqtt_topic->c_str());
         Serial.println("Connected to MQTT Broker");
         Serial.print("Subscribed to topic: ");
-        Serial.println(mqtt_topic);
+        Serial.println(mqtt_topic->c_str());
     }
     else
     {

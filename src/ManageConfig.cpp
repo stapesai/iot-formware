@@ -10,45 +10,42 @@
 // Constructor
 ManageConfig::ManageConfig()
 {
-    fields = {wifi_ssid, wifi_password, mqtt_server, mqtt_port, mqtt_user, mqtt_password, mqtt_topic};
+    fields = {&wifi_ssid, &wifi_password, &mqtt_broker, &mqtt_port, &mqtt_user, &mqtt_password, &mqtt_topic};
 }
 
 // Getter methods
-const char *ManageConfig::getWiFiSSID() const { return wifi_ssid; }
-const char *ManageConfig::getWiFiPassword() const { return wifi_password; }
-const char *ManageConfig::getMQTTServer() const { return mqtt_server; }
-const char *ManageConfig::getMQTTPort() const { return mqtt_port; }
-const char *ManageConfig::getMQTTUser() const { return mqtt_user; }
-const char *ManageConfig::getMQTTPassword() const { return mqtt_password; }
-const char *ManageConfig::getMQTTTopic() const { return mqtt_topic; }
+const std::string &ManageConfig::getWiFiSSID() const { return wifi_ssid; }
+const std::string &ManageConfig::getWiFiPassword() const { return wifi_password; }
+const std::string &ManageConfig::getMQTTBroker() const { return mqtt_broker; }
+const std::string &ManageConfig::getMQTTClientID() const { return mqtt_client_id;}
+const std::string &ManageConfig::getMQTTPort() const { return mqtt_port; }
+const std::string &ManageConfig::getMQTTUser() const { return mqtt_user; }
+const std::string &ManageConfig::getMQTTPassword() const { return mqtt_password; }
+const std::string &ManageConfig::getMQTTTopic() const { return mqtt_topic; }
 
 // Setter methods
-void ManageConfig::setWiFiSSID(const char *value) { wifi_ssid = value; }
-void ManageConfig::setWiFiPassword(const char *value) { wifi_password = value; }
-void ManageConfig::setMQTTServer(const char *value) { mqtt_server = value; }
-void ManageConfig::setMQTTPort(const char *value) { mqtt_port = value; }
-void ManageConfig::setMQTTUser(const char *value) { mqtt_user = value; }
-void ManageConfig::setMQTTPassword(const char *value) { mqtt_password = value; }
-void ManageConfig::setMQTTTopic(const char *value) { mqtt_topic = value; }
+void ManageConfig::setWiFiSSID(const std::string &value) { wifi_ssid = value; }
+void ManageConfig::setWiFiPassword(const std::string &value) { wifi_password = value; }
+void ManageConfig::setMQTTBroker(const std::string &value) { mqtt_broker = value; }
+void ManageConfig::setMQTTPort(const std::string &value) { mqtt_port = value; }
+void ManageConfig::setMQTTUser(const std::string &value) { mqtt_user = value; }
+void ManageConfig::setMQTTPassword(const std::string &value) { mqtt_password = value; }
+void ManageConfig::setMQTTTopic(const std::string &value) { mqtt_topic = value; }
 
 // This method is used to split the string received from the BLE by the delimiter (in this case, ';')
 // and then make a vector of strings from the split string
-std::vector<char *> ManageConfig::formatString(const char *str, char delim)
+std::vector<std::string> ManageConfig::formatString(const std::string &str, char delim)
 {
-    std::vector<char *> tokens;
+    std::vector<std::string> tokens;
     std::stringstream ss(str);
-    char *token;
-    char *str_copy = strdup(str); // Make a copy of the input string
-    token = strtok(str_copy, &delim);
-    while (token != NULL)
+    std::string token;
+    while (std::getline(ss, token, delim))
     {
         tokens.push_back(token);
-        token = strtok(NULL, &delim);
     }
-    free(str_copy); // Free the duplicated string
-
     return tokens;
 }
+
 
 void ManageConfig::writeConfig()
 {
@@ -62,7 +59,7 @@ void ManageConfig::writeConfig()
 
     for (int i = 0; i < 7; ++i)
     {
-        err = nvs_set_str(my_handle, keys[i], fields[i]);
+        err = nvs_set_str(my_handle, keys[i], fields[i]->c_str());
         if (err != ESP_OK)
         {
             Serial.printf("Error writing to NVS for key '%s'\n", keys[i]);
@@ -107,7 +104,7 @@ void ManageConfig::readConfig()
         err = nvs_get_str(my_handle, keys[i], value, &required_size);
         if (err == ESP_OK)
         {
-            fields[i] = value;
+           *fields[i] = std::string(value);
             Serial.printf("Read from NVS: %s = %s\n", keys[i], value);
         }
         else

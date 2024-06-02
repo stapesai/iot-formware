@@ -10,36 +10,39 @@
 class ManageConfig
 {
 private:
-    const char *wifi_ssid;
-    const char *wifi_password;
-    const char *mqtt_server;
-    const char *mqtt_port;
-    const char *mqtt_user;
-    const char *mqtt_password;
-    const char *mqtt_topic;
-    std::array<const char *, 7> fields;
-    const char *keys[7] = {"wifi_ssid", "wifi_password", "mqtt_server", "mqtt_port", "mqtt_user", "mqtt_password", "mqtt_topic"};
+    std::string wifi_ssid;
+    std::string wifi_password;
+    std::string mqtt_broker;
+    std::string mqtt_client_id;
+    std::string mqtt_port;
+    std::string mqtt_user;
+    std::string mqtt_password;
+    std::string mqtt_topic;
+    std::array<std::string *, 7> fields;
+    const char *keys[7] = {"wifi_ssid", "wifi_password", "mqtt_broker", "mqtt_port", "mqtt_user", "mqtt_password", "mqtt_topic"};
 
 public:
     ManageConfig();
 
-    const char * getWiFiSSID() const;
-    const char * getWiFiPassword() const;
-    const char * getMQTTServer() const;
-    const char * getMQTTPort() const;
-    const char * getMQTTUser() const;
-    const char * getMQTTPassword() const;
-    const char * getMQTTTopic() const;
+    const std::string &getWiFiSSID() const;
+    const std::string &getWiFiPassword() const;
+    const std::string &getMQTTBroker() const;
+    const std::string &getMQTTClientID() const;
+    const std::string &getMQTTPort() const;
+    const std::string &getMQTTUser() const;
+    const std::string &getMQTTPassword() const;
+    const std::string &getMQTTTopic() const;
 
-    void setWiFiSSID(const char * value);
-    void setWiFiPassword(const char * value);
-    void setMQTTServer(const char * value);
-    void setMQTTPort(const char * value);
-    void setMQTTUser(const char * value);
-    void setMQTTPassword(const char * value);
-    void setMQTTTopic(const char * value);
+    void setWiFiSSID(const std::string &value);
+    void setWiFiPassword(const std::string &value);
+    void setMQTTBroker(const std::string &value);
+    void setMQTTClientID(const std::string &value);
+    void setMQTTPort(const std::string &value);
+    void setMQTTUser(const std::string &value);
+    void setMQTTPassword(const std::string &value);
+    void setMQTTTopic(const std::string &value);
 
-    std::vector<char *> formatString(const char * str, char delim);
+    std::vector<std::string> formatString(const std::string &str, char delim);
 
     void writeConfig();
     void readConfig();

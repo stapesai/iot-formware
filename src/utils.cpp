@@ -3,7 +3,23 @@
 
 #include <Arduino.h>
 #include <nvs_flash.h>
+#include <nvs.h>
 #include <utils.h>
+
+const char* Utils::generateName()
+{
+    std::string result;
+    std::string macAddress = WiFi.macAddress().c_str();
+
+    // Replace ':' with '_'
+    std::replace(macAddress.begin(), macAddress.end(), ':', '_');
+
+    // Create the result string
+    result = BLE_DEVICE_NAME + macAddress;
+
+    // Return the C-style string
+    return result.c_str();
+}
 
 void Utils::statusBuzzer(int times, int delayTime)
 {
@@ -16,25 +32,58 @@ void Utils::statusBuzzer(int times, int delayTime)
   }
 }
 
-bool Utils::isNVSEmpty()
+bool Utils::isNVSEmpty() {
+    // Initialize NVS
+    esp_err_t err = nvs_flash_init();
+    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        // NVS partition was truncated and needs to be erased
+        nvs_flash_erase();
+        err = nvs_flash_init();
+    }
+    if (err != ESP_OK) {
+        Serial.println("Error initializing NVS");
+        return false;
+    }
+
+    // Check NVS stats
+    nvs_stats_t nvs_stats;
+    err = nvs_get_stats(NULL, &nvs_stats);
+    if (err != ESP_OK) {
+        Serial.println("Error getting NVS stats");
+        return false;
+    }
+
+    // Check if used entries are zero
+    return nvs_stats.used_entries == 0;
+}
+
+
+void Utils::initialiseWiFi(ManageConfig *config)
 {
-  nvs_handle_t nvsHandle;
-  esp_err_t err = nvs_open("storage", NVS_READWRITE, &nvsHandle);
-  if (err != ESP_OK)
+  Serial.print("Connecting to SSID: ");
+  Serial.println(config->getWiFiSSID().c_str());
+  Serial.print("With password: ");
+  Serial.println(config->getWiFiPassword().c_str());
+
+  WiFi.begin(config->getWiFiSSID().c_str(), config->getWiFiPassword().c_str());
+
+  u_int8_t attemptCount = 0;
+  while (WiFi.status() != WL_CONNECTED && attemptCount < 10)
   {
-    Serial.println("Error opening NVS handle!");
-    return false;
+    delay(1000);
+    Serial.print(".");
+    attemptCount++;
   }
 
-  size_t required_size;
-  err = nvs_get_blob(nvsHandle, "config", NULL, &required_size);
-  if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND)
+  Serial.println();
+  if (WiFi.status() == WL_CONNECTED)
   {
-    Serial.println("Error reading NVS blob!");
-    return false;
+    Serial.println("Connected to the WiFi network");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
   }
-
-  nvs_close(nvsHandle);
-
-  return required_size == 0;
+  else
+  {
+    Serial.println("Failed to connect to WiFi");
+  }
 }
