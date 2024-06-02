@@ -1,10 +1,8 @@
 // Path: include/utils.h
 // Utility functions and constants.
 
-
 #include <WiFi.h>
 #include <ManageConfig.h>
-
 #ifndef UTILS_H
 #define UTILS_H
 
@@ -22,10 +20,7 @@ public:
     static bool isNVSEmpty();
     static void resetModule();
     void initialiseWiFi(ManageConfig *config);
-    const char* generateName();
-
-
+    const char *generateName();
 };
-
 
 #endif // UTILS_H

@@ -7,18 +7,15 @@
 #include <BLEUtils.h>
 #include <BLEServer.h>
 #include <nvs_flash.h>
-#include <utils.h>
 #include <PubSubClient.h>
 #include <BLEConfigCallbacks.h>
 #include <MQTTManager.h>
-
 
 unsigned long previousMillisWiFi = 0;
 unsigned long previousMillisMQTT = 0;
 unsigned long previousMillisKeepAlive = 0;
 unsigned long keepAliveInterval = 50000; // 50 seconds
 unsigned long wifiCheckInterval = 5000;  // 5 seconds
-unsigned long previousMillis = 0;
 unsigned long keep_alive_counter = 1;
 
 Utils utils;                                           // Utility class to handle common functions
@@ -88,6 +85,8 @@ void setup()
   BLEDevice::init(utils.generateName());
 
   // TODO: Add BLE security, Make device only visible to `JarvisHome` app.
+  // TODO:If not enough tokens are received then it shoudn't stop the ble server
+  // TODO: Send the messages through ble
   // Create BLE Server
   BLEServer *pServer = BLEDevice::createServer();
   BLEService *pService = pServer->createService(SERVICE_UUID);
@@ -126,6 +125,8 @@ void setup()
   }
 }
 
+// TODO: Fix Reconnection 
+
 void loop()
 {
   unsigned long currentMillis = millis();
@@ -134,7 +135,7 @@ void loop()
   {
     previousMillisWiFi = currentMillis;
 
-    if (!config.getWiFiSSID().empty())
+    if (!utils.isNVSEmpty()==0)
     {
       if (WiFi.status() != WL_CONNECTED)
       {
