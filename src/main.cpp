@@ -7,8 +7,8 @@
 #include <BLEUtils.h>
 #include <BLEServer.h>
 #include <nvs_flash.h>
-#include <PubSubClient.h>
 #include <utils.h>
+#include <PubSubClient.h>
 #include <BLEConfigCallbacks.h>
 #include <MQTTManager.h>
 
@@ -98,7 +98,7 @@ void setup()
 
 
   BLEDevice::startAdvertising();
-  BLEDevice::setEncryptionLevel(ESP_BLE_SEC_ENCRYPT);
+  // BLEDevice::setEncryptionLevel(ESP_BLE_SEC_ENCRYPT);
 
 
 

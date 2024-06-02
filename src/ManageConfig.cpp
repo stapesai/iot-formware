@@ -1,6 +1,6 @@
 // Path: src/ManageConfig.cpp
 
-#include "ManageConfig.h"
+#include <ManageConfig.h>
 #include <nvs.h>
 #include <nvs_flash.h>
 #include <Arduino.h>
@@ -17,7 +17,6 @@ ManageConfig::ManageConfig()
 const std::string &ManageConfig::getWiFiSSID() const { return wifi_ssid; }
 const std::string &ManageConfig::getWiFiPassword() const { return wifi_password; }
 const std::string &ManageConfig::getMQTTBroker() const { return mqtt_broker; }
-const std::string &ManageConfig::getMQTTClientID() const { return mqtt_client_id;}
 const std::string &ManageConfig::getMQTTPort() const { return mqtt_port; }
 const std::string &ManageConfig::getMQTTUser() const { return mqtt_user; }
 const std::string &ManageConfig::getMQTTPassword() const { return mqtt_password; }

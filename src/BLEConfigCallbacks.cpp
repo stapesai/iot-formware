@@ -7,19 +7,34 @@ BLEConfigCallbacks::BLEConfigCallbacks(ManageConfig &config) : config(config) {}
 
 void BLEConfigCallbacks::onWrite(BLECharacteristic *pCharacteristic)
 {
-
+    // Parse the characteristic value
     std::string value = pCharacteristic->getValue();
-    std::vector<std::string> tokens = config.formatString(value, delim );
+    char delim = ';';
+    std::vector<std::string> tokens = config.formatString(value, delim);
 
-    if (tokens.size() == 7)
+    if (tokens.size()<=7)
     {
         config.setWiFiSSID(tokens[0]);
+        std::cout << "SSID: " << config.getWiFiSSID() << std::endl;
+
         config.setWiFiPassword(tokens[1]);
+        std::cout << "Password: " << config.getWiFiPassword() << std::endl;
+
         config.setMQTTBroker(tokens[2]);
+        std::cout << "MQTT Server: " << config.getMQTTBroker() << std::endl;
+
         config.setMQTTPort(tokens[3]);
+        std::cout << "MQTT Port: " << config.getMQTTPort() << std::endl;
+
         config.setMQTTUser(tokens[4]);
+        std::cout << "MQTT User: " << config.getMQTTUser() << std::endl;
+
         config.setMQTTPassword(tokens[5]);
+        std::cout << "MQTT Password: " << config.getMQTTPassword() << std::endl;
+
         config.setMQTTTopic(tokens[6]);
+        std::cout << "MQTT Topic: " << config.getMQTTTopic() << std::endl;
+
         // Write configuration to NVS
         config.writeConfig();
         Serial.println("Data written to NVS");

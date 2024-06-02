@@ -13,7 +13,6 @@ private:
     std::string wifi_ssid;
     std::string wifi_password;
     std::string mqtt_broker;
-    std::string mqtt_client_id;
     std::string mqtt_port;
     std::string mqtt_user;
     std::string mqtt_password;
@@ -27,7 +26,6 @@ public:
     const std::string &getWiFiSSID() const;
     const std::string &getWiFiPassword() const;
     const std::string &getMQTTBroker() const;
-    const std::string &getMQTTClientID() const;
     const std::string &getMQTTPort() const;
     const std::string &getMQTTUser() const;
     const std::string &getMQTTPassword() const;
@@ -36,7 +34,6 @@ public:
     void setWiFiSSID(const std::string &value);
     void setWiFiPassword(const std::string &value);
     void setMQTTBroker(const std::string &value);
-    void setMQTTClientID(const std::string &value);
     void setMQTTPort(const std::string &value);
     void setMQTTUser(const std::string &value);
     void setMQTTPassword(const std::string &value);
