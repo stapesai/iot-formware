@@ -32,33 +32,7 @@ void Utils::statusBuzzer(int times, int delayTime)
   }
 }
 
-bool Utils::isNVSEmpty() {
-    // Initialize NVS
-    esp_err_t err = nvs_flash_init();
-    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        // NVS partition was truncated and needs to be erased
-        nvs_flash_erase();
-        err = nvs_flash_init();
-    }
-    if (err != ESP_OK) {
-        Serial.println("Error initializing NVS");
-        return false;
-    }
-
-    // Check NVS stats
-    nvs_stats_t nvs_stats;
-    err = nvs_get_stats(NULL, &nvs_stats);
-    if (err != ESP_OK) {
-        Serial.println("Error getting NVS stats");
-        return false;
-    }
-
-    // Check if used entries are zero
-    return nvs_stats.used_entries == 0;
-}
-
-
-void Utils::initialiseWiFi(ManageConfig *config)
+void Utils::initialiseWiFi(NVSManager *config)
 {
   Serial.print("Connecting to SSID: ");
   Serial.println(config->getWiFiSSID().c_str());
@@ -66,6 +40,7 @@ void Utils::initialiseWiFi(ManageConfig *config)
   Serial.println(config->getWiFiPassword().c_str());
 
   WiFi.begin(config->getWiFiSSID().c_str(), config->getWiFiPassword().c_str());
+  
 
   u_int8_t attemptCount = 0;
   while (WiFi.status() != WL_CONNECTED && attemptCount < 10)

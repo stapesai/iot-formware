@@ -1,6 +1,6 @@
 // Path: include/MQTTManager.h
 #include <PubSubClient.h>
-#include <ManageConfig.h>
+#include <NVSManager.h>
 #include <utils.h>
 
 class MQTTManager
@@ -8,7 +8,7 @@ class MQTTManager
 private:
 
     PubSubClient *mqttclient;
-    ManageConfig *manage_config;
+    NVSManager *manage_config;
     Utils *generate_client_id;
     std::string mqtt_client_id;
     const std::string *mqtt_broker;
@@ -21,7 +21,7 @@ private:
 
 public:
  
-    MQTTManager(PubSubClient *client, ManageConfig *config, Utils *utils);
+    MQTTManager(PubSubClient *client, NVSManager *config, Utils *utils);
     void publish_keep_alive_message(unsigned long &keep_alive_counter);
     void mqttCallback(char *topic, byte *payload, unsigned short int length);
     void connectToMQTT();

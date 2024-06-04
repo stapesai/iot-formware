@@ -1,4 +1,4 @@
-// Path: include/ManageConfig.h
+// Path: include/NVSManager.h
 
 #ifndef MANAGECONFIG_H
 #define MANAGECONFIG_H
@@ -7,7 +7,7 @@
 #include <vector>
 #include <array>
 
-class ManageConfig
+class NVSManager
 {
 private:
     std::string wifi_ssid;
@@ -21,7 +21,7 @@ private:
     const char *keys[7] = {"wifi_ssid", "wifi_password", "mqtt_broker", "mqtt_port", "mqtt_user", "mqtt_password", "mqtt_topic"};
 
 public:
-    ManageConfig();
+    NVSManager();
 
     const std::string &getWiFiSSID() const;
     const std::string &getWiFiPassword() const;
@@ -40,9 +40,11 @@ public:
     void setMQTTTopic(const std::string &value);
 
     std::vector<std::string> formatString(const std::string &str, char delim);
-
+    bool isNVSEmpty();
     void writeConfig();
     void readConfig();
+    void intialiseNVS();
+    void resetNVS();
 };
 
 #endif // MANAGECONFIG_H

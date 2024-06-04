@@ -5,7 +5,7 @@ import os
 
 load_dotenv()
 
-data = f"{os.getenv('WIFI_SSID')};{os.getenv('WIFI_PASSWORD')};{os.getenv('MQTT_BROKER_IP')};{os.getenv('MQTT_BROKER_PORT')};{os.getenv('MQTT_USER')};{os.getenv('MQTT_PASSWORD')};{os.getenv('MQTT_TOPIC')}"
+data = f"{os.getenv('WIFI_SSID')};{os.getenv('WIFI_PASSWORD')};{os.getenv('MQTT_BROKER_IP')};{os.getenv('MQTT_BROKER_PORT')};{os.getenv('MQTT_USERNAME')};{os.getenv('MQTT_PASSWORD')};{os.getenv('MQTT_TOPIC')}"
 
 device_name = os.getenv("BLE_DEVICE_NAME")
 
@@ -29,4 +29,5 @@ async def send_data():
             print("Data sent")
 
 loop = asyncio.get_event_loop()
-loop.run_until_complete(send_data())
+
+loop.run_until_complete(send_data()) 

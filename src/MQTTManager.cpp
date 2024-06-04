@@ -5,7 +5,7 @@
 #include <MQTTManager.h>
 
 // Constructor
-MQTTManager::MQTTManager(PubSubClient *client, ManageConfig *config, Utils *utils)
+MQTTManager::MQTTManager(PubSubClient *client, NVSManager *config, Utils *utils)
 {
     mqttclient = client;
     manage_config = config;

@@ -2,7 +2,7 @@
 // Utility functions and constants.
 
 #include <WiFi.h>
-#include <ManageConfig.h>
+#include <NVSManager.h>
 #ifndef UTILS_H
 #define UTILS_H
 
@@ -17,9 +17,7 @@ class Utils
 {
 public:
     static void statusBuzzer(int times, int delayTime);
-    static bool isNVSEmpty();
-    static void resetModule();
-    void initialiseWiFi(ManageConfig *config);
+    void initialiseWiFi(NVSManager *config);
     const char *generateName();
 };
 
