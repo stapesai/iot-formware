@@ -8,7 +8,7 @@ void BLEConfigCallbacks::onWrite(BLECharacteristic *pCharacteristic)
 {
     // Parse the characteristic value
     std::string value = pCharacteristic->getValue();
-    std::vector<std::string> tokens = config.formatString(value, ';');
+    std::vector<std::string> tokens = utils.formatString(value, ';');
     std::vector<std::function<void(const std::string &)>> configSetters = {
         [this](const std::string &v)
         { config.setWiFiSSID(v); },

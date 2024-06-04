@@ -38,8 +38,7 @@ public:
     void setMQTTUser(const std::string &value);
     void setMQTTPassword(const std::string &value);
     void setMQTTTopic(const std::string &value);
-
-    std::vector<std::string> formatString(const std::string &str, char delim);
+    
     bool isNVSEmpty();
     void writeConfig();
     void readConfig();

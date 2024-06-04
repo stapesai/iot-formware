@@ -2,6 +2,8 @@
 // Utility functions and constants.
 
 #include <WiFi.h>
+#include <iostream>
+#include <sstream>
 #include <NVSManager.h>
 #ifndef UTILS_H
 #define UTILS_H
@@ -16,6 +18,7 @@
 class Utils
 {
 public:
+    std::vector<std::string> formatString(const std::string &str, char delim);
     static void statusBuzzer(int times, int delayTime);
     void initialiseWiFi(NVSManager *config);
     const char *generateName();

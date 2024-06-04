@@ -4,8 +4,7 @@
 #include <nvs.h>
 #include <nvs_flash.h>
 #include <Arduino.h>
-#include <iostream>
-#include <sstream>
+
 #include <utils.h>
 
 // Constructor
@@ -24,27 +23,13 @@ const std::string &NVSManager::getMQTTPassword() const { return mqtt_password; }
 const std::string &NVSManager::getMQTTTopic() const { return mqtt_topic; }
 
 // Setter methods
-void NVSManager::setWiFiSSID(const std::string &value) { wifi_ssid = value; }
+void NVSManager::setWiFiSSID(const std::string &value) { wifi_ssid = value.c_str(); }
 void NVSManager::setWiFiPassword(const std::string &value) { wifi_password = value; }
 void NVSManager::setMQTTBroker(const std::string &value) { mqtt_broker = value; }
 void NVSManager::setMQTTPort(const std::string &value) { mqtt_port = value; }
 void NVSManager::setMQTTUser(const std::string &value) { mqtt_user = value; }
 void NVSManager::setMQTTPassword(const std::string &value) { mqtt_password = value; }
 void NVSManager::setMQTTTopic(const std::string &value) { mqtt_topic = value; }
-
-// This method is used to split the string received from the BLE by the delimiter (in this case, ';')
-// and then make a vector of strings from the split string
-std::vector<std::string> NVSManager::formatString(const std::string &str, char delim)
-{
-    std::vector<std::string> tokens;
-    std::stringstream ss(str);
-    std::string token;
-    while (std::getline(ss, token, delim))
-    {
-        tokens.push_back(token);
-    }
-    return tokens;
-}
 
 // Interrupt handler to reset the module
 void IRAM_ATTR NVSManager::resetNVS()

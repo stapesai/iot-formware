@@ -6,19 +6,33 @@
 #include <nvs.h>
 #include <utils.h>
 
-const char* Utils::generateName()
+const char *Utils::generateName()
 {
-    std::string result;
-    std::string macAddress = WiFi.macAddress().c_str();
+  std::string result;
+  std::string macAddress = WiFi.macAddress().c_str();
 
-    // Replace ':' with '_'
-    std::replace(macAddress.begin(), macAddress.end(), ':', '_');
+  // Replace ':' with '_'
+  std::replace(macAddress.begin(), macAddress.end(), ':', '_');
 
-    // Create the result string
-    result = BLE_DEVICE_NAME + macAddress;
+  // Create the result string
+  result = BLE_DEVICE_NAME + macAddress;
 
-    // Return the C-style string
-    return result.c_str();
+  // Return the C-style string
+  return result.c_str();
+}
+
+// This method is used to split the string received from the BLE by the delimiter (in this case, ';')
+// and then make a vector of strings from the split string
+std::vector<std::string> Utils::formatString(const std::string &str, char delim)
+{
+  std::vector<std::string> tokens;
+  std::stringstream ss(str);
+  std::string token;
+  while (std::getline(ss, token, delim))
+  {
+    tokens.push_back(token);
+  }
+  return tokens;
 }
 
 void Utils::statusBuzzer(int times, int delayTime)
@@ -40,7 +54,6 @@ void Utils::initialiseWiFi(NVSManager *config)
   Serial.println(config->getWiFiPassword().c_str());
 
   WiFi.begin(config->getWiFiSSID().c_str(), config->getWiFiPassword().c_str());
-  
 
   u_int8_t attemptCount = 0;
   while (WiFi.status() != WL_CONNECTED && attemptCount < 10)
