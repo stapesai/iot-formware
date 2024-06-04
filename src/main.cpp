@@ -82,7 +82,7 @@ void loop()
   {
     previousMillisWiFi = currentMillis;
 
-    if (!config.isNVSEmpty() == 01)
+    if (!config.isNVSEmpty() == 0)
     {
       if (WiFi.status() != WL_CONNECTED)
       {
