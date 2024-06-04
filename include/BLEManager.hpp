@@ -11,21 +11,22 @@
 #include <BLEUtils.h>
 #include <functional>
 
-class BLEManager : public BLECharacteristicCallbacks {
-  private:
-    NVSManager &config;
-    Utils &utils;
-    BLEServer *pServer;
-    BLEService *pService;
-    BLECharacteristic *pCharacteristic;
-    BLEAdvertising *pAdvertising;
+class BLEManager : public BLECharacteristicCallbacks
+{
+private:
+	NVSManager& config;
+	Utils& utils;
+	BLEServer* pServer;
+	BLEService* pService;
+	BLECharacteristic* pCharacteristic;
+	BLEAdvertising* pAdvertising;
 
-  public:
-    BLEManager(NVSManager &config, Utils &utils);
-    void initializeBLE();
-    void sendError(const std::string &error);
-    void onWrite(BLECharacteristic *pCharacteristic) override;
-    void restartBLEAdvertising();
+public:
+	BLEManager(NVSManager& config, Utils& utils);
+	void initializeBLE();
+	void sendError(const std::string& error);
+	void onWrite(BLECharacteristic* pCharacteristic) override;
+	void restartBLEAdvertising();
 };
 
 #endif // BLEMANGER_HPP
