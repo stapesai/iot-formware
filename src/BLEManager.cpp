@@ -7,11 +7,11 @@
 #include <Arduino.h>
 #include <iostream>
 
-BLEConfigCallbacks::BLEConfigCallbacks(NVSManager &config, Utils &utils)
+BLEManager::BLEManager(NVSManager &config, Utils &utils)
     : config(config), utils(utils), pServer(nullptr), pService(nullptr),
       pCharacteristic(nullptr), pAdvertising(nullptr) {}
 
-void BLEConfigCallbacks::onWrite(BLECharacteristic *pCharacteristic) {
+void BLEManager::onWrite(BLECharacteristic *pCharacteristic) {
     // Parse the characteristic value
     std::string value = pCharacteristic->getValue();
     Logger::log(INFO, "Received value: " + value);
@@ -58,7 +58,7 @@ void BLEConfigCallbacks::onWrite(BLECharacteristic *pCharacteristic) {
     }
 }
 
-void BLEConfigCallbacks::initializeBLE() {
+void BLEManager::initializeBLE() {
     // Initialize BLE
     BLEDevice::init(utils.generateName());
     pServer = BLEDevice::createServer();
@@ -86,7 +86,7 @@ void BLEConfigCallbacks::initializeBLE() {
     pAdvertising->start();
 }
 
-void BLEConfigCallbacks::restartBLEAdvertising() {
+void BLEManager::restartBLEAdvertising() {
 
     if (pAdvertising != nullptr) {
         pAdvertising->stop();

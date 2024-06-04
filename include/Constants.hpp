@@ -1,7 +1,7 @@
 // Path: include/Constants.hpp
 
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+#ifndef CONSTANTS_HPP
+#define CONSTANTS_HPP
 
 #define STATUS_BUZZER 27
 #define RESET_LED 2
@@ -10,4 +10,4 @@
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 #define BLE_DEVICE_NAME "Jarvis_"
 
-#endif // CONSTANTS_H
+#endif // CONSTANTS_HPP

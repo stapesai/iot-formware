@@ -1,7 +1,7 @@
 // Path: include/WiFiManager.hpp
 
-#ifndef WIFI_MANAGER_H
-#define WIFI_MANAGER_H
+#ifndef WIFI_MANAGER_HPP
+#define WIFI_MANAGER_HPP
 
 #include "NVSManager.hpp"
 #include <Arduino.h>
@@ -19,4 +19,4 @@ class WiFiManager {
     void setupWiFi();
 };
 
-#endif // WIFI_MANAGER_H
+#endif // WIFI_MANAGER_HPP

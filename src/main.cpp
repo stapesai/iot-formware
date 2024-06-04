@@ -28,13 +28,13 @@ class MainApp {
     unsigned long keep_alive_counter;
     bool isConfigured;
 
-    Utils utils;                   // Utility class to handle common functions
-    NVSManager config;             // NVS manager class
-    WiFiClient wifiClient;         // WiFi client for MQTT
-    PubSubClient mqttClient;       // MQTT client
-    MQTTManager mqttManager;       // MQTT manager
-    BLEConfigCallbacks bleManager; // BLE Config Callbacks
-    WiFiManager wifiManager;       // WiFi Manager
+    Utils utils;             // Utility class to handle common functions
+    NVSManager config;       // NVS manager class
+    WiFiClient wifiClient;   // WiFi client for MQTT
+    PubSubClient mqttClient; // MQTT client
+    MQTTManager mqttManager; // MQTT manager
+    BLEManager bleManager;   // BLE Config Callbacks
+    WiFiManager wifiManager; // WiFi Manager
 };
 
 MainApp::MainApp()

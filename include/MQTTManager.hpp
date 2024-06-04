@@ -1,5 +1,8 @@
 // Path: include/MQTTManager.hpp
 
+#ifndef MQTT_MANAGER_HPP
+#define MQTT_MANAGER_HPP
+
 #include "NVSManager.hpp"
 #include "Utils.hpp"
 #include <PubSubClient.h>
@@ -25,3 +28,5 @@ class MQTTManager {
     void initializeMQTT();
     void connectToMQTT();
 };
+
+#endif // MQTT_MANAGER_HPP

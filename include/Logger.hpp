@@ -1,7 +1,7 @@
 // Path: include/Logger.hpp
 
-#ifndef LOGGER_H
-#define LOGGER_H
+#ifndef LOGGER_HPP
+#define LOGGER_HPP
 
 #include <Arduino.h>
 #include <string>
@@ -18,4 +18,4 @@ class Logger {
     static void printPrefix(LogLevel level);
 };
 
-#endif // LOGGER_H
+#endif // LOGGER_HPP

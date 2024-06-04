@@ -1,12 +1,12 @@
 // Path: include/Utils.hpp
 
+#ifndef UTILS_H
+#define UTILS_H
+
 #include "NVSManager.hpp"
 #include <WiFi.h>
 #include <iostream>
 #include <sstream>
-
-#ifndef UTILS_H
-#define UTILS_H
 
 class Utils {
   public:

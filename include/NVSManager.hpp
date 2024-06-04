@@ -1,7 +1,7 @@
 // Path: include/NVSManager.hpp
 
-#ifndef MANAGECONFIG_H
-#define MANAGECONFIG_H
+#ifndef NVS_MANAGER_HPP
+#define NVS_MANAGER_HPP
 
 #include <array>
 #include <nvs.h>
@@ -51,4 +51,4 @@ class NVSManager {
     void intialiseNVS();
 };
 
-#endif // MANAGECONFIG_H
+#endif // NVS_MANAGER_HPP
