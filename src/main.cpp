@@ -18,12 +18,12 @@ unsigned long keepAliveInterval = 50000; // 50 seconds
 unsigned long wifiCheckInterval = 5000;  // 5 seconds
 unsigned long keep_alive_counter = 1;
 
-Utils utils;                         // Utility class to handle common functions
-NVSManager config;                   // Nvs manager class
-WiFiClient wifiClient;               // WiFi client for MQTT
-PubSubClient mqttclient(wifiClient); // MQTT client
+Utils utils;                                           // Utility class to handle common functions
+NVSManager config;                                     // Nvs manager class
+WiFiClient wifiClient;                                 // WiFi client for MQTT
+PubSubClient mqttclient(wifiClient);                   // MQTT client
 MQTTManager mqttManager(&mqttclient, &config, &utils); // MQTT manager
-BLEConfigCallbacks bleConfigCallbacks(config, utils); // BLE Config Callbacks
+BLEConfigCallbacks bleConfigCallbacks(config, utils);  // BLE Config Callbacks
 
 void setup()
 {
@@ -44,8 +44,8 @@ void setup()
   Serial.println(utils.generateName());
 
   // TODO: Add BLE security, Make device only visible to `JarvisHome` app.
-  // TODO:If not enough tokens are received then it shoudn't stop the ble server
-  // TODO: Send the messages through ble
+  // TODO: If not enough tokens are received then it shoudn't stop the BLE server
+  // TODO: Send the messages through BLE
 
   // Read the configuration from NVS, if it exists
 
@@ -65,9 +65,6 @@ void setup()
     utils.initialiseWiFi(&config);
     mqttManager.connectToMQTT();
   }
-
-
-
 }
 
 // TODO: Fix Reconnection

@@ -71,7 +71,6 @@ bool NVSManager::isNVSEmpty()
 
 void NVSManager::intialiseNVS()
 {
-
     esp_err_t err = nvs_flash_init();
 
     // Check if initialization encountered specific errors
