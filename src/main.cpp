@@ -44,9 +44,17 @@ void setup()
   Serial.println(utils.generateName());
 
   // Check if the device is configured
-  isConfigured = config.isNVSEmpty() ? false : true;
+  isConfigured = !config.isNVSEmpty();
 
-  if (!isConfigured)
+  if (isConfigured)
+  {
+    // Read data from NVS and store it in the config object
+    config.readConfig();
+
+    // Initialize MQTT
+    mqttManager.initializeMQTT();
+  }
+  else
   {
     // Initialize BLE if the device is not configured
     bleConfigCallbacks.initialiseBLE(utils);
@@ -54,14 +62,7 @@ void setup()
     Serial.println("Waiting for a client connection to notify...");
     Serial.println("The device started, now you can pair it with BLE Scanner!");
   }
-  else
-  {
-    // Read data from NVS and store it in the config object
-    config.readConfig();
-  }
 }
-
-// TODO: Fix Reconnection
 
 void loop()
 {

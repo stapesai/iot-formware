@@ -72,3 +72,21 @@ void Utils::initialiseWiFi(NVSManager *config)
     Serial.println("Failed to connect to WiFi");
   }
 }
+
+void Utils::printConfig(const NVSManager &config)
+{
+    std::cout << "SSID: " << config.getWiFiSSID() << std::endl;
+    std::cout << "Password: " << config.getWiFiPassword() << std::endl;
+    std::cout << "MQTT Server: " << config.getMQTTBroker() << std::endl;
+    std::cout << "MQTT Port: " << config.getMQTTPort() << std::endl;
+    std::cout << "MQTT User: " << config.getMQTTUser() << std::endl;
+    std::cout << "MQTT Password: " << config.getMQTTPassword() << std::endl;
+    std::cout << "MQTT Topic: " << config.getMQTTTopic() << std::endl;
+}
+
+void Utils::restartDevice(unsigned long delayTime)
+{
+    std::cout << "Restarting ESP32..." << std::endl;
+    delay(delayTime);
+    esp_restart();
+}

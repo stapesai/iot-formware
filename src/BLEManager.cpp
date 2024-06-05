@@ -10,7 +10,11 @@ void BLEConfigCallbacks::onWrite(NVSManager &config, Utils &utils)
 {
     // Parse the characteristic value
     std::string value = pCharacteristic->getValue();
+
+    // Split the string into tokens
     std::vector<std::string> tokens = utils.formatString(value, ';');
+
+    // Setters for configuration parameters
     std::vector<std::function<void(const std::string &)>> configSetters = {
         [&config](const std::string &v) { config.setWiFiSSID(v); },
         [&config](const std::string &v) { config.setWiFiPassword(v); },
@@ -21,36 +25,27 @@ void BLEConfigCallbacks::onWrite(NVSManager &config, Utils &utils)
         [&config](const std::string &v) { config.setMQTTTopic(v); }
     };
 
+    // Check if the number of tokens matches the number of configuration parameters
     if (tokens.size() == configSetters.size())
     {
         // Assign tokens to configuration parameters
-
         for (size_t i = 0; i < configSetters.size(); i++)
         {
             configSetters[i](tokens[i]);
         }
         // Debugging output
-        std::cout << "SSID: " << config.getWiFiSSID() << std::endl;
-        std::cout << "Password: " << config.getWiFiPassword() << std::endl;
-        std::cout << "MQTT Server: " << config.getMQTTBroker() << std::endl;
-        std::cout << "MQTT Port: " << config.getMQTTPort() << std::endl;
-        std::cout << "MQTT User: " << config.getMQTTUser() << std::endl;
-        std::cout << "MQTT Password: " << config.getMQTTPassword() << std::endl;
-        std::cout << "MQTT Topic: " << config.getMQTTTopic() << std::endl;
+        utils.printConfig(config);
 
         // Write configuration to NVS
         config.writeConfig();
         std::cout << "Data written to NVS" << std::endl;
 
         // Restart the ESP32
-        std::cout << "Restarting ESP32..." << std::endl;
-        delay(1000);
-        esp_restart();
+        utils.restartDevice(1000);
     }
     else
     {
         std::cerr << "Mismatch between the number of tokens and the number of config parameters." << std::endl;
-        return;
     }
 }
 
@@ -60,10 +55,7 @@ void BLEConfigCallbacks::initialiseBLE(Utils &utils)
     BLEDevice::init(utils.generateName());
     pServer = BLEDevice::createServer();
     pService = pServer->createService(SERVICE_UUID);
-    pCharacteristic = pService->createCharacteristic(
-        CHARACTERISTIC_UUID, 
-        BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_NOTIFY
-    );
+    pCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_NOTIFY);
     pCharacteristic->setCallbacks(new BLEConfigCallbacks());
     pCharacteristic->addDescriptor(new BLE2902());
     pService->start();
@@ -77,7 +69,7 @@ void BLEConfigCallbacks::initialiseBLE(Utils &utils)
     pAdvertising->start();
 }
 
-void BLEConfigCallbacks::sendError(std::string error)
+void BLEConfigCallbacks::sendError(const std::string &error)
 {
     pCharacteristic->setValue(error);
     pCharacteristic->notify();

@@ -95,9 +95,7 @@ void NVSManager::intialiseNVS()
 
 void NVSManager::writeConfig()
 {
-
-    err = nvs_open("storage", NVS_READWRITE, &nvs_handler);
-    if (err != ESP_OK)
+    if (nvs_open("storage", NVS_READWRITE, &nvs_handler) != ESP_OK)
     {
         Serial.println("Error opening NVS handle");
         return;
@@ -105,15 +103,13 @@ void NVSManager::writeConfig()
 
     for (int i = 0; i < 7; ++i)
     {
-        err = nvs_set_str(nvs_handler, keys[i], fields[i]->c_str());
-        if (err != ESP_OK)
+        if (nvs_set_str(nvs_handler, keys[i], fields[i]->c_str()) != ESP_OK)
         {
             Serial.printf("Error writing to NVS for key '%s'\n", keys[i]);
         }
     }
 
-    err = nvs_commit(nvs_handler);
-    if (err != ESP_OK)
+    if (nvs_commit(nvs_handler) != ESP_OK)
     {
         Serial.println("Error committing NVS changes");
     }

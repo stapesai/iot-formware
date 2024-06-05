@@ -23,5 +23,6 @@ public:
     MQTTManager(PubSubClient *client, NVSManager *config, Utils *utils);
     void publish_keep_alive_message(unsigned long &keep_alive_counter);
     void mqttCallback(char *topic, byte *payload, unsigned short int length);
+    void initializeMQTT();
     void connectToMQTT();
 };

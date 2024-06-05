@@ -31,20 +31,17 @@ void MQTTManager::publish_keep_alive_message(unsigned long &keep_alive_counter)
 }
 void MQTTManager::mqttCallback(char *topic, byte *payload, unsigned short int length) {};
 
-// TODO:  Move this to the source file.
-// TODO: Make diffrent funcs for:
-// 1. Initlialize MQTT
-// 2. Connect to MQTT
-// 3. Reconnect to MQTT
-void MQTTManager::connectToMQTT()
+void MQTTManager::initializeMQTT()
 {
-    Serial.println("Connecting to MQTT Broker");
-    Serial.println("Broker: " + String(mqtt_broker->c_str()) + "\n Port: " + String(atoi(mqtt_port->c_str())) + "\n ClientID: " + String(mqtt_client_id.c_str()) + "\n Username: " + String(mqtt_username->c_str()) + "\n Password: " + String(mqtt_password->c_str()) + "\n Topic: " + String(mqtt_topic->c_str()));
-
     mqttclient->setServer(mqtt_broker->c_str(), atoi(mqtt_port->c_str()));
     mqttclient->setKeepAlive(60);
     mqttclient->setCallback([this](char *topic, uint8_t *payload, unsigned int length)
                             { this->mqttCallback(topic, payload, length); });
+}
+
+void MQTTManager::connectToMQTT()
+{
+    Serial.println("Connecting to MQTT Broker");
 
     if (mqttclient->connect(mqtt_client_id.c_str(), mqtt_username->c_str(), mqtt_password->c_str()))
     {
@@ -58,6 +55,5 @@ void MQTTManager::connectToMQTT()
         Serial.println("MQTT connection failed");
         Serial.print("Error code: ");
         Serial.println(mqttclient->state());
-        // statusBuzzer(5, 100);
     }
 }

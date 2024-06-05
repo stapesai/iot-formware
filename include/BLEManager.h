@@ -21,7 +21,7 @@ private:
 public:
     BLEConfigCallbacks();
     void initialiseBLE(Utils &utils);
-    void sendError(std::string error);
+    void sendError(const std::string &error);
     void onWrite(NVSManager &config, Utils &utils);
 };
 
