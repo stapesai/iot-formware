@@ -20,9 +20,7 @@ const char *Utils::generateName()
   // Return the C-style string
   return result.c_str();
 }
-
-// This method is used to split the string received from the BLE by the delimiter (in this case, ';')
-// and then make a vector of strings from the split string
+//Format incoming input string
 std::vector<std::string> Utils::formatString(const std::string &str, char delim)
 {
   std::vector<std::string> tokens;

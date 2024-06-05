@@ -6,10 +6,14 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <nvs.h>
+#include <nvs_flash.h>
 
 class NVSManager
 {
 private:
+    nvs_handle_t nvs_handler;
+    esp_err_t err;
     std::string wifi_ssid;
     std::string wifi_password;
     std::string mqtt_broker;
@@ -38,12 +42,12 @@ public:
     void setMQTTUser(const std::string &value);
     void setMQTTPassword(const std::string &value);
     void setMQTTTopic(const std::string &value);
-    
+
+    static void resetNVS();
     bool isNVSEmpty();
     void writeConfig();
     void readConfig();
     void intialiseNVS();
-    void resetNVS();
 };
 
 #endif // MANAGECONFIG_H

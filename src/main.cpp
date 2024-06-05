@@ -2,11 +2,10 @@
 // Main file that contains the setup and loop functions.
 
 // Include the necessary libraries
+
+// TODO: Add BLE security, Make device only visible to `JarvisHome` app.
+
 #include <Arduino.h>
-#include <BLEDevice.h>
-#include <BLEUtils.h>
-#include <BLEServer.h>
-#include <nvs_flash.h>
 #include <PubSubClient.h>
 #include <BLEManager.h>
 #include <MQTTManager.h>
@@ -15,7 +14,7 @@ unsigned long previousMillisWiFi = 0;
 unsigned long previousMillisMQTT = 0;
 unsigned long previousMillisKeepAlive = 0;
 unsigned long keepAliveInterval = 50000; // 50 seconds
-unsigned long wifiCheckInterval = 5000;  // 5 seconds
+unsigned long requiredInterval = 5000;   // 5 seconds
 unsigned long keep_alive_counter = 1;
 
 Utils utils;                                           // Utility class to handle common functions
@@ -23,13 +22,18 @@ NVSManager config;                                     // Nvs manager class
 WiFiClient wifiClient;                                 // WiFi client for MQTT
 PubSubClient mqttclient(wifiClient);                   // MQTT client
 MQTTManager mqttManager(&mqttclient, &config, &utils); // MQTT manager
-BLEConfigCallbacks bleConfigCallbacks(config, utils);  // BLE Config Callbacks
+BLEConfigCallbacks bleConfigCallbacks(config, utils);
+BLEServer *pServer;
+BLEService *pService;
+BLECharacteristic *pCharacteristic;
+BLEAdvertising *pAdvertising; // BLE Config Callbacks
 
 void setup()
 {
   // Initialize Serial
   Serial.begin(115200);
   Serial.println("Serial Initialized");
+  attachInterrupt(NVS_RESET_PIN, config.resetNVS, FALLING);
 
   // Initialize Buzzer and Reset LED
   pinMode(STATUS_BUZZER, OUTPUT);
@@ -43,27 +47,22 @@ void setup()
   Serial.print("Device Name: ");
   Serial.println(utils.generateName());
 
-  // TODO: Add BLE security, Make device only visible to `JarvisHome` app.
-  // TODO: If not enough tokens are received then it shoudn't stop the BLE server
-  // TODO: Send the messages through BLE
-
-  // Read the configuration from NVS, if it exists
 
   if (config.isNVSEmpty())
   {
-    Serial.println("Data is not present in NVS");
     bleConfigCallbacks.initialiseBLE();
+    config.readConfig();
+    Serial.println("Data is not present in NVS");
     Serial.println("Waiting for a client connection to notify...");
     Serial.println("The device started, now you can pair it with BLE Scanner!");
   }
   else
   {
-    Serial.println("Data is present in NVS");
     bleConfigCallbacks.deinitaliseBLE();
-    config.readConfig();
     Serial.println("BLE service stopped.");
+    config.readConfig();
     utils.initialiseWiFi(&config);
-    mqttManager.connectToMQTT();
+    // mqttManager.connectToMQTT();
   }
 }
 
@@ -72,53 +71,35 @@ void setup()
 void loop()
 {
   unsigned long currentMillis = millis();
+  // Check if the device is connected to WiFi
 
-  config.resetNVS();
-
-  if (currentMillis - previousMillisWiFi >= wifiCheckInterval)
+  if (!config.isNVSEmpty())
   {
-    previousMillisWiFi = currentMillis;
-
-    if (!config.isNVSEmpty() == 0)
+    
+    while (WiFi.status() == WL_DISCONNECTED)
     {
-      if (WiFi.status() != WL_CONNECTED)
-      {
-        Serial.println("Connecting to WiFi...");
-        utils.statusBuzzer(STATUS_BUZZER, 100);
-        utils.initialiseWiFi(&config);
-      }
+      Serial.println("Reconnecting to WiFi...");
+      utils.initialiseWiFi(&config);
+      delay(1000);
+
+      
     }
+
+    // Check if the device is connected to MQTT
+
+    while (!mqttclient.connected())
+    {
+      Serial.println("Reconnecting to MQTT...");
+      mqttManager.connectToMQTT();
+      delay(1000);
+    }
+   
+    
   }
+  else
+  {
+    log_d("Device is not configured yet.");
+  }
+
+ 
 }
-
-// // Check MQTT connection if WiFi is connected
-// if (WiFi.status() == WL_CONNECTED)
-// {
-//   // Handle different MQTT states
-//   switch (mqttclient.state())
-//   {
-//   case MQTT_CONNECTION_LOST:
-//     Serial.println("MQTT Connection lost.. Reconnecting..");
-//     mqttManager.connectToMQTT();
-//     break;
-
-//   case MQTT_DISCONNECTED:
-//     Serial.println("MQTT Disconnected.. Reconnecting..");
-//     mqttManager.connectToMQTT();
-//     break;
-
-//   case MQTT_CONNECTED:
-//     // Send keep-alive message every 50 seconds
-//     if (currentMillis - previousMillisKeepAlive >= keepAliveInterval)
-//     {
-//       Serial.println("Publishing keep alive message");
-//       mqttManager.publish_keep_alive_message(keep_alive_counter);
-//       keep_alive_counter++;
-//       previousMillisKeepAlive = currentMillis;
-//     }
-//     break;
-
-//   default:
-//     Serial.println("done");
-//     break;
-//   }

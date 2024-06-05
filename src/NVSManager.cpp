@@ -1,10 +1,7 @@
 // Path: src/NVSManager.cpp
 
-#include <NVSManager.h>
-#include <nvs.h>
-#include <nvs_flash.h>
 #include <Arduino.h>
-
+#include <NVSManager.h>
 #include <utils.h>
 
 // Constructor
@@ -23,7 +20,7 @@ const std::string &NVSManager::getMQTTPassword() const { return mqtt_password; }
 const std::string &NVSManager::getMQTTTopic() const { return mqtt_topic; }
 
 // Setter methods
-void NVSManager::setWiFiSSID(const std::string &value) { wifi_ssid = value.c_str(); }
+void NVSManager::setWiFiSSID(const std::string &value) { wifi_ssid = value; }
 void NVSManager::setWiFiPassword(const std::string &value) { wifi_password = value; }
 void NVSManager::setMQTTBroker(const std::string &value) { mqtt_broker = value; }
 void NVSManager::setMQTTPort(const std::string &value) { mqtt_port = value; }
@@ -53,25 +50,35 @@ void IRAM_ATTR NVSManager::resetNVS()
 
 bool NVSManager::isNVSEmpty()
 {
-    nvs_handle_t my_handle;
-    esp_err_t err = nvs_open_from_partition("storage", "nvs", NVS_READONLY, &my_handle);
+    err = nvs_open("storage", NVS_READWRITE, &nvs_handler);
+    const char *key = "wifi_ssid";
 
     // Check NVS stats
-    nvs_stats_t nvs_stats;
-    err = nvs_get_stats(NULL, &nvs_stats);
-    if (err != ESP_OK)
+
+    size_t required_size;
+    err = nvs_get_str(nvs_handler, key, NULL, &required_size);
+    nvs_close(nvs_handler);
+
+    if (err == ESP_OK)
     {
-        Serial.println("Error getting NVS stats");
+        // Serial.printf("Key: %s\n", key);
         return false;
     }
-
-    // Check if used entries are zero
-    return nvs_stats.used_entries == 0;
+    else if (err == ESP_ERR_NVS_NOT_FOUND)
+    {
+        return true;
+    }
+    else
+    {
+        Serial.printf("Error getting key '%s': %s\n", key, esp_err_to_name(err));
+        return true;
+    }
+    
 }
 
 void NVSManager::intialiseNVS()
 {
-    esp_err_t err = nvs_flash_init();
+    err = nvs_flash_init();
 
     // Check if initialization encountered specific errors
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
@@ -88,8 +95,8 @@ void NVSManager::intialiseNVS()
 
 void NVSManager::writeConfig()
 {
-    nvs_handle_t my_handle;
-    esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
+
+    err = nvs_open("storage", NVS_READWRITE, &nvs_handler);
     if (err != ESP_OK)
     {
         Serial.println("Error opening NVS handle");
@@ -98,35 +105,40 @@ void NVSManager::writeConfig()
 
     for (int i = 0; i < 7; ++i)
     {
-        err = nvs_set_str(my_handle, keys[i], fields[i]->c_str());
+        err = nvs_set_str(nvs_handler, keys[i], fields[i]->c_str());
         if (err != ESP_OK)
         {
             Serial.printf("Error writing to NVS for key '%s'\n", keys[i]);
         }
     }
 
-    err = nvs_commit(my_handle);
+    err = nvs_commit(nvs_handler);
     if (err != ESP_OK)
     {
         Serial.println("Error committing NVS changes");
     }
-    nvs_close(my_handle);
+    nvs_close(nvs_handler);
 }
 
 void NVSManager::readConfig()
 {
-    nvs_handle_t my_handle;
-    esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
+
+    err = nvs_open("storage", NVS_READWRITE, &nvs_handler);
+
     if (err != ESP_OK)
     {
         Serial.println("Error opening NVS handle");
         return;
     }
+    else
+    {
+        Serial.println("NVS opened successfully");
+    }
 
     for (int i = 0; i < 7; ++i)
     {
         size_t required_size;
-        err = nvs_get_str(my_handle, keys[i], NULL, &required_size);
+        err = nvs_get_str(nvs_handler, keys[i], NULL, &required_size);
         if (err != ESP_OK)
         {
             // Serial.printf("Error reading size for key '%s'\n", keys[i]);
@@ -140,7 +152,7 @@ void NVSManager::readConfig()
             continue;
         }
 
-        err = nvs_get_str(my_handle, keys[i], value, &required_size);
+        err = nvs_get_str(nvs_handler, keys[i], value, &required_size);
         if (err == ESP_OK)
         {
             *fields[i] = std::string(value);
@@ -152,5 +164,5 @@ void NVSManager::readConfig()
         }
         free(value);
     }
-    nvs_close(my_handle);
+    nvs_close(nvs_handler);
 }

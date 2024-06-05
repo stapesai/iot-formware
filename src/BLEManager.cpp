@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <BLEManager.h>
 
-BLEConfigCallbacks::BLEConfigCallbacks(NVSManager &config, Utils &utils) : config(config), utils(utils) {}
+BLEConfigCallbacks::BLEConfigCallbacks(NVSManager &config, Utils &utils) : config(config), utils(utils), pServer(nullptr), pService(nullptr), pCharacteristic(nullptr), pAdvertising(nullptr) {}
 
 void BLEConfigCallbacks::onWrite(BLECharacteristic *pCharacteristic)
 {
@@ -63,27 +63,51 @@ void BLEConfigCallbacks::initialiseBLE()
     // Initialize BLE
     BLEDevice::init(utils.generateName());
     pServer = BLEDevice::createServer();
-    pServer->createService(SERVICE_UUID);
-    pService->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_NOTIFY);
+    pService = pServer->createService(SERVICE_UUID);
+    pCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_NOTIFY);
     pCharacteristic->setCallbacks(new BLEConfigCallbacks(config, utils));
+    pCharacteristic->addDescriptor(new BLE2902());
     pService->start();
 
     // Set up advertising
     pAdvertising = BLEDevice::getAdvertising();
     pAdvertising->addServiceUUID(SERVICE_UUID);
     pAdvertising->setScanResponse(false);
+    pAdvertising->setMinPreferred(0x06); // Functions that help with iPhone connections issue
+    pAdvertising->setMinPreferred(0x12);
     pAdvertising->start();
 }
 
 void BLEConfigCallbacks::deinitaliseBLE()
 {
-    pService->stop();
-    pAdvertising->stop();
-    BLEDevice::deinit(true);
+    if (pService)
+    {
+        pService->stop();
+    }
+
+    if (pAdvertising)
+    {
+        pAdvertising->stop();
+    }
+
+    if (pServer && pService)
+    {
+        pServer->removeService(pService);
+    }
+
+    // Deinitialize BLE device safely
+    BLEDevice::deinit();
+
+    // Set pointers to null to avoid accidental use after deinitialization
+    pService = nullptr;
+    pAdvertising = nullptr;
+    pServer = nullptr;
+    pCharacteristic = nullptr;
 }
 
 void BLEConfigCallbacks::sendError(std::string error)
 {
-    pCharacteristic->setValue(error.c_str());
+    pCharacteristic->setValue(error);
     pCharacteristic->notify();
+    delay(500);
 }
