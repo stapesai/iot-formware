@@ -20,7 +20,7 @@ const char *Utils::generateName()
   // Return the C-style string
   return result.c_str();
 }
-//Format incoming input string
+// Format incoming input string
 std::vector<std::string> Utils::formatString(const std::string &str, char delim)
 {
   std::vector<std::string> tokens;

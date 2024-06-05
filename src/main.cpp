@@ -16,49 +16,51 @@ unsigned long previousMillisKeepAlive = 0;
 unsigned long keepAliveInterval = 50000; // 50 seconds
 unsigned long requiredInterval = 5000;   // 5 seconds
 unsigned long keep_alive_counter = 1;
+bool isConfigured = false;
 
 Utils utils;                                           // Utility class to handle common functions
 NVSManager config;                                     // Nvs manager class
 WiFiClient wifiClient;                                 // WiFi client for MQTT
 PubSubClient mqttclient(wifiClient);                   // MQTT client
 MQTTManager mqttManager(&mqttclient, &config, &utils); // MQTT manager
-BLEConfigCallbacks bleConfigCallbacks(config, utils); // BLE Config Callbacks
+BLEConfigCallbacks bleConfigCallbacks(config, utils);  // BLE Config Callbacks
 
 void setup()
 {
   // Initialize Serial
   Serial.begin(115200);
   Serial.println("Serial Initialized");
-  attachInterrupt(NVS_RESET_PIN, config.resetNVS, FALLING);
 
   // Initialize Buzzer and Reset LED
   pinMode(STATUS_BUZZER, OUTPUT);
   pinMode(RESET_LED, OUTPUT);
   pinMode(NVS_RESET_PIN, INPUT);
 
+  // Attach interrupt to reset the NVS
+  attachInterrupt(NVS_RESET_PIN, config.resetNVS, FALLING);
+
+  // Initialize NVS
   config.intialiseNVS();
 
   // Create a unique device name by prefixing with a string
-
   Serial.print("Device Name: ");
   Serial.println(utils.generateName());
 
+  // Check if the device is configured
+  isConfigured = config.isNVSEmpty() ? false : true;
 
-  if (config.isNVSEmpty())
+  if (!isConfigured)
   {
+    // Initialize BLE if the device is not configured
     bleConfigCallbacks.initialiseBLE();
-    config.readConfig();
     Serial.println("Data is not present in NVS");
     Serial.println("Waiting for a client connection to notify...");
     Serial.println("The device started, now you can pair it with BLE Scanner!");
   }
   else
   {
-    bleConfigCallbacks.deinitaliseBLE();
-    Serial.println("BLE service stopped.");
+    // Read data from NVS and store it in the config object
     config.readConfig();
-    utils.initialiseWiFi(&config);
-    // mqttManager.connectToMQTT();
   }
 }
 
@@ -67,35 +69,54 @@ void setup()
 void loop()
 {
   unsigned long currentMillis = millis();
-  // Check if the device is connected to WiFi
 
-  if (!config.isNVSEmpty())
+  if (isConfigured)
   {
-    
-    while (WiFi.status() == WL_DISCONNECTED)
+    // Check if the device is connected to WiFi
+    if (WiFi.status() == WL_CONNECTED)
     {
-      Serial.println("Reconnecting to WiFi...");
-      utils.initialiseWiFi(&config);
-      delay(1000);
-
-      
+      // Check if the device is connected to MQTT
+      if (mqttclient.connected())
+      {
+        // Check if the device is connected to MQTT
+        if (currentMillis - previousMillisMQTT >= keepAliveInterval)
+        {
+          previousMillisMQTT = currentMillis;
+          Serial.println("Publishing keep alive message...");
+          mqttManager.publish_keep_alive_message(keep_alive_counter);
+          keep_alive_counter++;
+        }
+      }
+      else
+      {
+        // Reconnect to MQTT
+        if (currentMillis - previousMillisMQTT >= requiredInterval)
+        {
+          previousMillisMQTT = currentMillis;
+          keep_alive_counter = 0;
+          Serial.println("Reconnecting to MQTT...");
+          mqttManager.connectToMQTT();
+        }
+      }
     }
-
-    // Check if the device is connected to MQTT
-
-    while (!mqttclient.connected())
+    else
     {
-      Serial.println("Reconnecting to MQTT...");
-      mqttManager.connectToMQTT();
-      delay(1000);
+      // Reconnect to WiFi
+      if (currentMillis - previousMillisWiFi >= requiredInterval)
+      {
+        previousMillisWiFi = currentMillis;
+        keep_alive_counter = 0;
+        Serial.println("Reconnecting to WiFi...");
+        utils.initialiseWiFi(&config);
+      }
     }
-   
-    
   }
   else
   {
-    log_d("Device is not configured yet.");
+    if (currentMillis - previousMillisWiFi >= requiredInterval)
+    {
+      previousMillisWiFi = currentMillis;
+      Serial.println("Waiting for a client to upload configuration...");
+    }
   }
-
- 
 }

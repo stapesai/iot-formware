@@ -78,32 +78,32 @@ void BLEConfigCallbacks::initialiseBLE()
     pAdvertising->start();
 }
 
-void BLEConfigCallbacks::deinitaliseBLE()
-{
-    if (pService)
-    {
-        pService->stop();
-    }
+// void BLEConfigCallbacks::deinitaliseBLE()
+// {
+//     if (pService)
+//     {
+//         pService->stop();
+//     }
 
-    if (pAdvertising)
-    {
-        pAdvertising->stop();
-    }
+//     if (pAdvertising)
+//     {
+//         pAdvertising->stop();
+//     }
 
-    if (pServer && pService)
-    {
-        pServer->removeService(pService);
-    }
+//     if (pServer && pService)
+//     {
+//         pServer->removeService(pService);
+//     }
 
-    // Deinitialize BLE device safely
-    BLEDevice::deinit();
+//     // Deinitialize BLE device safely
+//     BLEDevice::deinit();
 
-    // Set pointers to null to avoid accidental use after deinitialization
-    pService = nullptr;
-    pAdvertising = nullptr;
-    pServer = nullptr;
-    pCharacteristic = nullptr;
-}
+//     // Set pointers to null to avoid accidental use after deinitialization
+//     pService = nullptr;
+//     pAdvertising = nullptr;
+//     pServer = nullptr;
+//     pCharacteristic = nullptr;
+// }
 
 void BLEConfigCallbacks::sendError(std::string error)
 {

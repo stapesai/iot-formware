@@ -6,7 +6,6 @@
 class MQTTManager
 {
 private:
-
     PubSubClient *mqttclient;
     NVSManager *manage_config;
     Utils *generate_client_id;
@@ -20,7 +19,6 @@ private:
     // const char *user_uuid;
 
 public:
- 
     MQTTManager(PubSubClient *client, NVSManager *config, Utils *utils);
     void publish_keep_alive_message(unsigned long &keep_alive_counter);
     void mqttCallback(char *topic, byte *payload, unsigned short int length);

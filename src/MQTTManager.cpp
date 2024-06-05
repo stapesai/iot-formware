@@ -40,7 +40,7 @@ void MQTTManager::mqttCallback(char *topic, byte *payload, unsigned short int le
 void MQTTManager::connectToMQTT()
 {
     Serial.println("Connecting to MQTT Broker");
-    Serial.println("Broker: " + String(mqtt_broker->c_str()) + "\n Port: " + String(atoi(mqtt_port->c_str())) +"\n ClientID: " + String(mqtt_client_id.c_str()) + "\n Username: " + String(mqtt_username->c_str()) + "\n Password: " + String(mqtt_password->c_str()) + "\n Topic: " + String(mqtt_topic->c_str()));
+    Serial.println("Broker: " + String(mqtt_broker->c_str()) + "\n Port: " + String(atoi(mqtt_port->c_str())) + "\n ClientID: " + String(mqtt_client_id.c_str()) + "\n Username: " + String(mqtt_username->c_str()) + "\n Password: " + String(mqtt_password->c_str()) + "\n Topic: " + String(mqtt_topic->c_str()));
 
     mqttclient->setServer(mqtt_broker->c_str(), atoi(mqtt_port->c_str()));
     mqttclient->setKeepAlive(60);

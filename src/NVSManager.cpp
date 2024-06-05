@@ -51,6 +51,7 @@ void IRAM_ATTR NVSManager::resetNVS()
 bool NVSManager::isNVSEmpty()
 {
     err = nvs_open("storage", NVS_READWRITE, &nvs_handler);
+    // use all available keys to check if any of them doesn't exists
     const char *key = "wifi_ssid";
 
     // Check NVS stats
@@ -70,10 +71,9 @@ bool NVSManager::isNVSEmpty()
     }
     else
     {
-        Serial.printf("Error getting key '%s': %s\n", key, esp_err_to_name(err));
+        // Serial.printf("Error getting key '%s': %s\n", key, esp_err_to_name(err));
         return true;
     }
-    
 }
 
 void NVSManager::intialiseNVS()

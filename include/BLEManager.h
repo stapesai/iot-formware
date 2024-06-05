@@ -12,7 +12,7 @@ class BLEConfigCallbacks : public BLECharacteristicCallbacks
 {
 private:
     NVSManager &config; // Reference to ManageConfig
-    Utils &utils; // Reference to Utils
+    Utils &utils;       // Reference to Utils
     BLEServer *pServer;
     BLEService *pService;
     BLECharacteristic *pCharacteristic;
