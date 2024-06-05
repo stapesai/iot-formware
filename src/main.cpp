@@ -22,11 +22,7 @@ NVSManager config;                                     // Nvs manager class
 WiFiClient wifiClient;                                 // WiFi client for MQTT
 PubSubClient mqttclient(wifiClient);                   // MQTT client
 MQTTManager mqttManager(&mqttclient, &config, &utils); // MQTT manager
-BLEConfigCallbacks bleConfigCallbacks(config, utils);
-BLEServer *pServer;
-BLEService *pService;
-BLECharacteristic *pCharacteristic;
-BLEAdvertising *pAdvertising; // BLE Config Callbacks
+BLEConfigCallbacks bleConfigCallbacks(config, utils); // BLE Config Callbacks
 
 void setup()
 {
