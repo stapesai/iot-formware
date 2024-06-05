@@ -52,7 +52,7 @@ void BLEConfigCallbacks::onWrite(BLECharacteristic* pCharacteristic)
     }
 }
 
-void BLEConfigCallbacks::initialiseBLE()
+void BLEConfigCallbacks::initializeBLE()
 {
     // Initialize BLE
     BLEDevice::init(utils.generateName());
@@ -64,6 +64,13 @@ void BLEConfigCallbacks::initialiseBLE()
     );
     pCharacteristic->setCallbacks(this);
     // pCharacteristic->addDescriptor(new BLE2902());
+
+    // Implement security: require bonding, MITM protection, etc.
+    BLESecurity *pSecurity = new BLESecurity();
+    pSecurity->setAuthenticationMode(ESP_LE_AUTH_BOND);
+    pSecurity->setCapability(ESP_IO_CAP_IO);
+
+    // Start the service
     pService->start();
 
     // Set up advertising

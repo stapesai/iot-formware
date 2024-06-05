@@ -22,7 +22,7 @@ private:
 
 public:
     BLEConfigCallbacks(NVSManager &config, Utils &utils);
-    void initialiseBLE();
+    void initializeBLE();
     void sendError(const std::string &error);
     void onWrite(BLECharacteristic* pCharacteristic) override;
 };

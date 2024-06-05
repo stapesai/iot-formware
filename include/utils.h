@@ -19,7 +19,6 @@ class Utils
 public:
     std::vector<std::string> formatString(const std::string &str, char delim);
     static void statusBuzzer(int times, int delayTime);
-    void initialiseWiFi(NVSManager *config);
     void printConfig(const NVSManager &config);
     void restartDevice(unsigned long delayTime);
     const char *generateName();
