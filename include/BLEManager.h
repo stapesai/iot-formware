@@ -13,16 +13,18 @@
 class BLEConfigCallbacks : public BLECharacteristicCallbacks
 {
 private:
+    NVSManager &config; 
+    Utils &utils; 
     BLEServer *pServer;
     BLEService *pService;
     BLECharacteristic *pCharacteristic;
     BLEAdvertising *pAdvertising;
 
 public:
-    BLEConfigCallbacks();
-    void initialiseBLE(Utils &utils);
+    BLEConfigCallbacks(NVSManager &config, Utils &utils);
+    void initialiseBLE();
     void sendError(const std::string &error);
-    void onWrite(NVSManager &config, Utils &utils);
+    void onWrite(BLECharacteristic* pCharacteristic) override;
 };
 
 #endif // BLECONFIGCALLBACKS_H

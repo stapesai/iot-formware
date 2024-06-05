@@ -29,15 +29,16 @@ private:
   unsigned long keep_alive_counter;
   bool isConfigured;
 
-  Utils utils;                   // Utility class to handle common functions
-  NVSManager config;             // Nvs manager class
-  WiFiClient wifiClient;         // WiFi client for MQTT
-  PubSubClient mqttClient;       // MQTT client
-  MQTTManager mqttManager;       // MQTT manager
+  Utils utils;                                  // Utility class to handle common functions
+  NVSManager config;                            // Nvs manager class
+  WiFiClient wifiClient;                        // WiFi client for MQTT
+  PubSubClient mqttClient;                      // MQTT client
+  MQTTManager mqttManager;                      // MQTT manager
   BLEConfigCallbacks bleManager; // BLE Config Callbacks
 };
+
 MainApp::MainApp() : previousMillisWiFi(0), previousMillisMQTT(0), keepAliveInterval(50000), requiredInterval(5000), keep_alive_counter(1),
-                     isConfigured(false), mqttClient(wifiClient), mqttManager(&mqttClient, &config, &utils), bleManager() {}
+                     isConfigured(false), mqttClient(wifiClient), mqttManager(&mqttClient, &config, &utils), bleManager(config, utils) {}
 
 void MainApp::setup()
 {
@@ -71,7 +72,7 @@ void MainApp::setupNVS()
 
 void MainApp::setupBLE()
 {
-  bleManager.initialiseBLE(utils);
+  bleManager.initialiseBLE();
   Serial.println("Data is not present in NVS");
   Serial.println("Waiting for a client connection to notify...");
   Serial.println("The device started, now you can pair it with BLE Scanner!");

@@ -62,7 +62,7 @@ bool NVSManager::isNVSEmpty()
 
     if (err == ESP_OK)
     {
-        // Serial.printf("Key: %s\n", key);
+        Serial.printf("Key: %s\n", key);
         return false;
     }
     else if (err == ESP_ERR_NVS_NOT_FOUND)
@@ -71,7 +71,7 @@ bool NVSManager::isNVSEmpty()
     }
     else
     {
-        // Serial.printf("Error getting key '%s': %s\n", key, esp_err_to_name(err));
+        Serial.printf("Error getting key '%s': %s\n", key, esp_err_to_name(err));
         return true;
     }
 }
@@ -103,6 +103,7 @@ void NVSManager::writeConfig()
 
     for (int i = 0; i < 7; ++i)
     {
+        Serial.printf("Writing to NVS: %s = %s\n", keys[i], fields[i]->c_str());
         if (nvs_set_str(nvs_handler, keys[i], fields[i]->c_str()) != ESP_OK)
         {
             Serial.printf("Error writing to NVS for key '%s'\n", keys[i]);
@@ -112,6 +113,10 @@ void NVSManager::writeConfig()
     if (nvs_commit(nvs_handler) != ESP_OK)
     {
         Serial.println("Error committing NVS changes");
+    }
+    else
+    {
+        Serial.println("NVS committed successfully");
     }
     nvs_close(nvs_handler);
 }
