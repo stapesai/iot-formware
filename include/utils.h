@@ -1,5 +1,4 @@
 // Path: include/utils.h
-// Utility functions and constants.
 
 #include <WiFi.h>
 #include <iostream>

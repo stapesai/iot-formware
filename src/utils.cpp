@@ -1,5 +1,4 @@
 // Path: src/utils.h
-// Description: This file contains the declaration of the Utils class.
 
 #include <Arduino.h>
 #include <nvs_flash.h>

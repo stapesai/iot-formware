@@ -1,29 +1,25 @@
+// Path: src/BLEManager.cpp
+
 #include <iostream>
 #include <Arduino.h>
 #include <BLEManager.h>
 
-BLEConfigCallbacks::BLEConfigCallbacks(NVSManager &config, Utils &utils) : config(config), utils(utils), pServer(nullptr), pService(nullptr), pCharacteristic(nullptr), pAdvertising(nullptr) {}
+BLEConfigCallbacks::BLEConfigCallbacks() : pServer(nullptr), pService(nullptr), pCharacteristic(nullptr), pAdvertising(nullptr) {}
 
-void BLEConfigCallbacks::onWrite(BLECharacteristic *pCharacteristic)
+void BLEConfigCallbacks::onWrite(NVSManager &config, Utils &utils)
 {
     // Parse the characteristic value
     std::string value = pCharacteristic->getValue();
     std::vector<std::string> tokens = utils.formatString(value, ';');
     std::vector<std::function<void(const std::string &)>> configSetters = {
-        [this](const std::string &v)
-        { config.setWiFiSSID(v); },
-        [this](const std::string &v)
-        { config.setWiFiPassword(v); },
-        [this](const std::string &v)
-        { config.setMQTTBroker(v); },
-        [this](const std::string &v)
-        { config.setMQTTPort(v); },
-        [this](const std::string &v)
-        { config.setMQTTUser(v); },
-        [this](const std::string &v)
-        { config.setMQTTPassword(v); },
-        [this](const std::string &v)
-        { config.setMQTTTopic(v); }};
+        [&config](const std::string &v) { config.setWiFiSSID(v); },
+        [&config](const std::string &v) { config.setWiFiPassword(v); },
+        [&config](const std::string &v) { config.setMQTTBroker(v); },
+        [&config](const std::string &v) { config.setMQTTPort(v); },
+        [&config](const std::string &v) { config.setMQTTUser(v); },
+        [&config](const std::string &v) { config.setMQTTPassword(v); },
+        [&config](const std::string &v) { config.setMQTTTopic(v); }
+    };
 
     if (tokens.size() == configSetters.size())
     {
@@ -58,14 +54,17 @@ void BLEConfigCallbacks::onWrite(BLECharacteristic *pCharacteristic)
     }
 }
 
-void BLEConfigCallbacks::initialiseBLE()
+void BLEConfigCallbacks::initialiseBLE(Utils &utils)
 {
     // Initialize BLE
     BLEDevice::init(utils.generateName());
     pServer = BLEDevice::createServer();
     pService = pServer->createService(SERVICE_UUID);
-    pCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_NOTIFY);
-    pCharacteristic->setCallbacks(new BLEConfigCallbacks(config, utils));
+    pCharacteristic = pService->createCharacteristic(
+        CHARACTERISTIC_UUID, 
+        BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_NOTIFY
+    );
+    pCharacteristic->setCallbacks(new BLEConfigCallbacks());
     pCharacteristic->addDescriptor(new BLE2902());
     pService->start();
 
@@ -77,33 +76,6 @@ void BLEConfigCallbacks::initialiseBLE()
     pAdvertising->setMinPreferred(0x12);
     pAdvertising->start();
 }
-
-// void BLEConfigCallbacks::deinitaliseBLE()
-// {
-//     if (pService)
-//     {
-//         pService->stop();
-//     }
-
-//     if (pAdvertising)
-//     {
-//         pAdvertising->stop();
-//     }
-
-//     if (pServer && pService)
-//     {
-//         pServer->removeService(pService);
-//     }
-
-//     // Deinitialize BLE device safely
-//     BLEDevice::deinit();
-
-//     // Set pointers to null to avoid accidental use after deinitialization
-//     pService = nullptr;
-//     pAdvertising = nullptr;
-//     pServer = nullptr;
-//     pCharacteristic = nullptr;
-// }
 
 void BLEConfigCallbacks::sendError(std::string error)
 {

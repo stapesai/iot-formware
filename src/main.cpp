@@ -1,7 +1,4 @@
 // Path: src/main.cpp
-// Main file that contains the setup and loop functions.
-
-// Include the necessary libraries
 
 // TODO: Add BLE security, Make device only visible to `JarvisHome` app.
 
@@ -23,7 +20,7 @@ NVSManager config;                                     // Nvs manager class
 WiFiClient wifiClient;                                 // WiFi client for MQTT
 PubSubClient mqttclient(wifiClient);                   // MQTT client
 MQTTManager mqttManager(&mqttclient, &config, &utils); // MQTT manager
-BLEConfigCallbacks bleConfigCallbacks(config, utils);  // BLE Config Callbacks
+BLEConfigCallbacks bleConfigCallbacks;                 // BLE Config Callbacks
 
 void setup()
 {
@@ -52,7 +49,7 @@ void setup()
   if (!isConfigured)
   {
     // Initialize BLE if the device is not configured
-    bleConfigCallbacks.initialiseBLE();
+    bleConfigCallbacks.initialiseBLE(utils);
     Serial.println("Data is not present in NVS");
     Serial.println("Waiting for a client connection to notify...");
     Serial.println("The device started, now you can pair it with BLE Scanner!");

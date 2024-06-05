@@ -1,5 +1,4 @@
 // Path: src/MQTTManager.cpp
-// Description: This file contains the implementation of the MQTTManager class.
 
 #include <ArduinoJson.h>
 #include <MQTTManager.h>

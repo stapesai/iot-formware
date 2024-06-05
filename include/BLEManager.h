@@ -1,3 +1,5 @@
+// Path: include/BLEManger.h
+
 #ifndef BLECONFIGCALLBACKS_H
 #define BLECONFIGCALLBACKS_H
 
@@ -11,19 +13,16 @@
 class BLEConfigCallbacks : public BLECharacteristicCallbacks
 {
 private:
-    NVSManager &config; // Reference to ManageConfig
-    Utils &utils;       // Reference to Utils
     BLEServer *pServer;
     BLEService *pService;
     BLECharacteristic *pCharacteristic;
     BLEAdvertising *pAdvertising;
 
 public:
-    BLEConfigCallbacks(NVSManager &config, Utils &utils);
-    void initialiseBLE();
-    void deinitaliseBLE();
+    BLEConfigCallbacks();
+    void initialiseBLE(Utils &utils);
     void sendError(std::string error);
-    void onWrite(BLECharacteristic *pCharacteristic) override;
+    void onWrite(NVSManager &config, Utils &utils);
 };
 
 #endif // BLECONFIGCALLBACKS_H
