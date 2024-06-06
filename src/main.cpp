@@ -1,6 +1,7 @@
 // Path: src/main.cpp
 
 #include "BLEManager.hpp"
+#include "Constants.hpp"
 #include "MQTTManager.hpp"
 #include "WiFiManager.hpp"
 #include <Arduino.h>

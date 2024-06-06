@@ -1,6 +1,7 @@
 // Path: src/Utils.cpp
 
 #include "Utils.hpp"
+#include "Constants.hpp"
 #include <Arduino.h>
 #include <nvs.h>
 #include <nvs_flash.h>

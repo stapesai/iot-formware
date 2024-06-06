@@ -1,6 +1,7 @@
 // Path: src/NVSManager.cpp
 
 #include "NVSManager.hpp"
+#include "Constants.hpp"
 #include "Utils.hpp"
 #include <Arduino.h>
 
