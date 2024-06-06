@@ -1,6 +1,6 @@
-// Path: include/Utils.h
+// Path: include/Utils.hpp
 
-#include "NVSManager.h"
+#include "NVSManager.hpp"
 #include <WiFi.h>
 #include <iostream>
 #include <sstream>
@@ -16,12 +16,12 @@
 #define BLE_DEVICE_NAME "Jarvis_"
 
 class Utils {
-public:
-  std::vector<std::string> formatString(const std::string &str, char delim);
-  static void statusBuzzer(int times, int delayTime);
-  void printConfig(const NVSManager &config);
-  void restartDevice(unsigned long delayTime);
-  const char *generateName();
+  public:
+    std::vector<std::string> formatString(const std::string &str, char delim);
+    static void statusBuzzer(int times, int delayTime);
+    void printConfig(const NVSManager &config);
+    void restartDevice(unsigned long delayTime);
+    const char *generateName();
 };
 
 #endif // UTILS_H
