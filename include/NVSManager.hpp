@@ -4,10 +4,11 @@
 #define NVS_MANAGER_HPP
 
 #include <array>
-#include <nvs.h>
-#include <nvs_flash.h>
 #include <string>
 #include <vector>
+#include <nvs.h>
+#include <nvs_flash.h>
+#include <Constants.hpp>
 
 class NVSManager
 {

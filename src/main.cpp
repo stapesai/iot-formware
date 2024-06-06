@@ -1,11 +1,12 @@
 // Path: src/main.cpp
 
-#include "BLEManager.hpp"
-#include "Constants.hpp"
-#include "MQTTManager.hpp"
-#include "WiFiManager.hpp"
 #include <Arduino.h>
+#include <BLEManager.hpp>
+#include <Constants.hpp>
+#include <Logger.hpp>
+#include <MQTTManager.hpp>
 #include <PubSubClient.h>
+#include <WiFiManager.hpp>
 
 class MainApp
 {
@@ -85,9 +86,9 @@ void MainApp::setupNVS()
 void MainApp::setupBLE()
 {
 	bleManager.initializeBLE();
-	Serial.println("Data is not present in NVS");
-	Serial.println("Waiting for a client connection to notify...");
-	Serial.println("The device started, now you can pair it with BLE Scanner!");
+	Logger::log(INFO, BLUE "Data is not present in NVS" RESET_COLOR);
+	Logger::log(INFO, BLUE "Waiting for a client connection to notify..." RESET_COLOR);
+	Logger::log(INFO, BLUE "The device started, now you can pair it with BLE Scanner!" RESET_COLOR);
 }
 
 void MainApp::setupMQTT()
@@ -107,7 +108,7 @@ void MainApp::loop()
 		if(currentMillis - previousMillisWiFi >= requiredInterval)
 		{
 			previousMillisWiFi = currentMillis;
-			Serial.println("Waiting for a client to upload configuration...");
+			Logger::log(INFO, YELLOW "Waiting for a client connection to notify..." RESET_COLOR);
 		}
 	}
 }
@@ -121,7 +122,7 @@ void MainApp::checkWiFiAndMQTT(unsigned long currentMillis)
 			if(currentMillis - previousMillisMQTT >= keepAliveInterval)
 			{
 				previousMillisMQTT = currentMillis;
-				Serial.println("Publishing keep alive message...");
+				Logger::log(INFO, MAGENTA "Sending keep alive message" RESET_COLOR);
 				mqttManager.publish_keep_alive_message(keep_alive_counter);
 				keep_alive_counter++;
 			}
@@ -132,7 +133,7 @@ void MainApp::checkWiFiAndMQTT(unsigned long currentMillis)
 			{
 				previousMillisMQTT = currentMillis;
 				keep_alive_counter = 0;
-				Serial.println("Reconnecting to MQTT...");
+				Logger::log(INFO, YELLOW "Reconnecting to MQTT..." RESET_COLOR);
 				mqttManager.connectToMQTT();
 			}
 		}
@@ -143,7 +144,7 @@ void MainApp::checkWiFiAndMQTT(unsigned long currentMillis)
 		{
 			previousMillisWiFi = currentMillis;
 			keep_alive_counter = 0;
-			Serial.println("Reconnecting to WiFi...");
+			Logger::log(INFO, YELLOW "Reconnecting to WiFi..." RESET_COLOR);
 			wifiManager.initialiseWiFi();
 		}
 	}
@@ -158,5 +159,5 @@ void setup()
 
 void loop()
 {
-	app.loop();
+app.loop();
 }

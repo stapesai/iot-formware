@@ -3,8 +3,10 @@
 #ifndef MQTT_MANAGER_HPP
 #define MQTT_MANAGER_HPP
 
-#include "NVSManager.hpp"
-#include "Utils.hpp"
+
+#include <Utils.hpp>
+#include <Constants.hpp>
+#include <NVSManager.hpp>
 #include <PubSubClient.h>
 
 class MQTTManager

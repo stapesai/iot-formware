@@ -20,11 +20,11 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 {
 	// Parse the characteristic value
 	std::string value = pCharacteristic->getValue();
-	Logger::log(INFO, "Received value: " + value);
+	Logger::log(INFO, GREEN "Received value: " RESET_COLOR + value);
 
 	// Split the string into tokens
 	std::vector<std::string> tokens = utils.formatString(value, ';');
-	Logger::log(INFO, "Number of tokens: " + String(tokens.size()));
+	Logger::log(INFO, YELLOW "Number of tokens: " RESET_COLOR + String(tokens.size()));
 
 	// Setters for configuration parameters
 	std::vector<std::function<void(const std::string&)>> configSetters = {
@@ -43,7 +43,9 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 		// Assign tokens to configuration parameters
 		for(size_t i = 0; i < configSetters.size(); i++)
 		{
-			std::cout << "Setting config parameter " << i << " to " << tokens[i] << std::endl;
+			Logger::log(INFO,
+						YELLOW "Setting config parameter " + String(i) + " to " +
+							String(tokens[i].c_str()) + RESET_COLOR);
 			configSetters[i](tokens[i]);
 		}
 		// Debugging output
@@ -58,9 +60,9 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 	}
 	else
 	{
-		std::cerr << "Mismatch between the number of tokens and the number of "
-					 "config parameters."
-				  << std::endl;
+		Logger::log(
+			ERROR,
+			RED "Number of tokens does not match number of configuration parameters." RESET_COLOR);
 
 		// Restart advertising on error
 		restartBLEAdvertising();
@@ -102,10 +104,10 @@ void BLEManager::restartBLEAdvertising()
 	{
 		pAdvertising->stop();
 		pAdvertising->start();
-		Serial.println("Restarted BLE Advertising.");
+		Logger::log(INFO, GREEN "Restarted advertising." RESET_COLOR);
 	}
 	else
 	{
-		Serial.println("Error: pAdvertising is nullptr, cannot restart advertising.");
+		Logger::log(ERROR, RED "Advertising object is null." RESET_COLOR);
 	}
 }

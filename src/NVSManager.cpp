@@ -1,9 +1,10 @@
 // Path: src/NVSManager.cpp
 
-#include "NVSManager.hpp"
-#include "Constants.hpp"
-#include "Utils.hpp"
 #include <Arduino.h>
+#include <Constants.hpp>
+#include <Logger.hpp>
+#include <NVSManager.hpp>
+#include <Utils.hpp>
 
 // Constructor
 NVSManager::NVSManager()
@@ -84,14 +85,13 @@ void IRAM_ATTR NVSManager::resetNVS()
 	{
 		if(nvs_flash_erase() == ESP_OK)
 		{
-			Serial.println("NVS erased");
+			Logger::log(INFO, CYAN "NVS erased" RESET_COLOR);
 		}
 		else
 		{
-			Serial.println("Error erasing NVS");
+			Logger::log(ERROR, RED "Error erasing NVS" RESET_COLOR);
 		}
-
-		Serial.println("Restarting ESP32...");
+		Logger::log(INFO, YELLOW "Restarting ESP32" RESET_COLOR);
 		delay(1000);
 		esp_restart();
 	}
@@ -145,26 +145,26 @@ void NVSManager::writeConfig()
 {
 	if(nvs_open("storage", NVS_READWRITE, &nvs_handler) != ESP_OK)
 	{
-		Serial.println("Error opening NVS handle");
+		Logger::log(ERROR, RED "Error opening NVS handle" RESET_COLOR);
 		return;
 	}
 
 	for(int i = 0; i < 7; ++i)
 	{
-		Serial.printf("Writing to NVS: %s = %s\n", keys[i], fields[i]->c_str());
+		Logger::log(INFO, YELLOW "Writing to NVS: " + String(keys[i]) + " = " + String(fields[i]->c_str()) + RESET_COLOR);
 		if(nvs_set_str(nvs_handler, keys[i], fields[i]->c_str()) != ESP_OK)
 		{
-			Serial.printf("Error writing to NVS for key '%s'\n", keys[i]);
+			Logger::log(ERROR, RED "Error writing to NVS" RESET_COLOR);
 		}
 	}
 
 	if(nvs_commit(nvs_handler) != ESP_OK)
 	{
-		Serial.println("Error committing NVS changes");
+		Logger::log(ERROR, RED "Error committing NVS changes" RESET_COLOR);
 	}
 	else
 	{
-		Serial.println("NVS committed successfully");
+		Logger::log(INFO, GREEN "NVS committed successfully" RESET_COLOR);
 	}
 	nvs_close(nvs_handler);
 }
@@ -176,12 +176,12 @@ void NVSManager::readConfig()
 
 	if(err != ESP_OK)
 	{
-		Serial.println("Error opening NVS handle");
+		Logger::log(ERROR, RED "Error opening NVS handle" RESET_COLOR);
 		return;
 	}
 	else
 	{
-		Serial.println("NVS opened successfully");
+		Logger::log(INFO, GREEN "NVS opened	successfully" RESET_COLOR);
 	}
 
 	for(int i = 0; i < 7; ++i)
@@ -190,14 +190,14 @@ void NVSManager::readConfig()
 		err = nvs_get_str(nvs_handler, keys[i], NULL, &required_size);
 		if(err != ESP_OK)
 		{
-			// Serial.printf("Error reading size for key '%s'\n", keys[i]);
+			Logger::log(ERROR, RED "Error reading size for key '%s'\n" + String(keys[i]) + RESET_COLOR);
 			continue;
 		}
 
 		char* value = (char*)malloc(required_size);
 		if(value == nullptr)
 		{
-			Serial.println("Failed to allocate memory for NVS read");
+			Logger::log(ERROR, RED "Error allocating memory for key '%s'\n" + String(keys[i]) + RESET_COLOR);
 			continue;
 		}
 
@@ -205,11 +205,11 @@ void NVSManager::readConfig()
 		if(err == ESP_OK)
 		{
 			*fields[i] = std::string(value);
-			Serial.printf("Read from NVS: %s = %s\n", keys[i], value);
+			Logger::log(INFO, GREEN "Read from NVS: " + String(keys[i]) + " = " + String(value) + RESET_COLOR);
 		}
 		else
 		{
-			Serial.printf("Error reading value for key '%s'\n", keys[i]);
+			Logger::log(ERROR, RED "Error reading value for key '%s'\n" + String(keys[i]) + RESET_COLOR);
 		}
 		free(value);
 	}

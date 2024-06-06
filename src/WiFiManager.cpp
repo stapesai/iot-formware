@@ -1,6 +1,7 @@
 // Path: src/WiFiManager.cpp
 
-#include "WiFiManager.hpp"
+#include <Logger.hpp>
+#include <WiFiManager.hpp>
 
 WiFiManager::WiFiManager(NVSManager* config)
 	: config(config)
@@ -8,7 +9,7 @@ WiFiManager::WiFiManager(NVSManager* config)
 
 void WiFiManager::initialiseWiFi()
 {
-	Serial.println("Initializing WiFi...");
+	Logger::log(INFO, YELLOW "Initializing WiFi..." RESET_COLOR);
 	setupWiFi();
 	connectWiFi();
 	printWiFiStatus();
@@ -17,16 +18,14 @@ void WiFiManager::initialiseWiFi()
 void WiFiManager::setupWiFi()
 {
 	WiFi.mode(WIFI_STA);
-	Serial.print("Setting up WiFi with SSID: ");
-	Serial.println(config->getWiFiSSID().c_str());
+	Logger::log(INFO, YELLOW "Setting up WiFi with SSID: " RESET_COLOR + config->getWiFiSSID());
+	Logger::log(INFO, YELLOW "With password: " RESET_COLOR + config->getWiFiPassword());
 }
 
 void WiFiManager::connectWiFi()
 {
-	Serial.print("Connecting to WiFi SSID: ");
-	Serial.println(config->getWiFiSSID().c_str());
-	Serial.print("With password: ");
-	Serial.println(config->getWiFiPassword().c_str());
+
+	Logger::log(INFO, YELLOW "Connecting to WiFi..." RESET_COLOR);
 
 	WiFi.begin(config->getWiFiSSID().c_str(), config->getWiFiPassword().c_str());
 
@@ -34,20 +33,18 @@ void WiFiManager::connectWiFi()
 	while(WiFi.status() != WL_CONNECTED && attemptCount < 10)
 	{
 		delay(1000);
-		Serial.print(".");
+		Logger::log(INFO, YELLOW "." RESET_COLOR);
 		attemptCount++;
 	}
 
-	Serial.println();
 	if(WiFi.status() == WL_CONNECTED)
 	{
-		Serial.println("Connected to the WiFi network");
-		Serial.print("IP Address: ");
-		Serial.println(WiFi.localIP());
+		Logger::log(INFO, GREEN "Connected to WiFi" RESET_COLOR);
+		Logger::log(INFO, BLUE "IP Address: " RESET_COLOR + WiFi.localIP().toString());
 	}
 	else
 	{
-		Serial.println("Failed to connect to WiFi");
+		Logger::log(ERROR, RED "Failed to connect to WiFi" RESET_COLOR);
 	}
 }
 
@@ -55,12 +52,13 @@ void WiFiManager::printWiFiStatus()
 {
 	if(WiFi.status() == WL_CONNECTED)
 	{
-		Serial.println("WiFi connected");
-		Serial.print("IP Address: ");
-		Serial.println(WiFi.localIP());
+
+		Logger::log(INFO, GREEN "WiFi connected" RESET_COLOR);
+		Logger::log(INFO, BLUE "IP Address: " RESET_COLOR + WiFi.localIP().toString());
+
 	}
 	else
 	{
-		Serial.println("WiFi not connected");
+		Logger::log(ERROR, RED "WiFi not connected" RESET_COLOR);
 	}
 }

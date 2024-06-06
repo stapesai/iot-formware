@@ -3,9 +3,9 @@
 #ifndef WIFI_MANAGER_HPP
 #define WIFI_MANAGER_HPP
 
-#include "NVSManager.hpp"
-#include <Arduino.h>
 #include <WiFi.h>
+#include <Arduino.h>
+#include <NVSManager.hpp>
 
 class WiFiManager
 {

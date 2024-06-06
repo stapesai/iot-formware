@@ -1,8 +1,8 @@
 // Path: src/MQTTManager.cpp
 
-#include "MQTTManager.hpp"
 #include <ArduinoJson.h>
-
+#include <Logger.hpp>
+#include <MQTTManager.hpp>
 // Constructor
 MQTTManager::MQTTManager(PubSubClient* client, NVSManager* config, Utils* utils)
 {
@@ -42,19 +42,16 @@ void MQTTManager::initializeMQTT()
 
 void MQTTManager::connectToMQTT()
 {
-	Serial.println("Connecting to MQTT Broker");
-
+	Logger::log(INFO, YELLOW "Connecting to MQTT Broker" RESET_COLOR);
 	if(mqttclient->connect(mqtt_client_id.c_str(), mqtt_username->c_str(), mqtt_password->c_str()))
 	{
 		mqttclient->subscribe(mqtt_topic->c_str());
-		Serial.println("Connected to MQTT Broker");
-		Serial.print("Subscribed to topic: ");
-		Serial.println(mqtt_topic->c_str());
+		Logger::log(INFO, GREEN "Connected to MQTT Broker" RESET_COLOR);
+		Logger::log(INFO, BLUE "Subscribed to topic: " + String(mqtt_topic->c_str()) + RESET_COLOR);
 	}
 	else
 	{
-		Serial.println("MQTT connection failed");
-		Serial.print("Error code: ");
-		Serial.println(mqttclient->state());
+		Logger::log(ERROR, RED "MQTT connection failed" RESET_COLOR);
+		Logger::log(ERROR, RED "Error code: " + String(mqttclient->state()) + RESET_COLOR);
 	}
 }

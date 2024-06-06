@@ -3,9 +3,8 @@
 #ifndef BLE_MANGER_HPP
 #define BLE_MANGER_HPP
 
-#include "NVSManager.hpp"
-#include "Utils.hpp"
-#include <BLE2902.h>
+#include <NVSManager.hpp>
+#include <Utils.hpp>
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
@@ -24,7 +23,6 @@ private:
 public:
 	BLEManager(NVSManager& config, Utils& utils);
 	void initializeBLE();
-	void sendError(const std::string& error);
 	void onWrite(BLECharacteristic* pCharacteristic) override;
 	void restartBLEAdvertising();
 };
