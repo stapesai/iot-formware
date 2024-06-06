@@ -1,9 +1,10 @@
 // Path: include/utils.h
 
+#include <NVSManager.h>
 #include <WiFi.h>
 #include <iostream>
 #include <sstream>
-#include <NVSManager.h>
+
 #ifndef UTILS_H
 #define UTILS_H
 
@@ -14,14 +15,13 @@
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 #define BLE_DEVICE_NAME "Jarvis_"
 
-class Utils
-{
+class Utils {
 public:
-    std::vector<std::string> formatString(const std::string &str, char delim);
-    static void statusBuzzer(int times, int delayTime);
-    void printConfig(const NVSManager &config);
-    void restartDevice(unsigned long delayTime);
-    const char *generateName();
+  std::vector<std::string> formatString(const std::string &str, char delim);
+  static void statusBuzzer(int times, int delayTime);
+  void printConfig(const NVSManager &config);
+  void restartDevice(unsigned long delayTime);
+  const char *generateName();
 };
 
 #endif // UTILS_H

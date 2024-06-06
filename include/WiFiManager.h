@@ -1,20 +1,21 @@
-// Path: src/WiFiManager.h
+#ifndef WIFI_MANAGER_H
+#define WIFI_MANAGER_H
 
-#ifndef WIFIMANAGER_H
-#define WIFIMANAGER_H
-
+#include "NVSManager.h"
 #include <Arduino.h>
 #include <WiFi.h>
-#include <NVSManager.h>
 
-class WiFiManager
-{
+
+class WiFiManager {
 public:
-    WiFiManager(NVSManager *config);
-    void initializeWiFi();
+  WiFiManager(NVSManager *config);
+  void initialiseWiFi();
+  void connectWiFi();
+  void printWiFiStatus();
 
 private:
-    NVSManager *config;
+  NVSManager *config;
+  void setupWiFi();
 };
 
-#endif // WIFIMANAGER_H
+#endif // WIFI_MANAGER_H
