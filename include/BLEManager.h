@@ -8,8 +8,8 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <NVSManager.h>
+#include <Utils.h>
 #include <functional>
-#include <utils.h>
 
 class BLEConfigCallbacks : public BLECharacteristicCallbacks {
 private:

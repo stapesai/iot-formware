@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 
-
 class NVSManager {
 private:
   nvs_handle_t nvs_handler;

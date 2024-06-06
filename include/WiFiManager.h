@@ -5,7 +5,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
-
 class WiFiManager {
 public:
   WiFiManager(NVSManager *config);

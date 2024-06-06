@@ -1,7 +1,8 @@
 // Path: src/BLEManager.cpp
 // TODO: Add BLE security, Make device only visible to `JarvisHome` app.
+#include "BLEManager.h"
+#include "Logger.h"
 #include <Arduino.h>
-#include <BLEManager.h>
 #include <iostream>
 
 BLEConfigCallbacks::BLEConfigCallbacks(NVSManager &config, Utils &utils)
@@ -11,11 +12,11 @@ BLEConfigCallbacks::BLEConfigCallbacks(NVSManager &config, Utils &utils)
 void BLEConfigCallbacks::onWrite(BLECharacteristic *pCharacteristic) {
   // Parse the characteristic value
   std::string value = pCharacteristic->getValue();
-  std::cout << "Received value: " << value << std::endl;
+  Logger::log(INFO, "Received value: " + value);
 
   // Split the string into tokens
   std::vector<std::string> tokens = utils.formatString(value, ';');
-  std::cout << "Number of tokens: " << tokens.size() << std::endl;
+  Logger::log(INFO, "Number of tokens: " + String(tokens.size()));
 
   // Setters for configuration parameters
   std::vector<std::function<void(const std::string &)>> configSetters = {

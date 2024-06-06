@@ -1,3 +1,5 @@
+// Path: src/WiFiManager.cpp
+
 #include "WiFiManager.h"
 
 WiFiManager::WiFiManager(NVSManager *config) : config(config) {}

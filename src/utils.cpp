@@ -1,9 +1,9 @@
-// Path: src/utils.h
+// Path: src/Utils.cpp
 
+#include "Utils.h"
 #include <Arduino.h>
 #include <nvs.h>
 #include <nvs_flash.h>
-#include <utils.h>
 
 const char *Utils::generateName() {
   std::string result;
