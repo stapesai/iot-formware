@@ -52,116 +52,116 @@ python -m esptool ...
 - `4 Beeps` -> Invalid pin found in `config.json`
 - `5 Beeps` -> Failed to connect to MQTT Server.
 
-## MQTT
+## MQTT Topic Structure
 
-- reconnection if disconnected from server, every `10 seconds`. (5 Beeps)
-- `keep-alive` message every 10s
-- `Invalid state`, if server sends invalid `state` in message.
-- `Not a valid JSON message`, if server sends invalid JSON message.
+## Base Topic
 
-### MQTT Message Format
+```plaintext
+user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
+```
 
-- `keep_alive` message:
+## Keep Alive
+
+### Request Keep Alive
+
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/keepalive/request`
+- **Payload:**
 
   ```json
   {
-    "origin": "$wifi_hostname", // from config.json
-    "messageType": "keep_alive",
-    "message": {
-      "keep_alive_counter": 10, // number of keep-alive messages sent from last reboot (starting from 1)
-      "uptime": 100 // uptime in seconds
-    }
+    "origin": "(from where keep alive message was requested)"
   }
   ```
 
-- `current_state` message:
+### Keep Alive Response
 
-  - From server to device:
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/keepalive`
+- **Payload:**
 
-    ```json
-    {
-      "origin": "controller",
-      "messageType": "current_state",
-      "message": {
-        "device_id": "Bulb" // device id should be defined in config.json (case sensitive)
-      }
-    }
-    ```
+  ```json
+  {
+    "origin": "{{node_id}}",
+    "counter": "",
+    "uptime": ""
+  }
+  ```
 
-  - From device to server:
+## Device Registration
 
-    ```json
-    {
-    "origin": "$wifi_hostname",
-    "messageType": "current_state",
-    "message": {
-      "device_id": "Bulb",
-      "state": "ON" // current state of device ('ON' or 'OFF')
-    }
-    ```
+### Register Device Request
 
-- `change_state` message:
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/register/request`
+- **Payload:**
 
-  - From server to device:
+  ```json
+  {
+    "device_id": "",
+    "channel": ""
+  }
+  ```
 
-    ```json
-    {
-      "origin": "controller",
-      "messageType": "change_state",
-      "message": {
-        "device_id": "Bulb",
-        "state": "ON" // target state ('ON' or 'OFF')
-      }
-    }
-    ```
+### Register Device Response
 
-  - From device to server:
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/register`
+- **Payload:**
 
-    ```json
-    {
-      "origin": "$wifi_hostname",
-      "messageType": "current_state",
-      "message": {
-        "device_id": "Bulb",
-        "state": "ON" // current state ('ON' or 'OFF')
-      }
-    }
-    ```
+  ```json
+  {
+    "status": "true/false",
+    "message": ""
+  }
+  ```
 
-- `error` message:
+## Device Unregistration
 
-  - From device to server:
+### Unregister Device Request
 
-    ```json
-    {
-      "origin": "$wifi_hostname",
-      "messageType": "error",
-      "message": {
-        "message": "ERROR_MESSAGE"
-      }
-    }
-    ```
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/unregister/request`
+- **Payload:**
 
-    > `TODO: Add all possible error messages here.`
-    >
-  - If `state` is changed using physical buttons: (Not Implemented Yet)
+  ```json
+  {
+    "device_id": ""
+  }
+  ```
 
-    - From device to server:
+### Unregister Device Response
 
-      ```json
-      {
-        "origin": "$wifi_hostname",
-        "messageType": "current_state",
-        "message": {
-          "device_id": "Bulb",
-          "state": "ON"
-        }
-      }
-      ```
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/unregister`
+- **Payload:**
 
-## WiFi
+  ```json
+  {
+    "status": "true/false",
+    "message": ""
+  }
+  ```
 
-- WiFi reconnects, if disconnected.
+## Device Control
+
+### Control Device
+
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/{{device_id}}/control`
+- **Payload:**
+
+  ```json
+  {
+    "device_id": "",
+    "state": ""
+  }
+  ```
+
+### Device State Reporting
+
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/{{device_id}}/state`
+- **Payload:**
+
+  ```json
+  {
+    "device_id": "",
+    "state": ""
+  }
+  ```
 
 ## See Team Contributions here
 
