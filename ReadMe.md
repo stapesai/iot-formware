@@ -67,10 +67,8 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 - **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/keepalive/request`
 - **Payload:**
 
-  ```json
-  {
-    "origin": "(from where keep alive message was requested)"
-  }
+  ```plaintext
+  ORIGIN={{node_id}}
   ```
 
 ### Keep Alive Response
@@ -78,12 +76,8 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 - **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/keepalive`
 - **Payload:**
 
-  ```json
-  {
-    "origin": "{{node_id}}",
-    "counter": "",
-    "uptime": ""
-  }
+  ```plaintext
+  ORIGIN={{node_id}};COUNTER=;UPTIME=
   ```
 
 ## Device Registration
@@ -93,11 +87,8 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 - **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/register/request`
 - **Payload:**
 
-  ```json
-  {
-    "device_id": "",
-    "channel": ""
-  }
+  ```plaintext
+  DEVICE_ID={{device_id}};CHANNEL={{channel}}
   ```
 
 ### Register Device Response
@@ -105,11 +96,8 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 - **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/register`
 - **Payload:**
 
-  ```json
-  {
-    "status": "true/false",
-    "message": ""
-  }
+  ```plaintext
+  STATUS=true/false;MESSAGE=
   ```
 
 ## Device Unregistration
@@ -119,10 +107,8 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 - **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/unregister/request`
 - **Payload:**
 
-  ```json
-  {
-    "device_id": ""
-  }
+  ```plaintext
+  DEVICE_ID={{device_id}}
   ```
 
 ### Unregister Device Response
@@ -130,11 +116,8 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 - **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/unregister`
 - **Payload:**
 
-  ```json
-  {
-    "status": "true/false",
-    "message": ""
-  }
+  ```plaintext
+  STATUS=true/false;MESSAGE=
   ```
 
 ## Device Control
@@ -144,11 +127,8 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 - **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/{{device_id}}/control`
 - **Payload:**
 
-  ```json
-  {
-    "device_id": "",
-    "state": ""
-  }
+  ```plaintext
+  STATE={{state}}
   ```
 
 ### Device State Reporting
@@ -156,11 +136,8 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 - **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/{{device_id}}/state`
 - **Payload:**
 
-  ```json
-  {
-    "device_id": "",
-    "state": ""
-  }
+  ```plaintext
+  STATE={{state}}
   ```
 
 ## See Team Contributions here
