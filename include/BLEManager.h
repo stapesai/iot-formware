@@ -25,6 +25,7 @@ public:
   void initializeBLE();
   void sendError(const std::string &error);
   void onWrite(BLECharacteristic *pCharacteristic) override;
+  void restartBLEAdvertising();
 };
 
 #endif // BLECONFIGCALLBACKS_H

@@ -4,7 +4,6 @@
 #include <BLEManager.h>
 #include <iostream>
 
-
 BLEConfigCallbacks::BLEConfigCallbacks(NVSManager &config, Utils &utils)
     : config(config), utils(utils), pServer(nullptr), pService(nullptr),
       pCharacteristic(nullptr), pAdvertising(nullptr) {}
@@ -50,6 +49,9 @@ void BLEConfigCallbacks::onWrite(BLECharacteristic *pCharacteristic) {
     std::cerr << "Mismatch between the number of tokens and the number of "
                  "config parameters."
               << std::endl;
+
+    // Restart advertising on error
+    restartBLEAdvertising();
   }
 }
 
@@ -81,9 +83,14 @@ void BLEConfigCallbacks::initializeBLE() {
   pAdvertising->start();
 }
 
-// void BLEConfigCallbacks::sendError(const std::string &error)
-// {
-//     pCharacteristic->setValue(error);
-//     pCharacteristic->notify();
-//     delay(500);
-// }
+void BLEConfigCallbacks::restartBLEAdvertising() {
+
+  if (pAdvertising != nullptr) {
+    pAdvertising->stop();
+    pAdvertising->start();
+    Serial.println("Restarted BLE Advertising.");
+  } else {
+    Serial.println(
+        "Error: pAdvertising is nullptr, cannot restart advertising.");
+  }
+}

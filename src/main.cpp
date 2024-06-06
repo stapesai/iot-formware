@@ -6,7 +6,6 @@
 #include <PubSubClient.h>
 #include <WiFiManager.h>
 
-
 class MainApp {
 public:
   MainApp();
