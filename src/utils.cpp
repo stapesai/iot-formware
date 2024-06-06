@@ -1,24 +1,24 @@
 // Path: src/Utils.cpp
 
 #include <Arduino.h>
-#include <nvs.h>
-#include <Utils.hpp>
-#include <nvs_flash.h>
 #include <Constants.hpp>
+#include <Utils.hpp>
+#include <nvs.h>
+#include <nvs_flash.h>
 
-const char* Utils::generateName()
+std::string Utils::generateName()
 {
-	std::string result;
+	
 	std::string macAddress = WiFi.macAddress().c_str();
 
 	// Replace ':' with '_'
 	std::replace(macAddress.begin(), macAddress.end(), ':', '_');
 
 	// Create the result string
-	result = BLE_DEVICE_NAME + macAddress;
+	std::string result= BLE_DEVICE_NAME + macAddress;
 
-	// Return the C-style string
-	return result.c_str();
+
+	return result;
 }
 
 // Format incoming input string
@@ -45,21 +45,21 @@ void Utils::statusBuzzer(int times, int delayTime)
 	}
 }
 
-// void Utils::printConfig(const NVSManager& config)
-// {
-// 	std::cout << "SSID: " << config.getWiFiSSID() << std::endl;
-// 	std::cout << "Password: " << config.getWiFiPassword() << std::endl;
-// 	std::cout << "MQTT Server: " << config.getMQTTBroker() << std::endl;
-// 	std::cout << "MQTT Port: " << config.getMQTTPort() << std::endl;
-// 	std::cout << "MQTT User: " << config.getMQTTUser() << std::endl;
-// 	std::cout << "MQTT Password: " << config.getMQTTPassword() << std::endl;
-// 	std::cout << "MQTT Topic: " << config.getMQTTTopic() << std::endl;
-	
-// }
+void Utils::printConfig(const NVSManager& config)
+{
+	Logger::log(DEBUG, GREEN "SSID: " + config.getWiFiSSID() + RESET_COLOR);
+	Logger::log(DEBUG, GREEN "Password: " + config.getWiFiPassword() + RESET_COLOR);
+	Logger::log(DEBUG, GREEN "MQTT Server: " + config.getMQTTBroker() + RESET_COLOR);
+	Logger::log(DEBUG, GREEN "MQTT Port: " + config.getMQTTPort() + RESET_COLOR);
+	Logger::log(DEBUG, GREEN "MQTT Password: " + config.getMQTTPassword() + RESET_COLOR);
+	Logger::log(DEBUG, GREEN "MQTT Topic: " + config.getUserId() + RESET_COLOR);
+
+
+}
 
 void Utils::restartDevice(unsigned long delayTime)
 {
-	std::cout << "Restarting ESP32..." << std::endl;
+	Logger::log(INFO,YELLOW "Restarting device...");
 	delay(delayTime);
 	esp_restart();
 }

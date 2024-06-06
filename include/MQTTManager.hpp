@@ -3,11 +3,10 @@
 #ifndef MQTT_MANAGER_HPP
 #define MQTT_MANAGER_HPP
 
-
-#include <Utils.hpp>
 #include <Constants.hpp>
 #include <NVSManager.hpp>
 #include <PubSubClient.h>
+#include <Utils.hpp>
 
 class MQTTManager
 {
@@ -18,11 +17,10 @@ private:
 	std::string mqtt_client_id;
 	const std::string* mqtt_broker;
 	const std::string* mqtt_port;
-	const std::string* mqtt_username;
 	const std::string* mqtt_password;
-	const std::string* mqtt_topic;
+	const std::string* user_id;
 	// TODO: Remove MQTT topic and user user's UUID
-	// const char *user_uuid;
+	
 
 public:
 	MQTTManager(PubSubClient* client, NVSManager* config, Utils* utils);

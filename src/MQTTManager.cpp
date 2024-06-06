@@ -12,9 +12,8 @@ MQTTManager::MQTTManager(PubSubClient* client, NVSManager* config, Utils* utils)
 	mqtt_client_id = generate_client_id->generateName();
 	mqtt_broker = &manage_config->getMQTTBroker();
 	mqtt_port = &manage_config->getMQTTPort();
-	mqtt_username = &manage_config->getMQTTUser();
 	mqtt_password = &manage_config->getMQTTPassword();
-	mqtt_topic = &manage_config->getMQTTTopic();
+	user_id = &manage_config->getUserId();
 }
 
 void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
@@ -27,7 +26,7 @@ void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
 
 	String docString;
 	serializeJson(doc, docString);
-	mqttclient->publish(mqtt_topic->c_str(), docString.c_str());
+	mqttclient->publish(user_id->c_str(), docString.c_str());
 }
 void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int length) {};
 
@@ -43,15 +42,15 @@ void MQTTManager::initializeMQTT()
 void MQTTManager::connectToMQTT()
 {
 	Logger::log(INFO, YELLOW "Connecting to MQTT Broker" RESET_COLOR);
-	if(mqttclient->connect(mqtt_client_id.c_str(), mqtt_username->c_str(), mqtt_password->c_str()))
+	if(mqttclient->connect(mqtt_client_id.c_str(), mqtt_client_id.c_str(), mqtt_password->c_str()))
 	{
-		mqttclient->subscribe(mqtt_topic->c_str());
+		mqttclient->subscribe(user_id->c_str());
 		Logger::log(INFO, GREEN "Connected to MQTT Broker" RESET_COLOR);
-		Logger::log(INFO, BLUE "Subscribed to topic: " + String(mqtt_topic->c_str()) + RESET_COLOR);
+		Logger::log(INFO, BLUE "Subscribed to topic: " + String(user_id->c_str()) + RESET_COLOR);
 	}
 	else
 	{
-		Logger::log(ERROR, RED "MQTT connection failed" RESET_COLOR);
+		Logger::log(WARN, ORANGE "MQTT connection failed" RESET_COLOR);
 		Logger::log(ERROR, RED "Error code: " + String(mqttclient->state()) + RESET_COLOR);
 	}
 }

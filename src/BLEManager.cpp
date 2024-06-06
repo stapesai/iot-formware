@@ -1,10 +1,10 @@
 // Path: src/BLEManager.cpp
 // TODO: Add BLE security, Make device only visible to `JarvisHome` app.
 
+#include <Arduino.h>
 #include <BLEManager.hpp>
 #include <Constants.hpp>
 #include <Logger.hpp>
-#include <Arduino.h>
 #include <iostream>
 
 BLEManager::BLEManager(NVSManager& config, Utils& utils)
@@ -32,9 +32,8 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 		[this](const std::string& v) { config.setWiFiPassword(v); },
 		[this](const std::string& v) { config.setMQTTBroker(v); },
 		[this](const std::string& v) { config.setMQTTPort(v); },
-		[this](const std::string& v) { config.setMQTTUser(v); },
 		[this](const std::string& v) { config.setMQTTPassword(v); },
-		[this](const std::string& v) { config.setMQTTTopic(v); }};
+		[this](const std::string& v) { config.setUserId(v); }};
 
 	// Check if the number of tokens matches the number of configuration
 	// parameters
@@ -72,7 +71,7 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 void BLEManager::initializeBLE()
 {
 	// Initialize BLE
-	BLEDevice::init(utils.generateName());
+	BLEDevice::init(utils.generateName().c_str());
 	pServer = BLEDevice::createServer();
 	pService = pServer->createService(SERVICE_UUID);
 	pCharacteristic =

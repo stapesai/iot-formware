@@ -9,3 +9,4 @@ for file in $files; do
 done
 
 echo "Code formatting completed."
+

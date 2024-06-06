@@ -55,7 +55,6 @@ void WiFiManager::printWiFiStatus()
 
 		Logger::log(INFO, GREEN "WiFi connected" RESET_COLOR);
 		Logger::log(INFO, BLUE "IP Address: " RESET_COLOR + WiFi.localIP().toString());
-
 	}
 	else
 	{

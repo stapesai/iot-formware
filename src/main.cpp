@@ -22,13 +22,13 @@ private:
 	void setupMQTT();
 	void checkWiFiAndMQTT(unsigned long);
 
+	bool isConfigured;
 	unsigned long previousMillisWiFi;
 	unsigned long previousMillisMQTT;
 	unsigned long previousMillisKeepAlive;
 	unsigned long keepAliveInterval;
 	unsigned long requiredInterval;
 	unsigned long keep_alive_counter;
-	bool isConfigured;
 
 	Utils utils; // Utility class to handle common functions
 	NVSManager config; // NVS manager class
@@ -133,7 +133,7 @@ void MainApp::checkWiFiAndMQTT(unsigned long currentMillis)
 			{
 				previousMillisMQTT = currentMillis;
 				keep_alive_counter = 0;
-				Logger::log(INFO, YELLOW "Reconnecting to MQTT..." RESET_COLOR);
+				Logger::log(WARN, ORANGE "Reconnecting to MQTT..." RESET_COLOR);
 				mqttManager.connectToMQTT();
 			}
 		}
@@ -144,7 +144,7 @@ void MainApp::checkWiFiAndMQTT(unsigned long currentMillis)
 		{
 			previousMillisWiFi = currentMillis;
 			keep_alive_counter = 0;
-			Logger::log(INFO, YELLOW "Reconnecting to WiFi..." RESET_COLOR);
+			Logger::log(WARN, ORANGE "Reconnecting to WiFi..." RESET_COLOR);
 			wifiManager.initialiseWiFi();
 		}
 	}
@@ -155,9 +155,10 @@ MainApp app;
 void setup()
 {
 	app.setup();
+	
 }
 
 void loop()
 {
-app.loop();
+	app.loop();
 }

@@ -3,11 +3,11 @@
 #ifndef BLE_MANGER_HPP
 #define BLE_MANGER_HPP
 
-#include <NVSManager.hpp>
-#include <Utils.hpp>
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
+#include <NVSManager.hpp>
+#include <Utils.hpp>
 #include <functional>
 
 class BLEManager : public BLECharacteristicCallbacks

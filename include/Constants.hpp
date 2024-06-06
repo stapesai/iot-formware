@@ -10,12 +10,22 @@
 #define BLE_DEVICE_NAME "Jarvis_"
 // COLORS
 #define RESET_COLOR "\033[0m"
-#define RED "\033[0;31m"
+#define RED "\033[31m"
 #define GREEN "\033[32m"
 #define YELLOW "\033[33m"
 #define BLUE "\033[34m"
 #define MAGENTA "\033[35m"
 #define CYAN "\033[36m"
 #define WHITE "\033[37m"
+#define BLACK "\033[30m"
+#define ORANGE "\033[38;5;208m"
+// BACKGROUND COLORS
+#define BG_RED "\033[41m"
+#define BG_GREEN "\033[42m"
+#define BG_BLUE "\033[44m"
+#define BG_MAGENTA "\033[45m"
+#define BG_CYAN "\033[46m"
+#define BG_WHITE "\033[47m"
+#define BG_ORANGE "\033[48;5;208m"
 
 #endif // CONSTANTS_HPP

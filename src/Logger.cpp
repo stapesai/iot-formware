@@ -1,40 +1,65 @@
 // Path: src/Logger.cpp
 
 #include <Logger.hpp>
+String colorCode;
+String bgColorCode;
 
 void Logger::log(LogLevel level, const std::string& message)
 {
 	printPrefix(level);
+	Serial.print(" ");
 	Serial.println(message.c_str());
 }
 
 void Logger::log(LogLevel level, const char* message)
 {
 	printPrefix(level);
+	Serial.print(" ");
 	Serial.println(message);
 }
 
 void Logger::log(LogLevel level, const String& message)
 {
 	printPrefix(level);
+	Serial.print(" ");
 	Serial.println(message);
 }
 
 void Logger::printPrefix(LogLevel level)
+
 {
+	String logLevelStr;
+	String colorCode;
+	String bgColorCode;
+
 	switch(level)
 	{
-	case DEBUG:
-		Serial.print("[DEBUG] ");
-		break;
 	case INFO:
-		Serial.print("[INFO] ");
+		logLevelStr = " [INFO]  ";
+		bgColorCode = BG_BLUE;
+		colorCode = RED;
 		break;
 	case WARN:
-		Serial.print("[WARN] ");
+		logLevelStr = " [WARN]  ";
+		bgColorCode = BG_ORANGE;
+		colorCode = WHITE;
 		break;
 	case ERROR:
-		Serial.print("[ERROR] ");
+		logLevelStr = " [ERROR] ";
+		bgColorCode = BG_RED;
+		colorCode = WHITE;
+		break;
+	case DEBUG:
+		logLevelStr = " [DEBUG] ";
+		bgColorCode = BG_GREEN;
+		colorCode = WHITE;
 		break;
 	}
+
+	Serial.print(bgColorCode); // Background color box
+	Serial.print(colorCode);
+	Serial.print(logLevelStr);
+	Serial.print(RESET_COLOR); // Reset color after log level
+
+
 }
