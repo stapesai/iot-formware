@@ -1,10 +1,10 @@
 // Path: src/Utils.cpp
 
-#include "Utils.hpp"
-#include "Constants.hpp"
 #include <Arduino.h>
 #include <nvs.h>
+#include <Utils.hpp>
 #include <nvs_flash.h>
+#include <Constants.hpp>
 
 const char* Utils::generateName()
 {
@@ -45,16 +45,17 @@ void Utils::statusBuzzer(int times, int delayTime)
 	}
 }
 
-void Utils::printConfig(const NVSManager& config)
-{
-	std::cout << "SSID: " << config.getWiFiSSID() << std::endl;
-	std::cout << "Password: " << config.getWiFiPassword() << std::endl;
-	std::cout << "MQTT Server: " << config.getMQTTBroker() << std::endl;
-	std::cout << "MQTT Port: " << config.getMQTTPort() << std::endl;
-	std::cout << "MQTT User: " << config.getMQTTUser() << std::endl;
-	std::cout << "MQTT Password: " << config.getMQTTPassword() << std::endl;
-	std::cout << "MQTT Topic: " << config.getMQTTTopic() << std::endl;
-}
+// void Utils::printConfig(const NVSManager& config)
+// {
+// 	std::cout << "SSID: " << config.getWiFiSSID() << std::endl;
+// 	std::cout << "Password: " << config.getWiFiPassword() << std::endl;
+// 	std::cout << "MQTT Server: " << config.getMQTTBroker() << std::endl;
+// 	std::cout << "MQTT Port: " << config.getMQTTPort() << std::endl;
+// 	std::cout << "MQTT User: " << config.getMQTTUser() << std::endl;
+// 	std::cout << "MQTT Password: " << config.getMQTTPassword() << std::endl;
+// 	std::cout << "MQTT Topic: " << config.getMQTTTopic() << std::endl;
+	
+// }
 
 void Utils::restartDevice(unsigned long delayTime)
 {

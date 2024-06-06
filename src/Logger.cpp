@@ -1,6 +1,6 @@
 // Path: src/Logger.cpp
 
-#include "Logger.hpp"
+#include <Logger.hpp>
 
 void Logger::log(LogLevel level, const std::string& message)
 {
