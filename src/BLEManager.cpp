@@ -22,30 +22,41 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 	std::string value = pCharacteristic->getValue();
 	Logger::log(INFO, GREEN "Received value: " RESET_COLOR + value);
 
-	// Split the string into tokens
-	std::vector<std::string> tokens = utils.formatString(value, ';');
-	Logger::log(INFO, YELLOW "Number of tokens: " RESET_COLOR + String(tokens.size()));
+	// Parse the key-value pairs
+	std::map<std::string, std::string> kv_map = utils.formatString(value);
+	Logger::log(INFO, YELLOW "Number of key-value pairs: " RESET_COLOR + String(kv_map.size()));
 
 	// Setters for configuration parameters
-	std::vector<std::function<void(const std::string&)>> configSetters = {
-		[this](const std::string& v) { config.setWiFiSSID(v); },
-		[this](const std::string& v) { config.setWiFiPassword(v); },
-		[this](const std::string& v) { config.setMQTTBroker(v); },
-		[this](const std::string& v) { config.setMQTTPort(v); },
-		[this](const std::string& v) { config.setMQTTPassword(v); },
-		[this](const std::string& v) { config.setUserId(v); }};
+	std::map<std::string, std::function<void(const std::string&)>> configSetters = {
+		{"SSID", [this](const std::string& v) { config.setWiFiSSID(v); }},
+		{"PASSWORD", [this](const std::string& v) { config.setWiFiPassword(v); }},
+		{"BROKER", [this](const std::string& v) { config.setMQTTBroker(v); }},
+		{"PORT", [this](const std::string& v) { config.setMQTTPort(v); }},
+		{"MQTTPASSWORD", [this](const std::string& v) { config.setMQTTPassword(v); }},
+		{"USERID", [this](const std::string& v) { config.setUserId(v); }}};
 
-	// Check if the number of tokens matches the number of configuration
-	// parameters
-	if(tokens.size() == configSetters.size())
+	// Check if all required keys are present
+	bool allKeysPresent = true;
+	for(const auto& setter : configSetters)
 	{
-		// Assign tokens to configuration parameters
-		for(size_t i = 0; i < configSetters.size(); i++)
+		if(kv_map.find(setter.first) == kv_map.end())
 		{
+			allKeysPresent = false;
+			break;
+		}
+	}
+
+	if(allKeysPresent)
+	{
+		// Assign values to configuration parameters
+		for(const auto& setter : configSetters)
+		{
+			const std::string& key = setter.first;
+			const std::string& value = kv_map[key];
 			Logger::log(INFO,
-						YELLOW "Setting config parameter " + String(i) + " to " +
-							String(tokens[i].c_str()) + RESET_COLOR);
-			configSetters[i](tokens[i]);
+						YELLOW "Setting config parameter " + String(key.c_str()) + " to " +
+							String(value.c_str()) + RESET_COLOR);
+			setter.second(value);
 		}
 		// Debugging output
 		utils.printConfig(config);
@@ -59,9 +70,7 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 	}
 	else
 	{
-		Logger::log(
-			ERROR,
-			RED "Number of tokens does not match number of configuration parameters." RESET_COLOR);
+		Logger::log(ERROR, RED "Missing one or more configuration parameters." RESET_COLOR);
 
 		// Restart advertising on error
 		restartBLEAdvertising();
@@ -98,7 +107,6 @@ void BLEManager::initializeBLE()
 
 void BLEManager::restartBLEAdvertising()
 {
-
 	if(pAdvertising != nullptr)
 	{
 		pAdvertising->stop();

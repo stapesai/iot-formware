@@ -20,17 +20,43 @@ std::string Utils::generateName()
 	return result;
 }
 
-// Format incoming input string
-std::vector<std::string> Utils::formatString(const std::string& str, char delim)
+// Format incoming input string as key-value pairs
+std::map<std::string, std::string> Utils::formatString(const std::string& str)
 {
-	std::vector<std::string> tokens;
+	char delim = ';';
+	char kv_delim = '=';
+
+	std::map<std::string, std::string> kv_map;
 	std::stringstream ss(str);
 	std::string token;
 	while(std::getline(ss, token, delim))
 	{
-		tokens.push_back(token);
+		size_t pos = token.find(kv_delim);
+		if(pos != std::string::npos)
+		{
+			std::string key = token.substr(0, pos);
+			std::string value = token.substr(pos + 1);
+			kv_map[key] = value;
+		}
 	}
-	return tokens;
+	return kv_map;
+}
+
+// Function to convert key-value pairs to a string
+std::string Utils::convertToKVString(const std::map<std::string, std::string>& kv_map)
+{
+	std::stringstream ss;
+	for(const auto& pair : kv_map)
+	{
+		ss << pair.first << "=" << pair.second << ";";
+	}
+	// Remove the trailing semicolon if there is one
+	std::string kv_string = ss.str();
+	if(!kv_string.empty() && kv_string.back() == ';')
+	{
+		kv_string.pop_back();
+	}
+	return kv_string;
 }
 
 void Utils::statusBuzzer(int times, int delayTime)

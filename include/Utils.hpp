@@ -6,16 +6,18 @@
 #include <Logger.hpp>
 #include <NVSManager.hpp>
 #include <WiFi.h>
+#include <map>
 #include <sstream>
 
 class Utils
 {
 public:
-	std::vector<std::string> formatString(const std::string& str, char delim);
 	std::string generateName();
 	static void statusBuzzer(int times, int delayTime);
-	void printConfig(const NVSManager& config);
-	void restartDevice(unsigned long delayTime);
+	static void printConfig(const NVSManager& config);
+	static void restartDevice(unsigned long delayTime);
+	static std::map<std::string, std::string> formatString(const std::string& str);
+	static std::string convertToKVString(const std::map<std::string, std::string>& kv_map);
 };
 
 #endif // UTILS_H
