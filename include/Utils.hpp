@@ -3,11 +3,10 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-
-#include <sstream>
-#include <WiFi.h>
 #include <Logger.hpp>
 #include <NVSManager.hpp>
+#include <WiFi.h>
+#include <sstream>
 
 class Utils
 {

@@ -22,12 +22,8 @@ private:
 	std::string mqtt_password;
 	std::string user_id;
 	std::array<std::string*, 6> fields;
-	const char* keys[7] = {"wifi_ssid",
-						   "wifi_password",
-						   "mqtt_broker",
-						   "mqtt_port",
-						   "mqtt_password",
-						   "user_id"};
+	const char* keys[7] = {
+		"wifi_ssid", "wifi_password", "mqtt_broker", "mqtt_port", "mqtt_password", "user_id"};
 
 public:
 	NVSManager();

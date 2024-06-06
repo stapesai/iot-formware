@@ -155,7 +155,6 @@ MainApp app;
 void setup()
 {
 	app.setup();
-	
 }
 
 void loop()

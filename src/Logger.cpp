@@ -60,6 +60,4 @@ void Logger::printPrefix(LogLevel level)
 	Serial.print(colorCode);
 	Serial.print(logLevelStr);
 	Serial.print(RESET_COLOR); // Reset color after log level
-
-
 }

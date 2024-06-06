@@ -20,7 +20,6 @@ private:
 	const std::string* mqtt_password;
 	const std::string* user_id;
 	// TODO: Remove MQTT topic and user user's UUID
-	
 
 public:
 	MQTTManager(PubSubClient* client, NVSManager* config, Utils* utils);

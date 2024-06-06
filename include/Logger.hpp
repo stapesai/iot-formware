@@ -18,7 +18,6 @@ enum LogLevel
 class Logger
 {
 public:
-
 	static void log(LogLevel level, const std::string& message);
 	static void log(LogLevel level, const char* message);
 	static void log(LogLevel level, const String& message);

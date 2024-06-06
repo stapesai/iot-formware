@@ -9,12 +9,7 @@
 // Constructor
 NVSManager::NVSManager()
 {
-	fields = {&wifi_ssid,
-			  &wifi_password,
-			  &mqtt_broker,
-			  &mqtt_port,
-			  &mqtt_password,
-			  &user_id};
+	fields = {&wifi_ssid, &wifi_password, &mqtt_broker, &mqtt_port, &mqtt_password, &user_id};
 }
 
 // Getter methods
@@ -34,7 +29,6 @@ const std::string& NVSManager::getMQTTPort() const
 {
 	return mqtt_port;
 }
-
 
 const std::string& NVSManager::getMQTTPassword() const
 {
@@ -113,8 +107,8 @@ bool NVSManager::isNVSEmpty()
 		else
 		{
 			Logger::log(ERROR,
-						RED "Error getting key '" + String(keys[i]) + "': " +
-							String(esp_err_to_name(err)) + RESET_COLOR);
+						RED "Error getting key '" + String(keys[i]) +
+							"': " + String(esp_err_to_name(err)) + RESET_COLOR);
 			return true;
 		}
 	}
