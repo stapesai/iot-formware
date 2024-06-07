@@ -18,13 +18,16 @@ public:
 	void connectToMQTT();
 
 private:
-	PubSubClient* mqttclient;
 	Utils* utils;
+	PubSubClient* mqttclient;
+	bool parseTopic(const String& topic, String& user_id, String& home_id, String& node_id);
 	const std::string* mqtt_broker;
 	const std::string* mqtt_port;
 	const std::string* mqtt_password;
 	const std::string* user_id;
 	std::string mqtt_client_id;
+	std::string node_id;
+	std::string home_id;
 };
 
 #endif // MQTT_MANAGER_HPP

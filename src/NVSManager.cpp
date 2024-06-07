@@ -9,7 +9,8 @@
 // Constructor
 NVSManager::NVSManager()
 {
-	fields = {&wifi_ssid, &wifi_password, &mqtt_broker, &mqtt_port, &mqtt_password, &user_id};
+	fields = {
+		&wifi_ssid, &wifi_password, &mqtt_broker, &mqtt_port, &mqtt_password, &user_id, &home_id};
 }
 
 // Getter methods
@@ -39,6 +40,11 @@ const std::string& NVSManager::getUserId() const
 	return user_id;
 }
 
+const std::string& NVSManager::getHomeId() const
+{
+	return home_id;
+}
+
 // Setter methods
 void NVSManager::setWiFiSSID(const std::string& value)
 {
@@ -65,7 +71,10 @@ void NVSManager::setUserId(const std::string& value)
 {
 	user_id = value;
 }
-
+void NVSManager::setHomeId(const std::string& value)
+{
+	home_id = value;
+}
 // Interrupt handler to reset the module
 void IRAM_ATTR NVSManager::resetNVS()
 {

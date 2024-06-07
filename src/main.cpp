@@ -25,7 +25,6 @@ private:
 	bool isConfigured;
 	unsigned long previousMillisWiFi;
 	unsigned long previousMillisMQTT;
-	unsigned long previousMillisKeepAlive;
 	unsigned long keepAliveInterval;
 	unsigned long requiredInterval;
 	unsigned long keep_alive_counter;

@@ -36,7 +36,22 @@ void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
 	}
 }
 
-void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int length) {};
+void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int length)
+{
+	String topicStr = String(topic);
+	String payloadStr = String((char*)payload);
+
+	Logger::log(INFO, GREEN "Message arrived [" + topicStr + "]" RESET_COLOR);
+	Logger::log(INFO, GREEN "Payload: " + payloadStr + RESET_COLOR);
+
+	// Extract user_id, home_id, node_id from the topic
+	String user_id, home_id, node_id;
+	if(!parseTopic(topicStr, user_id, home_id, node_id))
+	{
+		Logger::log(ERROR, RED "Invalid topic format: " + topicStr);
+		return;
+	}
+};
 
 void MQTTManager::initializeMQTT()
 {
@@ -54,6 +69,7 @@ void MQTTManager::connectToMQTT()
 	if(mqttclient->connect(mqtt_client_id.c_str(), mqtt_client_id.c_str(), mqtt_password->c_str()))
 	{
 		mqttclient->subscribe(user_id->c_str());
+		mqttclient->subscribe("");
 		Logger::log(INFO, GREEN "Connected to MQTT Broker" RESET_COLOR);
 		Logger::log(INFO, BLUE "Subscribed to topic: " + String(user_id->c_str()) + RESET_COLOR);
 	}
@@ -69,4 +85,28 @@ void MQTTManager::connectToMQTT()
 		Logger::log(WARN, ORANGE "MQTT connection failed" RESET_COLOR);
 		Logger::log(ERROR, RED "Error code: " + String(mqttclient->state()) + RESET_COLOR);
 	}
+}
+
+bool MQTTManager::parseTopic(const String& topic, String& user_id, String& home_id, String& node_id)
+{
+	int startPos = topic.indexOf("user/");
+	int endPos = topic.indexOf("/home/");
+	if(startPos == -1 || endPos == -1)
+	{
+		return false;
+	}
+	user_id = topic.substring(startPos + 5, endPos);
+
+	startPos = endPos + 6;
+	endPos = topic.indexOf("/node/", startPos);
+	if(endPos == -1)
+	{
+		return false;
+	}
+	home_id = topic.substring(startPos, endPos);
+
+	startPos = endPos + 6;
+	node_id = topic.substring(startPos, topic.length() - 1);
+
+	return true;
 }

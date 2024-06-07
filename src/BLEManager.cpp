@@ -33,7 +33,9 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 		{"BROKER", [this](const std::string& v) { config.setMQTTBroker(v); }},
 		{"PORT", [this](const std::string& v) { config.setMQTTPort(v); }},
 		{"MQTTPASSWORD", [this](const std::string& v) { config.setMQTTPassword(v); }},
-		{"USERID", [this](const std::string& v) { config.setUserId(v); }}};
+		{"USERID", [this](const std::string& v) { config.setUserId(v); }},
+		{"HOMEID", [this](const std::string& v) { config.setHomeId(v); }},
+	};
 
 	// Check if all required keys are present
 	bool allKeysPresent = true;
