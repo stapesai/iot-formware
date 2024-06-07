@@ -23,7 +23,7 @@ private:
 	std::string mqtt_password;
 	std::string user_id;
 	std::string home_id;
-	std::string registered_appliance_ids;
+	std::string reg_device_ids;
 
 	const char* keys[8] = {"WIFI_SSID",
 						   "WIFI_PASSWORD",
@@ -32,7 +32,7 @@ private:
 						   "MQTT_PASSWORD",
 						   "USER_ID",
 						   "HOME_ID",
-						   "REGISTERED_APPLIANCE_IDS"};
+						   "REG_DEVICE_IDS"};
 
 public:
 	NVSManager();
@@ -44,7 +44,7 @@ public:
 	const std::string& getMQTTPassword() const;
 	const std::string& getUserId() const;
 	const std::string& getHomeId() const;
-	const std::string& getRegisteredApplianceIds() const;
+	const std::string& getRegisteredDevicesIds() const;
 
 
 	void setWiFiSSID(const std::string& value);
@@ -54,7 +54,8 @@ public:
 	void setMQTTPassword(const std::string& value);
 	void setUserId(const std::string& value);
 	void setHomeId(const std::string& value);
-	void setRegisteredApplianceIds(const std::string& value);
+	void setRegisteredDeviceIds(const std::string& value);
+
 
 	static void resetNVS();
 	bool isNVSEmpty();

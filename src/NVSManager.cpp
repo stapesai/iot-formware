@@ -9,8 +9,14 @@
 // Constructor
 NVSManager::NVSManager()
 {
-	fields = {
-		&wifi_ssid, &wifi_password, &mqtt_broker, &mqtt_port, &mqtt_password, &user_id, &home_id};
+	fields = {&wifi_ssid,
+			  &wifi_password,
+			  &mqtt_broker,
+			  &mqtt_port,
+			  &mqtt_password,
+			  &user_id,
+			  &home_id,
+			  &reg_device_ids};
 }
 
 // Getter methods
@@ -44,9 +50,9 @@ const std::string& NVSManager::getHomeId() const
 {
 	return home_id;
 }
-const std::string& NVSManager::getRegisteredApplianceIds() const
+const std::string& NVSManager::getRegisteredDevicesIds() const
 {
-	return registered_appliance_ids;
+	return reg_device_ids;
 }
 
 // Setter methods
@@ -80,9 +86,9 @@ void NVSManager::setHomeId(const std::string& value)
 	home_id = value;
 }
 
-void NVSManager::setRegisteredApplianceIds(const std::string& value)
+void NVSManager::setRegisteredDeviceIds(const std::string& value)
 {
-	registered_appliance_ids = value;
+	reg_device_ids = value;
 }
 
 // Interrupt handler to reset the module
@@ -106,7 +112,13 @@ void IRAM_ATTR NVSManager::resetNVS()
 
 bool NVSManager::isNVSEmpty()
 {
-	err = nvs_open("storage", NVS_READWRITE, &nvs_handler);
+	if(nvs_open("storage", NVS_READWRITE, &nvs_handler) != ESP_OK)
+	{
+		Logger::log(ERROR, RED "Error opening NVS handle" RESET_COLOR);
+		return true;
+	}
+	Logger::log(INFO, GREEN "NVS opened	successfully" RESET_COLOR);
+
 	for(int i = 0; i < 6; i++)
 	{
 		// Check NVS stats
@@ -158,7 +170,7 @@ void NVSManager::writeConfig()
 		return;
 	}
 
-	for(int i = 0; i < 6; ++i)
+	for(int i = 0; i < 8; i++)
 	{
 		Logger::log(INFO,
 					YELLOW "Writing to NVS: " + String(keys[i]) + " = " +
@@ -169,33 +181,27 @@ void NVSManager::writeConfig()
 		}
 	}
 
-	if(nvs_commit(nvs_handler) != ESP_OK)
+	if(nvs_commit(nvs_handler) == ESP_OK)
 	{
-		Logger::log(ERROR, RED "Error committing NVS changes" RESET_COLOR);
+		Logger::log(INFO, GREEN "NVS committed successfully" RESET_COLOR);
 	}
 	else
 	{
-		Logger::log(INFO, GREEN "NVS committed successfully" RESET_COLOR);
+		Logger::log(ERROR, RED "Error committing NVS changes" RESET_COLOR);
 	}
 	nvs_close(nvs_handler);
 }
 
 void NVSManager::readConfig()
 {
-
-	err = nvs_open("storage", NVS_READWRITE, &nvs_handler);
-
-	if(err != ESP_OK)
+	if(nvs_open("storage", NVS_READWRITE, &nvs_handler) != ESP_OK)
 	{
 		Logger::log(ERROR, RED "Error opening NVS handle" RESET_COLOR);
 		return;
 	}
-	else
-	{
-		Logger::log(INFO, GREEN "NVS opened	successfully" RESET_COLOR);
-	}
+	Logger::log(INFO, GREEN "NVS opened	successfully" RESET_COLOR);
 
-	for(int i = 0; i < 7; ++i)
+	for(int i = 0; i < 8; i++)
 	{
 		size_t required_size;
 		err = nvs_get_str(nvs_handler, keys[i], NULL, &required_size);

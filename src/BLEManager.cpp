@@ -28,14 +28,13 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 
 	// Setters for configuration parameters
 	std::map<std::string, std::function<void(const std::string&)>> configSetters = {
-		{"SSID", [this](const std::string& v) { config.setWiFiSSID(v); }},
-		{"PASSWORD", [this](const std::string& v) { config.setWiFiPassword(v); }},
-		{"BROKER", [this](const std::string& v) { config.setMQTTBroker(v); }},
-		{"PORT", [this](const std::string& v) { config.setMQTTPort(v); }},
-		{"MQTTPASSWORD", [this](const std::string& v) { config.setMQTTPassword(v); }},
-		{"USERID", [this](const std::string& v) { config.setUserId(v); }},
-		{"HOMEID", [this](const std::string& v) { config.setHomeId(v); }},
-	};
+		{"WIFI_SSID", [this](const std::string& v) { config.setWiFiSSID(v); }},
+		{"WIFI_PASSWORD", [this](const std::string& v) { config.setWiFiPassword(v); }},
+		{"MQTT_BROKER", [this](const std::string& v) { config.setMQTTBroker(v); }},
+		{"MQTT_PORT", [this](const std::string& v) { config.setMQTTPort(v); }},
+		{"MQTT_PASSWORD", [this](const std::string& v) { config.setMQTTPassword(v); }},
+		{"USER_ID", [this](const std::string& v) { config.setUserId(v); }},
+		{"HOME_ID", [this](const std::string& v) { config.setHomeId(v); }}};
 
 	// Check if all required keys are present
 	bool allKeysPresent = true;
@@ -65,7 +64,7 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 
 		// Write configuration to NVS
 		config.writeConfig();
-		std::cout << "Data written to NVS" << std::endl;
+		Logger::log(INFO, GREEN "Configuration written to NVS." RESET_COLOR);
 
 		// Restart the ESP32
 		utils.restartDevice(1000);
