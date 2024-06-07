@@ -84,7 +84,7 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 
 ### Register Device Request
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/register/request`
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/devices/registration/request`
 - **Payload:**
 
   ```plaintext
@@ -93,18 +93,18 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 
 ### Register Device Response
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/register`
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/devices/registration/response`
 - **Payload:**
 
   ```plaintext
-  STATUS=true/false;MESSAGE=
+  DEVICE_ID={{device_id}};STATUS=true/false;MESSAGE=
   ```
 
 ## Device Unregistration
 
 ### Unregister Device Request
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/unregister/request`
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/devices/unregistration/request`
 - **Payload:**
 
   ```plaintext
@@ -113,18 +113,18 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 
 ### Unregister Device Response
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/unregister`
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/devices/unregistration/response`
 - **Payload:**
 
   ```plaintext
-  STATUS=true/false;MESSAGE=
+  DEVICE_ID={{device_id}};STATUS=true/false;MESSAGE=
   ```
 
 ## Device Control
 
 ### Control Device
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/{{device_id}}/control`
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/devices/{{device_id}}/control`
 - **Payload:**
 
   ```plaintext
@@ -133,7 +133,7 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 
 ### Device State Reporting
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/{{device_id}}/state`
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/devices/{{device_id}}/state`
 - **Payload:**
 
   ```plaintext
