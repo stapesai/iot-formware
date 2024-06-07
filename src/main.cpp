@@ -125,6 +125,9 @@ void MainApp::checkWiFiAndMQTT(unsigned long currentMillis)
 				mqttManager.publish_keep_alive_message(keep_alive_counter);
 				keep_alive_counter++;
 			}
+
+			// It will check for incoming messages
+			mqttClient.loop();
 		}
 		else
 		{

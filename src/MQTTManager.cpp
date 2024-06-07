@@ -53,7 +53,7 @@ void MQTTManager::initializeMQTT()
 {
 	mqttclient->setServer(mqtt_broker->c_str(), atoi(mqtt_port->c_str()));
 	mqttclient->setKeepAlive(60);
-	mqttclient->setCallback(MQTTManager::mqttCallback);
+	mqttclient->setCallback(mqttCallback);
 }
 
 void MQTTManager::connectToMQTT()
@@ -62,8 +62,7 @@ void MQTTManager::connectToMQTT()
 
 	if(mqttclient->connect(mqtt_client_id.c_str(), mqtt_client_id.c_str(), mqtt_password->c_str()))
 	{
-		mqttclient->subscribe("keep_alive/#");
-		// mqttclient->subscribe("");
+		mqttclient->subscribe(user_id->c_str());
 		Logger::log(INFO, GREEN "Connected to MQTT Broker" RESET_COLOR);
 		Logger::log(INFO, BLUE "Subscribed to topic: " + String(user_id->c_str()) + RESET_COLOR);
 	}
