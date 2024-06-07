@@ -71,17 +71,17 @@ void Utils::statusBuzzer(int times, int delayTime)
 }
 
 // function generate the mqtt topic
-std::string Utils::generateTopic(std::string& user_id, std::string& home_id, std::string& client_id)
-{
-	std::ostringstream base_mqtt_topic;
-	base_mqtt_topic << "user/" << user_id << "/home/" << home_id << "/node/" << client_id << "/";
-	std::string keep_alive_request = base_mqtt_topic.str() + "/keepalive/request";
-	std::string device_registration_request = base_mqtt_topic.str() + "/device/register/request";
-	std::string device_unregistration_request =
-		base_mqtt_topic.str() + "/device/unregister/request";
-	std::string device_control_request = base_mqtt_topic.str() + "/device/control/request";
-	std::cout << "Keep alive request topic: " << keep_alive_request << std::endl;
-}
+// std::string Utils::generateTopic(std::string& user_id, std::string& home_id, std::string& client_id)
+// {
+// 	std::ostringstream base_mqtt_topic;
+// 	base_mqtt_topic << "user/" << user_id << "/home/" << home_id << "/node/" << client_id << "/";
+// 	std::string keep_alive_request = base_mqtt_topic.str() + "/keepalive/request";
+// 	std::string device_registration_request = base_mqtt_topic.str() + "/device/register/request";
+// 	std::string device_unregistration_request =
+// 		base_mqtt_topic.str() + "/device/unregister/request";
+// 	std::string device_control_request = base_mqtt_topic.str() + "/device/control/request";
+// 	std::cout << "Keep alive request topic: " << keep_alive_request << std::endl;
+// }
 
 void Utils::printConfig(const NVSManager& config)
 {

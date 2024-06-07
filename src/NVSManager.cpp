@@ -44,6 +44,10 @@ const std::string& NVSManager::getHomeId() const
 {
 	return home_id;
 }
+const std::string& NVSManager::getRegisteredApplianceIds() const
+{
+	return registered_appliance_ids;
+}
 
 // Setter methods
 void NVSManager::setWiFiSSID(const std::string& value)
@@ -75,6 +79,12 @@ void NVSManager::setHomeId(const std::string& value)
 {
 	home_id = value;
 }
+
+void NVSManager::setRegisteredApplianceIds(const std::string& value)
+{
+	registered_appliance_ids = value;
+}
+
 // Interrupt handler to reset the module
 void IRAM_ATTR NVSManager::resetNVS()
 {
@@ -185,7 +195,7 @@ void NVSManager::readConfig()
 		Logger::log(INFO, GREEN "NVS opened	successfully" RESET_COLOR);
 	}
 
-	for(int i = 0; i < 6; ++i)
+	for(int i = 0; i < 7; ++i)
 	{
 		size_t required_size;
 		err = nvs_get_str(nvs_handler, keys[i], NULL, &required_size);
