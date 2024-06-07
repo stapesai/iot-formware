@@ -36,7 +36,7 @@ void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
 	}
 }
 
-void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int length)
+void  MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int length)
 {
 	String topicStr = String(topic);
 	String payloadStr = String((char*)payload);
@@ -45,21 +45,15 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 	Logger::log(INFO, GREEN "Payload: " + payloadStr + RESET_COLOR);
 
 	// Extract user_id, home_id, node_id from the topic
-	String user_id, home_id, node_id;
-	if(!parseTopic(topicStr, user_id, home_id, node_id))
-	{
-		Logger::log(ERROR, RED "Invalid topic format: " + topicStr);
-		return;
-	}
+	// Serial.println("hello");
+	
 };
 
 void MQTTManager::initializeMQTT()
 {
 	mqttclient->setServer(mqtt_broker->c_str(), atoi(mqtt_port->c_str()));
 	mqttclient->setKeepAlive(60);
-	mqttclient->setCallback([this](char* topic, uint8_t* payload, unsigned int length) {
-		this->mqttCallback(topic, payload, length);
-	});
+	mqttclient->setCallback(MQTTManager::mqttCallback);
 }
 
 void MQTTManager::connectToMQTT()
@@ -68,8 +62,8 @@ void MQTTManager::connectToMQTT()
 
 	if(mqttclient->connect(mqtt_client_id.c_str(), mqtt_client_id.c_str(), mqtt_password->c_str()))
 	{
-		mqttclient->subscribe(user_id->c_str());
-		mqttclient->subscribe("");
+		mqttclient->subscribe("keep_alive/#");
+		// mqttclient->subscribe("");
 		Logger::log(INFO, GREEN "Connected to MQTT Broker" RESET_COLOR);
 		Logger::log(INFO, BLUE "Subscribed to topic: " + String(user_id->c_str()) + RESET_COLOR);
 	}
