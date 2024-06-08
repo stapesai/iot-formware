@@ -61,8 +61,8 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 	{
 		// Parse the payload to get the device id
 		std::map<std::string, std::string> kv_map = utils->convertToKVMap(payloadStr.c_str());
-		const std::string device_id = kv_map["DEVICE_ID"];
-		const std::string channel_number = kv_map["CHANNEL_NUMBER"];
+		std::string device_id = kv_map["DEVICE_ID"];
+		std::string channel_number = kv_map["CHANNEL_NUMBER"];
 
 		// Register the device
 		if(config->registerNewDevice(device_id, channel_number))
@@ -87,7 +87,7 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 	{
 		// Parse the payload to get the device id
 		std::map<std::string, std::string> kv_map = utils->convertToKVMap(payloadStr.c_str());
-		const std::string device_id = kv_map["DEVICE_ID"];
+		std::string device_id = kv_map["DEVICE_ID"];
 
 		// Unregister the device
 		if(config->unregisterDevice(device_id))

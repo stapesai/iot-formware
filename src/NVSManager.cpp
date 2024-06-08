@@ -239,14 +239,109 @@ void NVSManager::readConfig()
 	nvs_close(nvs_handler);
 }
 
-bool registerNewDevice(const std::string& device_id, const std::string& channel_number)
+bool NVSManager::registerNewDevice(const std::string& device_id, const std::string& channel_number)
 {
 	// Add the device to the list of registered devices (`REG_DEVICE_IDS`) (separated by `;`)
 	// Make a new key-value pair in NVS with KEY=device_id and VALUE=channel_number
+
+	// get the current list of registered devices
+	std::string reg_device_ids = getRegisteredDevicesIds();
+
+	// split the string into a vector
+	std::vector<std::string> device_ids = Utils::splitString(reg_device_ids, ';');
+
+	// check if the device is already registered
+	if(std::find(device_ids.begin(), device_ids.end(), device_id) != device_ids.end())
+	{
+		Logger::log(WARN, ORANGE "Device already registered" RESET_COLOR);
+		return false;
+	}
+
+	// add the device to the list
+	reg_device_ids += device_id + ";";
+	setRegisteredDeviceIds(reg_device_ids);
+
+	// add the key-value pair to NVS
+	nvs_handle_t nvs_handler;
+	if(nvs_open("storage", NVS_READWRITE, &nvs_handler) != ESP_OK)
+	{
+		Logger::log(ERROR, RED "Error opening NVS handle" RESET_COLOR);
+		return false;
+	}
+
+	if(nvs_set_str(nvs_handler, device_id.c_str(), channel_number.c_str()) != ESP_OK)
+	{
+		Logger::log(ERROR, RED "Error writing to NVS" RESET_COLOR);
+		return false;
+	}
+
+	if(nvs_commit(nvs_handler) == ESP_OK)
+	{
+		Logger::log(INFO, GREEN "NVS committed successfully" RESET_COLOR);
+	}
+	else
+	{
+		Logger::log(ERROR, RED "Error committing NVS changes" RESET_COLOR);
+		return false;
+	}
+
+	nvs_close(nvs_handler);
+	return true;
 }
 
-bool unregisterDevice(const std::string& device_id)
+bool NVSManager::unregisterDevice(const std::string& device_id)
 {
 	// Remove the device from the list of registered devices (`REG_DEVICE_IDS`)
 	// Remove the key-value pair from NVS with KEY=device_id
+
+	// get the current list of registered devices
+	std::string reg_device_ids = getRegisteredDevicesIds();
+
+	// split the string into a vector
+	std::vector<std::string> device_ids = Utils::splitString(reg_device_ids, ';');
+
+	// check if the device is already registered
+	auto it = std::find(device_ids.begin(), device_ids.end(), device_id);
+	if(it == device_ids.end())
+	{
+		Logger::log(WARN, ORANGE "Device not registered" RESET_COLOR);
+		return false;
+	}
+
+	// remove the device from the list
+	device_ids.erase(it);
+	reg_device_ids = "";
+	for(const auto& device_id : device_ids)
+	{
+		reg_device_ids += device_id + ";";
+	}
+
+	// remove the key-value pair from NVS
+	setRegisteredDeviceIds(reg_device_ids);
+
+	nvs_handle_t nvs_handler;
+	if(nvs_open("storage", NVS_READWRITE, &nvs_handler) != ESP_OK)
+	{
+		Logger::log(ERROR, RED "Error opening NVS handle" RESET_COLOR);
+		return false;
+	}
+
+	if(nvs_erase_key(nvs_handler, device_id.c_str()) != ESP_OK)
+	{
+		Logger::log(ERROR, RED "Error erasing key from NVS" RESET_COLOR);
+		return false;
+	}
+
+	if(nvs_commit(nvs_handler) == ESP_OK)
+	{
+		Logger::log(INFO, GREEN "NVS committed successfully" RESET_COLOR);
+	}
+	else
+	{
+		Logger::log(ERROR, RED "Error committing NVS changes" RESET_COLOR);
+		return false;
+	}
+
+	nvs_close(nvs_handler);
+	return true;
 }

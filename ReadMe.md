@@ -93,7 +93,7 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 
 ### Register Device Response (if success, else no response)
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/{{device_id}}/register`
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/{{device_id}}/state`
 - **Payload:**
 
   ```plaintext
@@ -111,13 +111,13 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
   DEVICE_ID={{device_id}}
   ```
 
-### Unregister Device Response
+### Unregister Device Response (if success, else no response)
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/unregistration/response`
+- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/{{device_id}}/state`
 - **Payload:**
 
   ```plaintext
-  DEVICE_ID={{device_id}};STATUS=true/false;MESSAGE=
+  UNREGISTERED
   ```
 
 ## Device Control
