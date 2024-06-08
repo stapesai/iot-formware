@@ -262,6 +262,9 @@ bool NVSManager::registerNewDevice(const std::string& device_id, const std::stri
 	setRegisteredDeviceIds(reg_device_ids);
 
 	// add the key-value pair to NVS
+	// TODO: Do not use this approach make a vector of maps of device_id and channel_number
+	// and then store them in a private variable of this class.
+	// Then in `writeConfig` method, write all the key-value pairs to NVS.
 	nvs_handle_t nvs_handler;
 	if(nvs_open("storage", NVS_READWRITE, &nvs_handler) != ESP_OK)
 	{
