@@ -23,7 +23,7 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 	Logger::log(INFO, GREEN "Received value: " RESET_COLOR + value);
 
 	// Parse the key-value pairs
-	std::map<std::string, std::string> kv_map = utils.formatString(value);
+	std::map<std::string, std::string> kv_map = utils.convertToKVMap(value);
 	Logger::log(INFO, YELLOW "Number of key-value pairs: " RESET_COLOR + String(kv_map.size()));
 
 	// Setters for configuration parameters

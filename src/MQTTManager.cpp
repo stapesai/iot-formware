@@ -14,6 +14,8 @@ MQTTManager::MQTTManager(PubSubClient* client, NVSManager* config, Utils* utils)
 	, user_id(&config->getUserId())
 	, home_id(&config->getHomeId())
 	, node_mac(utils->getMacAddr())
+	, keep_alive_topic("user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac +
+					   "/keepalive")
 { }
 
 void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
@@ -26,8 +28,6 @@ void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
 
 	std::string kv_string = utils->convertToKVString(kv_map);
 
-	const std::string keep_alive_topic =
-		"user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac + "/keepalive";
 	if(mqttclient->publish(keep_alive_topic.c_str(), kv_string.c_str()))
 	{
 		Logger::log(INFO,
@@ -46,13 +46,75 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 
 	Logger::log(INFO, GREEN "Message arrived [" + topicStr + "]" RESET_COLOR);
 	Logger::log(INFO, GREEN "Payload: " + payloadStr + RESET_COLOR);
+
+	// Check if the topic is a keep alive request
+	if(topicStr.endsWith("/keepalive/request"))
+	{
+		// Publish the keep alive message
+		unsigned long temp = 0;
+		publish_keep_alive_message(temp);
+		Logger::log(INFO, GREEN "Keep alive request received" RESET_COLOR);
+	}
+
+	// Check if the topic is a device registration request
+	if(topicStr.endsWith("/device/register/request"))
+	{
+		// Parse the payload to get the device id
+		std::map<std::string, std::string> kv_map = utils->convertToKVMap(payloadStr.c_str());
+		const std::string device_id = kv_map["DEVICE_ID"];
+		const std::string channel_number = kv_map["CHANNEL_NUMBER"];
+
+		// Register the device
+		if(config->registerNewDevice(device_id, channel_number))
+		{
+			Logger::log(INFO, GREEN "Device registered successfully: " + device_id + RESET_COLOR);
+			mqttclient->subscribe(("user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac +
+								   "/device/" + device_id + "/control")
+									  .c_str());
+			mqttclient->publish(("user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac +
+								 "/device/" + device_id + "/register")
+									.c_str(),
+								"REGISTERED");
+		}
+		else
+		{
+			Logger::log(ERROR, RED "Failed to register device: " + device_id + RESET_COLOR);
+		}
+	}
+
+	// Check if the topic is a device unregistration request
+	if(topicStr.endsWith("/device/unregister/request"))
+	{
+		// Parse the payload to get the device id
+		std::map<std::string, std::string> kv_map = utils->convertToKVMap(payloadStr.c_str());
+		const std::string device_id = kv_map["DEVICE_ID"];
+
+		// Unregister the device
+		if(config->unregisterDevice(device_id))
+		{
+			Logger::log(INFO, GREEN "Device unregistered successfully: " + device_id + RESET_COLOR);
+			mqttclient->unsubscribe(("user/" + *user_id + "/home/" + *home_id + "/node/" +
+									 node_mac + "/device/" + device_id + "/control")
+										.c_str());
+			mqttclient->publish(("user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac +
+								 "/device/" + device_id + "/unregister")
+									.c_str(),
+								"UNREGISTERED");
+		}
+		else
+		{
+			Logger::log(ERROR, RED "Failed to unregister device: " + device_id + RESET_COLOR);
+		}
+	}
 };
 
 void MQTTManager::initializeMQTT()
 {
 	mqttclient->setServer(mqtt_broker->c_str(), atoi(mqtt_port->c_str()));
 	mqttclient->setKeepAlive(60);
-	mqttclient->setCallback(mqttCallback);
+	mqttclient->setCallback([&](char* topic, byte* payload, unsigned short int length) {
+		this->mqttCallback(topic, payload, length);
+	});
 }
 
 void MQTTManager::connectToMQTT()

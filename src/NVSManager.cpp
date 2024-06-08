@@ -238,3 +238,15 @@ void NVSManager::readConfig()
 	}
 	nvs_close(nvs_handler);
 }
+
+bool registerNewDevice(const std::string& device_id, const std::string& channel_number)
+{
+	// Add the device to the list of registered devices (`REG_DEVICE_IDS`) (separated by `;`)
+	// Make a new key-value pair in NVS with KEY=device_id and VALUE=channel_number
+}
+
+bool unregisterDevice(const std::string& device_id)
+{
+	// Remove the device from the list of registered devices (`REG_DEVICE_IDS`)
+	// Remove the key-value pair from NVS with KEY=device_id
+}

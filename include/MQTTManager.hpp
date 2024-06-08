@@ -12,7 +12,7 @@ class MQTTManager
 {
 public:
 	MQTTManager(PubSubClient* client, NVSManager* config, Utils* utils);
-	static void mqttCallback(char* topic, byte* payload, unsigned short int length);
+	void mqttCallback(char* topic, byte* payload, unsigned short int length);
 	void publish_keep_alive_message(unsigned long& keep_alive_counter);
 	void initializeMQTT();
 	void connectToMQTT();
@@ -27,6 +27,7 @@ private:
 	const std::string* user_id;
 	const std::string* home_id;
 	const std::string node_mac;
+	const std::string keep_alive_topic;
 };
 
 #endif // MQTT_MANAGER_HPP

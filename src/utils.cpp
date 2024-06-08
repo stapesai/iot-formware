@@ -22,7 +22,7 @@ std::string Utils::getMacAddr()
 }
 
 // Format incoming input string as key-value pairs
-std::map<std::string, std::string> Utils::formatString(const std::string& str)
+std::map<std::string, std::string> Utils::convertToKVMap(const std::string& str)
 {
 	char delim = ';';
 	char kv_delim = '=';

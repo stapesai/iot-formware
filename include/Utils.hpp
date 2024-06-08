@@ -19,7 +19,7 @@ public:
 	static void statusBuzzer(int times, int delayTime);
 	static void printConfig(const NVSManager& config);
 	static void restartDevice(unsigned long delayTime);
-	static std::map<std::string, std::string> formatString(const std::string& str);
+	static std::map<std::string, std::string> convertToKVMap(const std::string& str);
 	static std::string convertToKVString(const std::map<std::string, std::string>& kv_map);
 	static std::vector<std::string> splitString(std::string string, char delim);
 };

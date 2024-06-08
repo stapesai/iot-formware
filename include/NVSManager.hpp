@@ -55,6 +55,9 @@ public:
 	void setHomeId(const std::string& value);
 	void setRegisteredDeviceIds(const std::string& value);
 
+	bool registerNewDevice(const std::string& device_id, const std::string& channel_number);
+	bool unregisterDevice(const std::string& device_id);
+
 	static void resetNVS();
 	bool isNVSEmpty();
 	void writeConfig();
