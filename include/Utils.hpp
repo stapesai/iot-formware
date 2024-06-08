@@ -21,7 +21,7 @@ public:
 	static void restartDevice(unsigned long delayTime);
 	static std::map<std::string, std::string> formatString(const std::string& str);
 	static std::string convertToKVString(const std::map<std::string, std::string>& kv_map);
-	static std::vector<String> splitString(String string, char delim);
+	static std::vector<std::string> splitString(std::string string, char delim);
 };
 
 #endif // UTILS_H

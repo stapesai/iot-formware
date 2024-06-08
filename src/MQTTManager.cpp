@@ -26,7 +26,7 @@ void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
 
 	std::string kv_string = utils->convertToKVString(kv_map);
 
-	const String keep_alive_topic =
+	const std::string keep_alive_topic =
 		"user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac + "/keepalive";
 	if(mqttclient->publish(keep_alive_topic.c_str(), kv_string.c_str()))
 	{
@@ -65,40 +65,40 @@ void MQTTManager::connectToMQTT()
 
 		// Subscribe to topics
 		// 1. Keep alive request topic (user/<user_id>/home/<home_id>/node/<node_id>/keepalive/request)
-		const String keep_alive_request_topic =
+		const std::string keep_alive_request_topic =
 			"user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac + "/keepalive/request";
 		mqttclient->subscribe(keep_alive_request_topic.c_str());
 		Logger::log(INFO, BLUE "Subscribed to topic: " + keep_alive_request_topic + RESET_COLOR);
 
 		// 2. Device registration request topic (user/<user_id>/home/<home_id>/node/<node_id>/device/register/request)
-		const String device_registration_request_topic = "user/" + *user_id + "/home/" + *home_id +
-														 "/node/" + node_mac +
-														 "/device/register/request";
+		const std::string device_registration_request_topic = "user/" + *user_id + "/home/" +
+															  *home_id + "/node/" + node_mac +
+															  "/device/register/request";
 		mqttclient->subscribe(device_registration_request_topic.c_str());
 		Logger::log(INFO,
 					BLUE "Subscribed to topic: " + device_registration_request_topic + RESET_COLOR);
 
 		// 3. Device unregistration request topic (user/<user_id>/home/<home_id>/node/<node_id>/device/unregister/request)
-		const String device_unregistration_request_topic = "user/" + *user_id + "/home/" +
-														   *home_id + "/node/" + node_mac +
-														   "/device/unregister/request";
+		const std::string device_unregistration_request_topic = "user/" + *user_id + "/home/" +
+																*home_id + "/node/" + node_mac +
+																"/device/unregister/request";
 		mqttclient->subscribe(device_unregistration_request_topic.c_str());
 		Logger::log(
 			INFO, BLUE "Subscribed to topic: " + device_unregistration_request_topic + RESET_COLOR);
 
 		// 4. Device control request topic (user/<user_id>/home/<home_id>/node/<node_id>/device/<device_id>/control/request)
 		// We get registered device ids from the NVS `REG_DEVICE_IDS` key (it can also be null) (`;` separated)
-		const String reg_device_ids = config->getRegisteredDevicesIds();
-		std::vector<String> device_ids;
+		const std::string reg_device_ids = config->getRegisteredDevicesIds();
+		std::vector<std::string> device_ids;
 		if(reg_device_ids.length() > 0)
 		{
 			device_ids = utils->splitString(reg_device_ids, ';');
 		}
 		for(const auto& device_id : device_ids)
 		{
-			const String device_control_request_topic = "user/" + *user_id + "/home/" + *home_id +
-														"/node/" + node_mac + "/device/" +
-														device_id + "/control";
+			const std::string device_control_request_topic = "user/" + *user_id + "/home/" +
+															 *home_id + "/node/" + node_mac +
+															 "/device/" + device_id + "/control";
 			mqttclient->subscribe(device_control_request_topic.c_str());
 			Logger::log(INFO,
 						BLUE "Subscribed to topic: " + device_control_request_topic + RESET_COLOR);

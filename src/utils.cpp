@@ -61,23 +61,16 @@ std::string Utils::convertToKVString(const std::map<std::string, std::string>& k
 }
 
 // It is used to split a string into a vector of sub-strings based on a delimiter
-std::vector<String> Utils::splitString(String string, char delim)
+// (e.g., splitString("hello,world", ',') returns ["hello", "world"]
+std::vector<std::string> Utils::splitString(std::string string, char delim)
 {
-	std::vector<String> tokens;
-	String token;
-	for(int i = 0; i < string.length(); i++)
+	std::vector<std::string> tokens;
+	std::string token;
+	std::istringstream tokenStream(string);
+	while(std::getline(tokenStream, token, delim))
 	{
-		if(string[i] != delim)
-		{
-			token += string[i];
-		}
-		else
-		{
-			tokens.push_back(token);
-			token = "";
-		}
+		tokens.push_back(token);
 	}
-	tokens.push_back(token);
 	return tokens;
 }
 
