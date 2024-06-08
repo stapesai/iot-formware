@@ -6,7 +6,7 @@
 #include <nvs.h>
 #include <nvs_flash.h>
 
-std::string Utils::generateName()
+std::string Utils::getMacAddr()
 {
 
 	std::string macAddress = WiFi.macAddress().c_str();
@@ -15,7 +15,8 @@ std::string Utils::generateName()
 	std::replace(macAddress.begin(), macAddress.end(), ':', '_');
 
 	// Create the result string
-	std::string result = BLE_DEVICE_NAME + macAddress;
+	std::string result = macAddress;
+	// std::string result = BLE_DEVICE_NAME + macAddress;
 
 	return result;
 }
@@ -59,6 +60,28 @@ std::string Utils::convertToKVString(const std::map<std::string, std::string>& k
 	return kv_string;
 }
 
+// It is used to split a string into a vector of sub-strings based on a delimiter
+std::vector<String> Utils::splitString(String string, char delim)
+{
+	std::vector<String> tokens;
+	String token;
+	for(int i = 0; i < string.length(); i++)
+	{
+		if(string[i] != delim)
+		{
+			token += string[i];
+		}
+		else
+		{
+			tokens.push_back(token);
+			token = "";
+		}
+	}
+	tokens.push_back(token);
+	return tokens;
+}
+
+// Function to generate a buzzer sound
 void Utils::statusBuzzer(int times, int delayTime)
 {
 	for(int i = 0; i < times; i++)

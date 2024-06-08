@@ -81,7 +81,8 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 void BLEManager::initializeBLE()
 {
 	// Initialize BLE
-	BLEDevice::init(utils.generateName().c_str());
+	std::string deviceName = BLE_DEVICE_NAME + utils.getMacAddr();
+	BLEDevice::init(deviceName.c_str());
 	pServer = BLEDevice::createServer();
 	pService = pServer->createService(SERVICE_UUID);
 	pCharacteristic =

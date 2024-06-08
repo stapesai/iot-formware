@@ -46,7 +46,6 @@ public:
 	const std::string& getHomeId() const;
 	const std::string& getRegisteredDevicesIds() const;
 
-
 	void setWiFiSSID(const std::string& value);
 	void setWiFiPassword(const std::string& value);
 	void setMQTTBroker(const std::string& value);
@@ -55,7 +54,6 @@ public:
 	void setUserId(const std::string& value);
 	void setHomeId(const std::string& value);
 	void setRegisteredDeviceIds(const std::string& value);
-
 
 	static void resetNVS();
 	bool isNVSEmpty();

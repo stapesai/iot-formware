@@ -13,7 +13,7 @@ class Utils
 {
 
 public:
-	std::string generateName();
+	static std::string getMacAddr();
 	// function to generate the mqtt topic
 	// std::string generateTopic(std::string& user_id, std::string& home_id, std::string& client_id);
 	static void statusBuzzer(int times, int delayTime);
@@ -21,6 +21,7 @@ public:
 	static void restartDevice(unsigned long delayTime);
 	static std::map<std::string, std::string> formatString(const std::string& str);
 	static std::string convertToKVString(const std::map<std::string, std::string>& kv_map);
+	static std::vector<String> splitString(String string, char delim);
 };
 
 #endif // UTILS_H
