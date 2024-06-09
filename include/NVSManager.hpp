@@ -28,13 +28,7 @@ private:
 	std::string user_id;
 	std::string home_id;
 
-	const char* keys[8] = {"WIFI_SSID",
-						   "WIFI_PASSWORD",
-						   "MQTT_BROKER",
-						   "MQTT_PORT",
-						   "MQTT_PASSWORD",
-						   "USER_ID",
-						   "HOME_ID"};
+	const char* keys[8] = {"WIFI_SSID", "WIFI_PASSWORD", "MQTT_BROKER", "MQTT_PORT", "MQTT_PASSWORD", "USER_ID", "HOME_ID"};
 
 public:
 	NVSManager();

@@ -9,8 +9,7 @@
 // Constructor
 NVSManager::NVSManager()
 {
-	fields = {
-		&wifi_ssid, &wifi_password, &mqtt_broker, &mqtt_port, &mqtt_password, &user_id, &home_id};
+	fields = {&wifi_ssid, &wifi_password, &mqtt_broker, &mqtt_port, &mqtt_password, &user_id, &home_id};
 }
 
 // Interrupt handler to reset the module
@@ -55,14 +54,11 @@ bool NVSManager::isNVSEmpty()
 		}
 		else if(err == ESP_ERR_NVS_NOT_FOUND)
 		{
-			Logger::log(WARN,
-						ORANGE "Key: " + std::string(keys[i]) + " does not exist" RESET_COLOR);
+			Logger::log(WARN, ORANGE "Key: " + std::string(keys[i]) + " does not exist" RESET_COLOR);
 		}
 		else
 		{
-			Logger::log(ERROR,
-						RED "Error getting key '" + std::string(keys[i]) +
-							"': " + std::string(esp_err_to_name(err)) + RESET_COLOR);
+			Logger::log(ERROR, RED "Error getting key '" + std::string(keys[i]) + "': " + std::string(esp_err_to_name(err)) + RESET_COLOR);
 			allKeysMissing = true;
 			break; // Exit loop on other errors
 		}
@@ -99,9 +95,7 @@ void NVSManager::writeConfig()
 
 	for(int i = 0; i < 7; i++)
 	{
-		Logger::log(INFO,
-					YELLOW "Writing to NVS: " + String(keys[i]) + " = " +
-						String(fields[i]->c_str()) + RESET_COLOR);
+		Logger::log(INFO, YELLOW "Writing to NVS: " + String(keys[i]) + " = " + String(fields[i]->c_str()) + RESET_COLOR);
 		if(nvs_set_str(nvs_handler, keys[i], fields[i]->c_str()) != ESP_OK)
 		{
 			Logger::log(ERROR, RED "Error writing to NVS" RESET_COLOR);
@@ -134,17 +128,14 @@ void NVSManager::readConfig()
 		err = nvs_get_str(nvs_handler, keys[i], NULL, &required_size);
 		if(err != ESP_OK)
 		{
-			Logger::log(ERROR,
-						RED "Error reading size for key '%s'\n" + String(keys[i]) + RESET_COLOR);
+			Logger::log(ERROR, RED "Error reading size for key '%s'\n" + String(keys[i]) + RESET_COLOR);
 			continue;
 		}
 
 		char* value = (char*)malloc(required_size);
 		if(value == nullptr)
 		{
-			Logger::log(ERROR,
-						RED "Error allocating memory for key '%s'\n" + String(keys[i]) +
-							RESET_COLOR);
+			Logger::log(ERROR, RED "Error allocating memory for key '%s'\n" + String(keys[i]) + RESET_COLOR);
 			continue;
 		}
 
@@ -152,14 +143,11 @@ void NVSManager::readConfig()
 		if(err == ESP_OK)
 		{
 			*fields[i] = std::string(value);
-			Logger::log(DEBUG,
-						GREEN "Read from NVS: " + String(keys[i]) + " = " + String(value) +
-							RESET_COLOR);
+			Logger::log(DEBUG, GREEN "Read from NVS: " + String(keys[i]) + " = " + String(value) + RESET_COLOR);
 		}
 		else
 		{
-			Logger::log(ERROR,
-						RED "Error reading value for key '%s'\n" + String(keys[i]) + RESET_COLOR);
+			Logger::log(ERROR, RED "Error reading value for key '%s'\n" + String(keys[i]) + RESET_COLOR);
 		}
 		free(value);
 	}
@@ -188,9 +176,7 @@ bool NVSManager::registerNewDevice(const std::string& device_id, const std::stri
 	size_t required_size;
 	if(nvs_get_str(nvs_handler, device_id.c_str(), NULL, &required_size) == ESP_OK)
 	{
-		Logger::log(ERROR,
-					RED "Device ID already exists in NVS: " + String(device_id.c_str()) +
-						RESET_COLOR);
+		Logger::log(ERROR, RED "Device ID already exists in NVS: " + String(device_id.c_str()) + RESET_COLOR);
 		return false;
 	}
 
@@ -237,9 +223,7 @@ bool NVSManager::unregisterDevice(const std::string& device_id)
 	size_t required_size;
 	if(nvs_get_str(nvs_handler, device_id.c_str(), NULL, &required_size) != ESP_OK)
 	{
-		Logger::log(ERROR,
-					RED "Device ID does not exist in NVS: " + String(device_id.c_str()) +
-						RESET_COLOR);
+		Logger::log(ERROR, RED "Device ID does not exist in NVS: " + String(device_id.c_str()) + RESET_COLOR);
 		return false;
 	}
 
@@ -279,33 +263,25 @@ const std::string& NVSManager::getChannelNumber(const std::string& device_id)
 	err = nvs_get_str(nvs_handler, device_id.c_str(), NULL, &required_size);
 	if(err != ESP_OK)
 	{
-		Logger::log(ERROR,
-					RED "Error reading size for key '%s'\n" + String(device_id.c_str()) +
-						RESET_COLOR);
+		Logger::log(ERROR, RED "Error reading size for key '%s'\n" + String(device_id.c_str()) + RESET_COLOR);
 		return "";
 	}
 
 	char* value = (char*)malloc(required_size);
 	if(value == nullptr)
 	{
-		Logger::log(ERROR,
-					RED "Error allocating memory for key '%s'\n" + String(device_id.c_str()) +
-						RESET_COLOR);
+		Logger::log(ERROR, RED "Error allocating memory for key '%s'\n" + String(device_id.c_str()) + RESET_COLOR);
 		return "";
 	}
 
 	err = nvs_get_str(nvs_handler, device_id.c_str(), value, &required_size);
 	if(err == ESP_OK)
 	{
-		Logger::log(DEBUG,
-					GREEN "Read from NVS: " + String(device_id.c_str()) + " = " + String(value) +
-						RESET_COLOR);
+		Logger::log(DEBUG, GREEN "Read from NVS: " + String(device_id.c_str()) + " = " + String(value) + RESET_COLOR);
 	}
 	else
 	{
-		Logger::log(ERROR,
-					RED "Error reading value for key '%s'\n" + String(device_id.c_str()) +
-						RESET_COLOR);
+		Logger::log(ERROR, RED "Error reading value for key '%s'\n" + String(device_id.c_str()) + RESET_COLOR);
 	}
 	nvs_close(nvs_handler);
 	return std::string(value);
