@@ -3,6 +3,7 @@
 #ifndef MQTT_MANAGER_HPP
 #define MQTT_MANAGER_HPP
 
+#include <Logger.hpp>
 #include <Constants.hpp>
 #include <NVSManager.hpp>
 #include <PubSubClient.h>

@@ -37,23 +37,25 @@ private:
 public:
 	NVSManager();
 
-	const std::string& getWiFiSSID() const;
-	const std::string& getWiFiPassword() const;
-	const std::string& getMQTTBroker() const;
-	const std::string& getMQTTPort() const;
-	const std::string& getMQTTPassword() const;
-	const std::string& getUserId() const;
-	const std::string& getHomeId() const;
-	const std::string& getRegisteredDevicesIds() const;
+	// Getter methods
+    const std::string& getWiFiSSID() const { return wifi_ssid; }
+    const std::string& getWiFiPassword() const { return wifi_password; }
+    const std::string& getMQTTBroker() const { return mqtt_broker; }
+    const std::string& getMQTTPort() const { return mqtt_port; }
+    const std::string& getMQTTPassword() const { return mqtt_password; }
+    const std::string& getUserId() const { return user_id; }
+    const std::string& getHomeId() const { return home_id; }
+    const std::string& getRegisteredDevicesIds() const { return reg_device_ids; }
 
-	void setWiFiSSID(const std::string& value);
-	void setWiFiPassword(const std::string& value);
-	void setMQTTBroker(const std::string& value);
-	void setMQTTPort(const std::string& value);
-	void setMQTTPassword(const std::string& value);
-	void setUserId(const std::string& value);
-	void setHomeId(const std::string& value);
-	void setRegisteredDeviceIds(const std::string& value);
+    // Setter methods
+    void setWiFiSSID(const std::string& value) { wifi_ssid = value; }
+    void setWiFiPassword(const std::string& value) { wifi_password = value; }
+    void setMQTTBroker(const std::string& value) { mqtt_broker = value; }
+    void setMQTTPort(const std::string& value) { mqtt_port = value; }
+    void setMQTTPassword(const std::string& value) { mqtt_password = value; }
+    void setUserId(const std::string& value) { user_id = value; }
+    void setHomeId(const std::string& value) { home_id = value; }
+    void setRegisteredDeviceIds(const std::string& value) { reg_device_ids = value; }
 
 	bool registerNewDevice(const std::string& device_id, const std::string& channel_number);
 	bool unregisterDevice(const std::string& device_id);

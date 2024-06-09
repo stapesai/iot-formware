@@ -1,6 +1,5 @@
 // Path: src/MQTTManager.cpp
 
-#include <Logger.hpp>
 #include <MQTTManager.hpp>
 
 // Constructor
@@ -30,8 +29,7 @@ void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
 
 	if(mqttclient->publish(keep_alive_topic.c_str(), kv_string.c_str()))
 	{
-		Logger::log(INFO,
-					GREEN "Keep-alive message published successfully: " + kv_string + RESET_COLOR);
+		Logger::log(INFO,GREEN "Keep-alive message published successfully: " + kv_string + RESET_COLOR);
 	}
 	else
 	{
@@ -42,7 +40,7 @@ void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
 void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int length)
 {
 	String topicStr = String(topic);
-	String payloadStr = String((char*)payload);
+    std::string payloadStr(reinterpret_cast<char*>(payload), length);
 
 	Logger::log(INFO, GREEN "Message arrived [" + topicStr + "]" RESET_COLOR);
 	Logger::log(INFO, GREEN "Payload: " + payloadStr + RESET_COLOR);

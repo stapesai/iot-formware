@@ -19,78 +19,6 @@ NVSManager::NVSManager()
 			  &reg_device_ids};
 }
 
-// Getter methods
-const std::string& NVSManager::getWiFiSSID() const
-{
-	return wifi_ssid;
-}
-const std::string& NVSManager::getWiFiPassword() const
-{
-	return wifi_password;
-}
-const std::string& NVSManager::getMQTTBroker() const
-{
-	return mqtt_broker;
-}
-const std::string& NVSManager::getMQTTPort() const
-{
-	return mqtt_port;
-}
-
-const std::string& NVSManager::getMQTTPassword() const
-{
-	return mqtt_password;
-}
-const std::string& NVSManager::getUserId() const
-{
-	return user_id;
-}
-
-const std::string& NVSManager::getHomeId() const
-{
-	return home_id;
-}
-const std::string& NVSManager::getRegisteredDevicesIds() const
-{
-	return reg_device_ids;
-}
-
-// Setter methods
-void NVSManager::setWiFiSSID(const std::string& value)
-{
-	wifi_ssid = value;
-}
-void NVSManager::setWiFiPassword(const std::string& value)
-{
-	wifi_password = value;
-}
-void NVSManager::setMQTTBroker(const std::string& value)
-{
-	mqtt_broker = value;
-}
-void NVSManager::setMQTTPort(const std::string& value)
-{
-	mqtt_port = value;
-}
-
-void NVSManager::setMQTTPassword(const std::string& value)
-{
-	mqtt_password = value;
-}
-void NVSManager::setUserId(const std::string& value)
-{
-	user_id = value;
-}
-void NVSManager::setHomeId(const std::string& value)
-{
-	home_id = value;
-}
-
-void NVSManager::setRegisteredDeviceIds(const std::string& value)
-{
-	reg_device_ids = value;
-}
-
 // Interrupt handler to reset the module
 void IRAM_ATTR NVSManager::resetNVS()
 {
@@ -112,38 +40,43 @@ void IRAM_ATTR NVSManager::resetNVS()
 
 bool NVSManager::isNVSEmpty()
 {
-	if(nvs_open("storage", NVS_READWRITE, &nvs_handler) != ESP_OK)
+	if(nvs_open("storage", NVS_READONLY, &nvs_handler) != ESP_OK)
 	{
 		Logger::log(ERROR, RED "Error opening NVS handle" RESET_COLOR);
 		return true;
 	}
-	Logger::log(INFO, GREEN "NVS opened	successfully" RESET_COLOR);
+	Logger::log(INFO, GREEN "Checking if NVS is empty" RESET_COLOR);
+	bool allKeysMissing = true;
 
-	for(int i = 0; i < 6; i++)
+	for(int i = 0; i < 7; i++)
 	{
 		// Check NVS stats
 		size_t required_size;
 		err = nvs_get_str(nvs_handler, keys[i], NULL, &required_size);
-		nvs_close(nvs_handler);
 
 		if(err == ESP_OK)
 		{
-			Logger::log(DEBUG, GREEN "Key: " + String(keys[i]) + " exists" RESET_COLOR);
-			return false;
+			Logger::log(DEBUG, GREEN "Key: " + std::string(keys[i]) + " exists" RESET_COLOR);
+			allKeysMissing = false; // At least one key exists
 		}
 		else if(err == ESP_ERR_NVS_NOT_FOUND)
 		{
-			return true;
+			Logger::log(WARN,
+						ORANGE "Key: " + std::string(keys[i]) + " does not exist" RESET_COLOR);
 		}
 		else
 		{
 			Logger::log(ERROR,
-						RED "Error getting key '" + String(keys[i]) +
-							"': " + String(esp_err_to_name(err)) + RESET_COLOR);
-			return true;
+						RED "Error getting key '" + std::string(keys[i]) +
+							"': " + std::string(esp_err_to_name(err)) + RESET_COLOR);
+			allKeysMissing = true;
+			break; // Exit loop on other errors
 		}
 	}
-	return true;
+
+	nvs_close(nvs_handler);
+
+	return allKeysMissing;
 }
 
 void NVSManager::intialiseNVS()
