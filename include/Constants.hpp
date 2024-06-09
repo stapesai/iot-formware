@@ -8,6 +8,7 @@
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 #define BLE_DEVICE_NAME "Jarvis_"
+
 // COLORS
 #define RESET_COLOR "\033[0m"
 #define RED "\033[31m"
@@ -19,6 +20,7 @@
 #define WHITE "\033[37m"
 #define BLACK "\033[30m"
 #define ORANGE "\033[38;5;208m"
+
 // BACKGROUND COLORS
 #define BG_RED "\033[41m"
 #define BG_GREEN "\033[42m"

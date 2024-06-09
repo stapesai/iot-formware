@@ -1,6 +1,5 @@
 // Path: src/MQTTManager.cpp
 
-
 #include <MQTTManager.hpp>
 
 // Constructor
@@ -51,6 +50,7 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 	if(topicStr.endsWith("/keepalive/request"))
 	{
 		// Publish the keep alive message
+		// FIXME: Use global keep alive counter
 		unsigned long temp = 0;
 		publish_keep_alive_message(temp);
 		Logger::log(INFO, GREEN "Keep alive request received" RESET_COLOR);
@@ -81,7 +81,7 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 		}
 		else
 		{
-			Logger::log(ERROR, RED "Failed to register device: " + device_id + RESET_COLOR);
+			Logger::log(ERROR, RED "Failed to register Device Id: " + device_id + RESET_COLOR);
 		}
 	}
 
@@ -106,7 +106,7 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 		}
 		else
 		{
-			Logger::log(ERROR, RED "Failed to unregister device: " + device_id + RESET_COLOR);
+			Logger::log(ERROR, RED "Failed to unregister Device ID: " + device_id + RESET_COLOR);
 		}
 	}
 };
@@ -153,21 +153,12 @@ void MQTTManager::connectToMQTT()
 
 		// 4. Device control request topic (user/<user_id>/home/<home_id>/node/<node_id>/device/<device_id>/control/request)
 		// We get registered device ids from the NVS `REG_DEVICE_IDS` key (it can also be null) (`;` separated)
-		const std::string reg_device_ids = config->getRegisteredDevicesIds();
-		std::vector<std::string> device_ids;
-		if(reg_device_ids.length() > 0)
-		{
-			device_ids = utils->splitString(reg_device_ids, ';');
-		}
-		for(const auto& device_id : device_ids)
-		{
-			const std::string device_control_request_topic = "user/" + *user_id + "/home/" +
-															 *home_id + "/node/" + node_mac +
-															 "/device/" + device_id + "/control";
-			mqttclient->subscribe(device_control_request_topic.c_str());
-			Logger::log(INFO,
-						BLUE "Subscribed to topic: " + device_control_request_topic + RESET_COLOR);
-		}
+		const std::string device_control_request_topic = "user/" + *user_id + "/home/" + *home_id +
+														 "/node/" + node_mac + "/device/" + "+" +
+														 "/control";
+		mqttclient->subscribe(device_control_request_topic.c_str());
+		Logger::log(INFO,
+					BLUE "Subscribed to topic: " + device_control_request_topic + RESET_COLOR);
 	}
 	else
 	{

@@ -108,8 +108,6 @@ void Utils::printConfig(const NVSManager& config)
 	Logger::log(DEBUG, GREEN "MQTT Password: " + config.getMQTTPassword() + RESET_COLOR);
 	Logger::log(DEBUG, GREEN "User ID: " + config.getUserId() + RESET_COLOR);
 	Logger::log(DEBUG, GREEN "Home ID: " + config.getHomeId() + RESET_COLOR);
-	Logger::log(DEBUG,
-				GREEN "Registered Devices IDs: " + config.getRegisteredDevicesIds() + RESET_COLOR);
 }
 
 void Utils::restartDevice(unsigned long delayTime)
