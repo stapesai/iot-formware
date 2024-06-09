@@ -85,10 +85,8 @@ void BLEManager::initializeBLE()
 	BLEDevice::init(deviceName.c_str());
 	pServer = BLEDevice::createServer();
 	pService = pServer->createService(SERVICE_UUID);
-	pCharacteristic =
-		pService->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE);
+	pCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE);
 	pCharacteristic->setCallbacks(this);
-	// pCharacteristic->addDescriptor(new BLE2902());
 
 	// Implement security: require bonding, MITM protection, etc.
 	BLESecurity* pSecurity = new BLESecurity();

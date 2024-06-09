@@ -14,8 +14,6 @@ class Utils
 
 public:
 	static std::string getMacAddr();
-	// function to generate the mqtt topic
-	// std::string generateTopic(std::string& user_id, std::string& home_id, std::string& client_id);
 	static void statusBuzzer(int times, int delayTime);
 	static void printConfig(const NVSManager& config);
 	static void restartDevice(unsigned long delayTime);

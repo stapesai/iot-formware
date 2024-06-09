@@ -266,47 +266,52 @@ bool NVSManager::unregisterDevice(const std::string& device_id)
 	return true;
 }
 
-const std::string& NVSManager::getChannelNumber(const std::string& device_id)
+std::string NVSManager::getChannelNumber(const std::string& device_id)
 {
 	nvs_handle_t nvs_handler;
 	if(nvs_open("storage", NVS_READONLY, &nvs_handler) != ESP_OK)
 	{
 		Logger::log(ERROR, RED "Error opening NVS handle" RESET_COLOR);
-		return "";
+		return ""; // Return empty string if NVS open fails
 	}
 
 	size_t required_size;
-	err = nvs_get_str(nvs_handler, device_id.c_str(), NULL, &required_size);
+	esp_err_t err = nvs_get_str(nvs_handler, device_id.c_str(), nullptr, &required_size);
 	if(err != ESP_OK)
 	{
 		Logger::log(ERROR,
-					RED "Error reading size for key '%s'\n" + String(device_id.c_str()) +
-						RESET_COLOR);
-		return "";
+					RED "Error reading size for key '%s'\n" + device_id + RESET_COLOR +
+						esp_err_to_name(err));
+		nvs_close(nvs_handler);
+		return ""; // Return empty string if key size read fails
 	}
 
+	// Allocate memory for value
 	char* value = (char*)malloc(required_size);
 	if(value == nullptr)
 	{
-		Logger::log(ERROR,
-					RED "Error allocating memory for key '%s'\n" + String(device_id.c_str()) +
-						RESET_COLOR);
-		return "";
+		Logger::log(ERROR, RED "Error allocating memory for key '%s'\n" + device_id + RESET_COLOR);
+		nvs_close(nvs_handler);
+		return ""; // Return empty string if memory allocation fails
 	}
 
+	// Read the value
 	err = nvs_get_str(nvs_handler, device_id.c_str(), value, &required_size);
 	if(err == ESP_OK)
 	{
-		Logger::log(DEBUG,
-					GREEN "Read from NVS: " + String(device_id.c_str()) + " = " + String(value) +
-						RESET_COLOR);
+		std::string result(value);
+		Logger::log(DEBUG, GREEN "Read from NVS: " + device_id + " = " + result + RESET_COLOR);
+		free(value); // Free allocated memory
+		nvs_close(nvs_handler);
+		return result; // Return the value as a string
 	}
 	else
 	{
 		Logger::log(ERROR,
-					RED "Error reading value for key '%s'\n" + String(device_id.c_str()) +
-						RESET_COLOR);
+					RED "Error reading value for key '%s': %s\n" + device_id + RESET_COLOR +
+						esp_err_to_name(err));
+		free(value); // Free allocated memory
+		nvs_close(nvs_handler);
+		return ""; // Return empty string if value read fails
 	}
-	nvs_close(nvs_handler);
-	return std::string(value);
 }
