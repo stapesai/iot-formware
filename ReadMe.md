@@ -88,7 +88,7 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 - **Payload:**
 
   ```plaintext
-  DEVICE_ID={{device_id}};CHANNEL={{channel}}
+  DEVICE_ID={{device_id}};CHANNEL_NUMBER={{channel}}
   ```
 
 ### Register Device Response (if success, else no response)

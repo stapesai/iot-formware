@@ -177,51 +177,44 @@ bool NVSManager::registerNewDevice(const std::string& device_id, const std::stri
 	// Add the device to the list of registered devices (`REG_DEVICE_IDS`) (separated by `;`)
 	// Make a new key-value pair in NVS with KEY=device_id and VALUE=channel_number
 
-	// get the current list of registered devices
-	std::string reg_device_ids = getRegisteredDevicesIds();
+	// add the key-value pair to NVS
+	// TODO: Do not use this approach make a vector of maps of device_id and channel_number and then store them in a private variable of this class. Then in `writeConfig` method, write all the key-value pairs to NVS.
+	if(registeredDeviceIds.empty())
+	{
+		std::string reg_device_ids = getRegisteredDevicesIds();
+		std::vector<std::string> device_ids = Utils::splitString(reg_device_ids, ';');
+		registeredDeviceIds.insert(device_ids.begin(), device_ids.end());
+	}
 
-	// split the string into a vector
-	std::vector<std::string> device_ids = Utils::splitString(reg_device_ids, ';');
-
-	// check if the device is already registered
-	if(std::find(device_ids.begin(), device_ids.end(), device_id) != device_ids.end())
+	// Check if the device is already registered
+	if(registeredDeviceIds.find(device_id) != registeredDeviceIds.end())
 	{
 		Logger::log(WARN, ORANGE "Device already registered" RESET_COLOR);
 		return false;
 	}
 
-	// add the device to the list
-	reg_device_ids += device_id + ";";
-	setRegisteredDeviceIds(reg_device_ids);
+	// Add the device to the set
+	registeredDeviceIds.insert(device_id);
 
-	// add the key-value pair to NVS
-	// TODO: Do not use this approach make a vector of maps of device_id and channel_number
-	// and then store them in a private variable of this class.
-	// Then in `writeConfig` method, write all the key-value pairs to NVS.
-	nvs_handle_t nvs_handler;
-	if(nvs_open("storage", NVS_READWRITE, &nvs_handler) != ESP_OK)
+	// Convert set back to a semicolon-separated string
+	std::string reg_device_ids;
+	for(const auto& id : registeredDeviceIds)
 	{
-		Logger::log(ERROR, RED "Error opening NVS handle" RESET_COLOR);
-		return false;
+		reg_device_ids += id + ";";
 	}
 
-	if(nvs_set_str(nvs_handler, device_id.c_str(), channel_number.c_str()) != ESP_OK)
+	// Store the device_id and channel_number in the vector of maps
+	registeredDevices.push_back({device_id, channel_number});
+
+	// print the registered devices
+
+	for(const auto& device : registeredDevices)
 	{
-		Logger::log(ERROR, RED "Error writing to NVS" RESET_COLOR);
-		return false;
+		Logger::log(DEBUG,
+					GREEN "Device ID: " + device.first + " Channel Number: " + device.second +
+						RESET_COLOR);
 	}
 
-	if(nvs_commit(nvs_handler) == ESP_OK)
-	{
-		Logger::log(INFO, GREEN "NVS committed successfully" RESET_COLOR);
-	}
-	else
-	{
-		Logger::log(ERROR, RED "Error committing NVS changes" RESET_COLOR);
-		return false;
-	}
-
-	nvs_close(nvs_handler);
 	return true;
 }
 
@@ -230,30 +223,36 @@ bool NVSManager::unregisterDevice(const std::string& device_id)
 	// Remove the device from the list of registered devices (`REG_DEVICE_IDS`)
 	// Remove the key-value pair from NVS with KEY=device_id
 
-	// get the current list of registered devices
-	std::string reg_device_ids = getRegisteredDevicesIds();
+	if(registeredDeviceIds.empty())
+	{
+		std::string reg_device_ids = getRegisteredDevicesIds();
+		std::vector<std::string> device_ids = Utils::splitString(reg_device_ids, ';');
+		registeredDeviceIds.insert(device_ids.begin(), device_ids.end());
+	}
 
-	// split the string into a vector
-	std::vector<std::string> device_ids = Utils::splitString(reg_device_ids, ';');
+	// Check if the device is already registered
+	if(registeredDeviceIds.find(device_id) != registeredDeviceIds.end())
+	{
+		Logger::log(WARN, ORANGE "Device already registered" RESET_COLOR);
+		return false;
+	}
 
-	// check if the device is already registered
-	auto it = std::find(device_ids.begin(), device_ids.end(), device_id);
-	if(it == device_ids.end())
+	// Remove the device from the set
+	registeredDeviceIds.erase(device_id);
+
+	// Convert set back to a semicolon-separated string
+	std::string reg_device_ids;
+
+	for(const auto& id : registeredDeviceIds)
+	{
+		reg_device_ids += id + ";";
+	}
+
+	if(registeredDeviceIds.find(device_id) == registeredDeviceIds.end())
 	{
 		Logger::log(WARN, ORANGE "Device not registered" RESET_COLOR);
 		return false;
 	}
-
-	// remove the device from the list
-	device_ids.erase(it);
-	reg_device_ids = "";
-	for(const auto& device_id : device_ids)
-	{
-		reg_device_ids += device_id + ";";
-	}
-
-	// remove the key-value pair from NVS
-	setRegisteredDeviceIds(reg_device_ids);
 
 	nvs_handle_t nvs_handler;
 	if(nvs_open("storage", NVS_READWRITE, &nvs_handler) != ESP_OK)

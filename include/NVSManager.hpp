@@ -9,12 +9,16 @@
 #include <nvs_flash.h>
 #include <string>
 #include <vector>
+#include <set>
+#include <map>
 
 class NVSManager
 {
 private:
 	nvs_handle_t nvs_handler;
 	esp_err_t err;
+	std::set<std::string> registeredDeviceIds;
+	std::vector<std::pair<std::string, std::string>> registeredDevices;
 	std::array<std::string*, 8> fields;
 	std::string wifi_ssid;
 	std::string wifi_password;

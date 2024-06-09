@@ -61,6 +61,8 @@ void MainApp::setup()
 	{
 		config.readConfig();
 		setupMQTT();
+		wifiManager.initialiseWiFi();
+		mqttManager.connectToMQTT();
 	}
 	else
 	{

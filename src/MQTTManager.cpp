@@ -1,5 +1,6 @@
 // Path: src/MQTTManager.cpp
 
+
 #include <MQTTManager.hpp>
 
 // Constructor
@@ -29,7 +30,8 @@ void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
 
 	if(mqttclient->publish(keep_alive_topic.c_str(), kv_string.c_str()))
 	{
-		Logger::log(INFO,GREEN "Keep-alive message published successfully: " + kv_string + RESET_COLOR);
+		Logger::log(INFO,
+					GREEN "Keep-alive message published successfully: " + kv_string + RESET_COLOR);
 	}
 	else
 	{
@@ -40,7 +42,7 @@ void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
 void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int length)
 {
 	String topicStr = String(topic);
-    std::string payloadStr(reinterpret_cast<char*>(payload), length);
+	std::string payloadStr(reinterpret_cast<char*>(payload), length);
 
 	Logger::log(INFO, GREEN "Message arrived [" + topicStr + "]" RESET_COLOR);
 	Logger::log(INFO, GREEN "Payload: " + payloadStr + RESET_COLOR);
@@ -61,6 +63,9 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 		std::map<std::string, std::string> kv_map = utils->convertToKVMap(payloadStr.c_str());
 		std::string device_id = kv_map["DEVICE_ID"];
 		std::string channel_number = kv_map["CHANNEL_NUMBER"];
+
+		Logger::log(DEBUG, GREEN "Device ID: " + device_id + RESET_COLOR);
+		Logger::log(DEBUG, GREEN "Channel Number: " + channel_number + RESET_COLOR);
 
 		// Register the device
 		if(config->registerNewDevice(device_id, channel_number))
