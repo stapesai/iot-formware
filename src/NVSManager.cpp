@@ -263,9 +263,7 @@ std::string NVSManager::getChannelNumber(const std::string& device_id)
 	esp_err_t err = nvs_get_str(nvs_handler, device_id.c_str(), nullptr, &required_size);
 	if(err != ESP_OK)
 	{
-		Logger::log(ERROR,
-					RED "Error reading size for key '%s'\n" + device_id + RESET_COLOR +
-						esp_err_to_name(err));
+		Logger::log(ERROR, RED "Error reading size for key '%s'\n" + device_id + RESET_COLOR + esp_err_to_name(err));
 		nvs_close(nvs_handler);
 		return ""; // Return empty string if key size read fails
 	}
@@ -291,11 +289,28 @@ std::string NVSManager::getChannelNumber(const std::string& device_id)
 	}
 	else
 	{
-		Logger::log(ERROR,
-					RED "Error reading value for key '%s': %s\n" + device_id + RESET_COLOR +
-						esp_err_to_name(err));
+		Logger::log(ERROR, RED "Error reading value for key '%s': %s\n" + device_id + RESET_COLOR + esp_err_to_name(err));
 		free(value); // Free allocated memory
 		nvs_close(nvs_handler);
 		return ""; // Return empty string if value read fails
 	}
+}
+
+bool NVSManager::controlDevice(const std::string& device_id, const std::string& target_state)
+{
+	// Check both device_id and target_state are not empty
+	if(device_id.empty() || target_state.empty())
+	{
+		Logger::log(ERROR, RED "Device ID or target state is empty" RESET_COLOR);
+		return false;
+	}
+
+	// Control the device
+	// For now, just print the device_id and target_state
+	// TODO: Implement actual device control
+	Logger::log(INFO, GREEN "Device ID: " + device_id + RESET_COLOR);
+	Logger::log(INFO, GREEN "Target State: " + target_state + RESET_COLOR);
+
+	// Return true if control is successful
+	return true;
 }

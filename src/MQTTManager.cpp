@@ -95,6 +95,40 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 			Logger::log(ERROR, RED "Failed to unregister Device ID: " + device_id + RESET_COLOR);
 		}
 	}
+
+	// Check if the topic is a device control request
+	if(topicStr.endsWith("/control"))
+	{
+		// Parse the topic to get the device id
+		std::vector<std::string> topic_parts = utils->splitString(topicStr.c_str(), '/');
+		std::string device_id = topic_parts[topic_parts.size() - 2];
+
+		// Parse the payload to get the control command
+		std::map<std::string, std::string> kv_map = utils->convertToKVMap(payloadStr.c_str());
+		std::string target_state = kv_map["STATE"];
+
+		Logger::log(DEBUG, GREEN "Device ID: " + device_id + RESET_COLOR);
+		Logger::log(DEBUG, GREEN "Target State: " + target_state + RESET_COLOR);
+
+		// Check if the target state is valid (0 or 1)
+		if(target_state == "0" || target_state == "1")
+		{
+			// Control the device
+			if(config->controlDevice(device_id, target_state))
+			{
+				Logger::log(INFO, GREEN "Device controlled successfully: " + device_id + RESET_COLOR);
+				mqttclient->publish(("user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac + "/device/" + device_id + "/state").c_str(), target_state.c_str());
+			}
+			else
+			{
+				Logger::log(ERROR, RED "Failed to control Device ID: " + device_id + RESET_COLOR);
+			}
+		}
+		else
+		{
+			Logger::log(ERROR, RED "Invalid target state: " + target_state + RESET_COLOR);
+		}
+	}
 };
 
 void MQTTManager::initializeMQTT()

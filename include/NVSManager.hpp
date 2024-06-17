@@ -95,7 +95,8 @@ public:
 
 	bool registerNewDevice(const std::string& device_id, const std::string& channel_number);
 	bool unregisterDevice(const std::string& device_id);
-    std::string getChannelNumber(const std::string& device_id);
+	std::string getChannelNumber(const std::string& device_id);
+	bool controlDevice(const std::string& device_id, const std::string& target_state);
 
 	static void resetNVS();
 	bool isNVSEmpty();
