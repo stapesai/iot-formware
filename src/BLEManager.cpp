@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+
 // Path: src/BLEManager.cpp
 // TODO: Add BLE security, Make device only visible to `JarvisHome` app.
 
