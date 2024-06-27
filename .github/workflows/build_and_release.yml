@@ -33,6 +33,14 @@ jobs:
         id: build-firmware-esp32
         run: platformio run -e esp32
 
+      - name: Merge Binaries for ESP32
+        id: merge-binaries-esp32
+        run: |
+          esptool.py --chip esp32 merge_bin -o main.bin --flash_mode dio --flash_freq 40m --flash_size 4MB \
+          0x1000 .pio/build/esp32/bootloader.bin \
+          0x8000 .pio/build/esp32/partitions.bin \
+          0x10000 .pio/build/esp32/firmware.bin
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -41,6 +49,12 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
+          body: |
+            ## Flashing Instructions
+            To flash the firmware to your ESP32 device, use the following command:
+            ```
+            python3 -m esptool --chip esp32 write_flash 0x1000 main.bin
+            ```
           draft: false
           prerelease: false
 
@@ -55,13 +69,13 @@ jobs:
       #     asset_name: firmware-esp8266.bin
       #     asset_content_type: application/octet-stream
 
-      - name: Upload Firmware for ESP32
+      - name: Upload Merged Firmware for ESP32
         id: upload-firmware-esp32
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: .pio/build/esp32/firmware.bin
+          asset_path: main.bin
           asset_name: firmware-esp32.bin
           asset_content_type: application/octet-stream
