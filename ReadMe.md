@@ -57,14 +57,14 @@ python -m esptool ...
 ## Base Topic
 
 ```plaintext
-user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
+user/{{user_id}}/node/{{node_id}}/
 ```
 
 ## Keep Alive
 
 ### Request Keep Alive
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/keepalive/request`
+- **Topic:** `user/{{user_id}}/node/{{node_id}}/keepalive/request`
 - **Payload:**
 
   ```plaintext
@@ -73,7 +73,7 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 
 ### Keep Alive Response
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/keepalive`
+- **Topic:** `user/{{user_id}}/node/{{node_id}}/keepalive`
 - **Payload:**
 
   ```plaintext
@@ -84,7 +84,7 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 
 ### Register Device Request
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/registration/request`
+- **Topic:** `user/{{user_id}}/node/{{node_id}}/device/registration/request`
 - **Payload:**
 
   ```plaintext
@@ -93,7 +93,7 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 
 ### Register Device Response (if success, else no response)
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/{{device_id}}/state`
+- **Topic:** `user/{{user_id}}/node/{{node_id}}/device/{{device_id}}/state`
 - **Payload:**
 
   ```plaintext
@@ -104,7 +104,7 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 
 ### Unregister Device Request
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/unregistration/request`
+- **Topic:** `user/{{user_id}}/node/{{node_id}}/device/unregistration/request`
 - **Payload:**
 
   ```plaintext
@@ -113,7 +113,7 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 
 ### Unregister Device Response (if success, else no response)
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/{{device_id}}/state`
+- **Topic:** `user/{{user_id}}/node/{{node_id}}/device/{{device_id}}/state`
 - **Payload:**
 
   ```plaintext
@@ -124,7 +124,7 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 
 ### Control Device
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/{{device_id}}/control`
+- **Topic:** `user/{{user_id}}/node/{{node_id}}/device/{{device_id}}/control`
 - **Payload:**
 
   ```plaintext
@@ -133,7 +133,7 @@ user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/
 
 ### Device State Reporting
 
-- **Topic:** `user/{{user_id}}/home/{{home_id}}/node/{{node_id}}/device/{{device_id}}/state`
+- **Topic:** `user/{{user_id}}/node/{{node_id}}/device/{{device_id}}/state`
 - **Payload:**
 
   ```plaintext

@@ -12,11 +12,11 @@ MQTTManager::MQTTManager(PubSubClient* client, NVSManager* config, Utils* utils)
 	, config(config)
 	, mqtt_broker(&config->getMQTTBroker())
 	, mqtt_port(&config->getMQTTPort())
+	, mqtt_username(&config->getMQTTUsername())
 	, mqtt_password(&config->getMQTTPassword())
 	, user_id(&config->getUserId())
-	, home_id(&config->getHomeId())
 	, node_mac(utils->getMacAddr())
-	, keep_alive_topic("user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac + "/keepalive")
+	, keep_alive_topic("user/" + *user_id + "/node/" + node_mac + "/keepalive")
 { }
 
 void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
@@ -70,8 +70,8 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 		if(config->registerNewDevice(device_id, channel_number))
 		{
 			Logger::log(INFO, GREEN "Device registered successfully: " + device_id + RESET_COLOR);
-			mqttclient->subscribe(("user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac + "/device/" + device_id + "/control").c_str());
-			mqttclient->publish(("user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac + "/device/" + device_id + "/register").c_str(), "REGISTERED");
+			mqttclient->subscribe(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/control").c_str());
+			mqttclient->publish(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/register").c_str(), "REGISTERED");
 		}
 		else
 		{
@@ -90,8 +90,8 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 		if(config->unregisterDevice(device_id))
 		{
 			Logger::log(INFO, GREEN "Device unregistered successfully: " + device_id + RESET_COLOR);
-			mqttclient->unsubscribe(("user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac + "/device/" + device_id + "/control").c_str());
-			mqttclient->publish(("user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac + "/device/" + device_id + "/unregister").c_str(), "UNREGISTERED");
+			mqttclient->unsubscribe(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/control").c_str());
+			mqttclient->publish(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/unregister").c_str(), "UNREGISTERED");
 		}
 		else
 		{
@@ -120,7 +120,7 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 			if(config->controlDevice(device_id, target_state))
 			{
 				Logger::log(INFO, GREEN "Device controlled successfully: " + device_id + RESET_COLOR);
-				mqttclient->publish(("user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac + "/device/" + device_id + "/state").c_str(), target_state.c_str());
+				mqttclient->publish(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/state").c_str(), target_state.c_str());
 			}
 			else
 			{
@@ -146,29 +146,29 @@ void MQTTManager::connectToMQTT()
 {
 	Logger::log(INFO, YELLOW "Connecting to MQTT Broker" RESET_COLOR);
 
-	if(mqttclient->connect(node_mac.c_str(), node_mac.c_str(), mqtt_password->c_str()))
+	if(mqttclient->connect(node_mac.c_str(), mqtt_username->c_str(), mqtt_password->c_str()))
 	{
 		Logger::log(INFO, GREEN "Connected to MQTT Broker" RESET_COLOR);
 
 		// Subscribe to topics
-		// 1. Keep alive request topic (user/<user_id>/home/<home_id>/node/<node_id>/keepalive/request)
-		const std::string keep_alive_request_topic = "user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac + "/keepalive/request";
+		// 1. Keep alive request topic (user/<user_id>/node/<node_id>/keepalive/request)
+		const std::string keep_alive_request_topic = "user/" + *user_id + "/node/" + node_mac + "/keepalive/request";
 		mqttclient->subscribe(keep_alive_request_topic.c_str());
 		Logger::log(INFO, BLUE "Subscribed to topic: " + keep_alive_request_topic + RESET_COLOR);
 
-		// 2. Device registration request topic (user/<user_id>/home/<home_id>/node/<node_id>/device/register/request)
-		const std::string device_registration_request_topic = "user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac + "/device/register/request";
+		// 2. Device registration request topic (user/<user_id>/node/<node_id>/device/register/request)
+		const std::string device_registration_request_topic = "user/" + *user_id + "/node/" + node_mac + "/device/register/request";
 		mqttclient->subscribe(device_registration_request_topic.c_str());
 		Logger::log(INFO, BLUE "Subscribed to topic: " + device_registration_request_topic + RESET_COLOR);
 
-		// 3. Device unregistration request topic (user/<user_id>/home/<home_id>/node/<node_id>/device/unregister/request)
-		const std::string device_unregistration_request_topic = "user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac + "/device/unregister/request";
+		// 3. Device unregistration request topic (user/<user_id>/node/<node_id>/device/unregister/request)
+		const std::string device_unregistration_request_topic = "user/" + *user_id + "/node/" + node_mac + "/device/unregister/request";
 		mqttclient->subscribe(device_unregistration_request_topic.c_str());
 		Logger::log(INFO, BLUE "Subscribed to topic: " + device_unregistration_request_topic + RESET_COLOR);
 
-		// 4. Device control request topic (user/<user_id>/home/<home_id>/node/<node_id>/device/<device_id>/control/request)
+		// 4. Device control request topic (user/<user_id>/node/<node_id>/device/<device_id>/control/request)
 		// We get registered device ids from the NVS `REG_DEVICE_IDS` key (it can also be null) (`;` separated)
-		const std::string device_control_request_topic = "user/" + *user_id + "/home/" + *home_id + "/node/" + node_mac + "/device/" + "+" + "/control";
+		const std::string device_control_request_topic = "user/" + *user_id + "/node/" + node_mac + "/device/" + "+" + "/control";
 		mqttclient->subscribe(device_control_request_topic.c_str());
 		Logger::log(INFO, BLUE "Subscribed to topic: " + device_control_request_topic + RESET_COLOR);
 	}
@@ -176,6 +176,7 @@ void MQTTManager::connectToMQTT()
 	{
 		Logger::log(DEBUG, YELLOW "MQTT Broker: " + String(mqtt_broker->c_str()) + ":" + String(mqtt_port->c_str()) + RESET_COLOR);
 		Logger::log(DEBUG, YELLOW "MQTT Client ID: " + String(node_mac.c_str()) + RESET_COLOR);
+		Logger::log(DEBUG, YELLOW "MQTT Username: " + String(mqtt_username->c_str()) + RESET_COLOR);
 		Logger::log(DEBUG, YELLOW "MQTT Password: " + String(mqtt_password->c_str()) + RESET_COLOR);
 		Logger::log(WARN, ORANGE "MQTT connection failed" RESET_COLOR);
 		Logger::log(ERROR, RED "Error code: " + String(mqttclient->state()) + RESET_COLOR);

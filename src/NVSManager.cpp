@@ -12,7 +12,7 @@
 // Constructor
 NVSManager::NVSManager()
 {
-	fields = {&wifi_ssid, &wifi_password, &mqtt_broker, &mqtt_port, &mqtt_password, &user_id, &home_id};
+	fields = {&wifi_ssid, &wifi_password, &mqtt_broker, &mqtt_port, &mqtt_username, &mqtt_password, &user_id};
 }
 
 // Interrupt handler to reset the module

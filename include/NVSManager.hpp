@@ -27,11 +27,11 @@ private:
 	std::string wifi_password;
 	std::string mqtt_broker;
 	std::string mqtt_port;
+	std::string mqtt_username;
 	std::string mqtt_password;
 	std::string user_id;
-	std::string home_id;
 
-	const char* keys[8] = {"WIFI_SSID", "WIFI_PASSWORD", "MQTT_BROKER", "MQTT_PORT", "MQTT_PASSWORD", "USER_ID", "HOME_ID"};
+	const char* keys[8] = {"WIFI_SSID", "WIFI_PASSWORD", "MQTT_BROKER", "MQTT_PORT", "MQTT_USERNAME", "MQTT_PASSWORD", "USER_ID"};
 
 public:
 	NVSManager();
@@ -53,6 +53,10 @@ public:
 	{
 		return mqtt_port;
 	}
+	const std::string& getMQTTUsername() const
+	{
+		return mqtt_username;
+	}
 	const std::string& getMQTTPassword() const
 	{
 		return mqtt_password;
@@ -60,10 +64,6 @@ public:
 	const std::string& getUserId() const
 	{
 		return user_id;
-	}
-	const std::string& getHomeId() const
-	{
-		return home_id;
 	}
 
 	// Setter methods
@@ -83,6 +83,10 @@ public:
 	{
 		mqtt_port = value;
 	}
+	void setMQTTUsername(const std::string& value)
+	{
+		mqtt_username = value;
+	}
 	void setMQTTPassword(const std::string& value)
 	{
 		mqtt_password = value;
@@ -90,10 +94,6 @@ public:
 	void setUserId(const std::string& value)
 	{
 		user_id = value;
-	}
-	void setHomeId(const std::string& value)
-	{
-		home_id = value;
 	}
 
 	bool registerNewDevice(const std::string& device_id, const std::string& channel_number);

@@ -27,9 +27,9 @@ private:
 	Utils* utils;
 	const std::string* mqtt_broker;
 	const std::string* mqtt_port;
+	const std::string* mqtt_username;
 	const std::string* mqtt_password;
 	const std::string* user_id;
-	const std::string* home_id;
 	const std::string node_mac;
 	const std::string keep_alive_topic;
 };

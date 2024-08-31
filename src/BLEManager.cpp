@@ -15,15 +15,43 @@ BLEManager::BLEManager(NVSManager& config, Utils& utils)
 	, utils(utils)
 	, pServer(nullptr)
 	, pService(nullptr)
-	, pCharacteristic(nullptr)
+	, pConfigCharacteristic(nullptr)
+	, pVersionCharacteristic(nullptr)
 	, pAdvertising(nullptr)
 { }
 
 void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 {
+	if(pCharacteristic->getUUID().toString() == CONFIG_CHARACTERISTIC_UUID)
+	{
+		handleConfigWrite(pCharacteristic);
+	}
+}
+
+void BLEManager::onRead(BLECharacteristic* pCharacteristic)
+{
+	if(pCharacteristic->getUUID().toString() == VERSION_CHARACTERISTIC_UUID)
+	{
+		handleVersionRead(pCharacteristic);
+	}
+}
+
+void BLEManager::onConnect(BLEServer* pServer)
+{
+	Logger::log(INFO, GREEN "Client connected" RESET_COLOR);
+}
+
+void BLEManager::onDisconnect(BLEServer* pServer)
+{
+	Logger::log(INFO, YELLOW "Client disconnected" RESET_COLOR);
+	pAdvertising->start();
+}
+
+void BLEManager::handleConfigWrite(BLECharacteristic* pCharacteristic)
+{
 	// Parse the characteristic value
 	std::string value = pCharacteristic->getValue();
-	Logger::log(INFO, GREEN "Received value: " RESET_COLOR + value);
+	Logger::log(INFO, GREEN "Received configuration: " RESET_COLOR + value);
 
 	// Parse the key-value pairs
 	std::map<std::string, std::string> kv_map = utils.convertToKVMap(value);
@@ -34,9 +62,9 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 																					{"WIFI_PASSWORD", [this](const std::string& v) { config.setWiFiPassword(v); }},
 																					{"MQTT_BROKER", [this](const std::string& v) { config.setMQTTBroker(v); }},
 																					{"MQTT_PORT", [this](const std::string& v) { config.setMQTTPort(v); }},
+																					{"MQTT_USERNAME", [this](const std::string& v) { config.setMQTTUsername(v); }},
 																					{"MQTT_PASSWORD", [this](const std::string& v) { config.setMQTTPassword(v); }},
-																					{"USER_ID", [this](const std::string& v) { config.setUserId(v); }},
-																					{"HOME_ID", [this](const std::string& v) { config.setHomeId(v); }}};
+																					{"USER_ID", [this](const std::string& v) { config.setUserId(v); }}};
 
 	// Check if all required keys are present
 	bool allKeysPresent = true;
@@ -66,6 +94,9 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 		config.writeConfig();
 		Logger::log(INFO, GREEN "Configuration written to NVS." RESET_COLOR);
 
+		// Stop advertising
+		pAdvertising->stop();
+
 		// Restart the ESP32
 		utils.restartDevice(1000);
 	}
@@ -78,15 +109,30 @@ void BLEManager::onWrite(BLECharacteristic* pCharacteristic)
 	}
 }
 
+void BLEManager::handleVersionRead(BLECharacteristic* pCharacteristic)
+{
+	std::string versionInfo = "HARDWARE_CHIP=" + std::string(HARDWARE_CHIP) + ";HARDWARE_MAC_ADDRESS=" + utils.getMacAddr() +
+							  ";HARDWARE_VERSION=" + std::string(HARDWARE_VERSION) + ";FIRMWARE_VERSION=" + std::string(FIRMWARE_VERSION);
+	pCharacteristic->setValue(versionInfo);
+	Logger::log(INFO, GREEN "Sent version info: " + String(versionInfo.c_str()) + RESET_COLOR);
+}
+
 void BLEManager::initializeBLE()
 {
 	// Initialize BLE
 	std::string deviceName = BLE_DEVICE_NAME + utils.getMacAddr();
 	BLEDevice::init(deviceName.c_str());
 	pServer = BLEDevice::createServer();
+	pServer->setCallbacks(this);
 	pService = pServer->createService(SERVICE_UUID);
-	pCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE);
-	pCharacteristic->setCallbacks(this);
+
+	// Create configuration characteristic
+	pConfigCharacteristic = pService->createCharacteristic(CONFIG_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_WRITE_NR);
+	pConfigCharacteristic->setCallbacks(this);
+
+	// Create version characteristic
+	pVersionCharacteristic = pService->createCharacteristic(VERSION_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ);
+	pVersionCharacteristic->setCallbacks(this);
 
 	// Implement security: require bonding, MITM protection, etc.
 	BLESecurity* pSecurity = new BLESecurity();
