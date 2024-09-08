@@ -96,11 +96,7 @@ public:
 		user_id = value;
 	}
 
-	bool registerNewDevice(const std::string& device_id, uint8_t channel_number);
-	bool unregisterDevice(const std::string& device_id);
-	std::string getChannelNumber(const std::string& device_id);
-	bool controlDevice(const std::string& device_id, bool target_state);
-
+	bool controlChannel(const std::string& channel_id, bool target_state);
 	static void resetNVS();
 	bool isNVSEmpty();
 	void writeConfig();

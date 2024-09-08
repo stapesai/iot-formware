@@ -55,75 +55,44 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 		Logger::log(INFO, GREEN "Keep alive request received" RESET_COLOR);
 	}
 
-	// Check if the topic is a device registration request
-	if(topicStr.endsWith("/device/register/request"))
-	{
-		// Parse the payload to get the device id
-		std::map<std::string, std::string> kv_map = utils->convertToKVMap(payloadStr.c_str());
-		std::string device_id = kv_map["DEVICE_ID"];
-		uint8_t channel_number = std::stoi(kv_map["CHANNEL_NUMBER"]);
-
-		Logger::log(DEBUG, GREEN "Device ID: " + device_id + RESET_COLOR);
-		Logger::log(DEBUG, GREEN "Channel Number: " + String(channel_number) + RESET_COLOR);
-
-		// Register the device
-		if(config->registerNewDevice(device_id, channel_number))
-		{
-			Logger::log(INFO, GREEN "Device registered successfully: " + device_id + RESET_COLOR);
-			mqttclient->subscribe(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/control").c_str());
-			mqttclient->publish(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/register").c_str(), "REGISTERED");
-		}
-		else
-		{
-			Logger::log(ERROR, RED "Failed to register Device Id: " + device_id + RESET_COLOR);
-		}
-	}
-
-	// Check if the topic is a device unregistration request
-	if(topicStr.endsWith("/device/unregister/request"))
-	{
-		// Parse the payload to get the device id
-		std::map<std::string, std::string> kv_map = utils->convertToKVMap(payloadStr.c_str());
-		std::string device_id = kv_map["DEVICE_ID"];
-
-		// Unregister the device
-		if(config->unregisterDevice(device_id))
-		{
-			Logger::log(INFO, GREEN "Device unregistered successfully: " + device_id + RESET_COLOR);
-			mqttclient->unsubscribe(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/control").c_str());
-			mqttclient->publish(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/unregister").c_str(), "UNREGISTERED");
-		}
-		else
-		{
-			Logger::log(ERROR, RED "Failed to unregister Device ID: " + device_id + RESET_COLOR);
-		}
-	}
-
-	// Check if the topic is a device control request
+	// Check if the topic is a channel control request
 	if(topicStr.endsWith("/control"))
 	{
-		// Parse the topic to get the device id
 		std::vector<std::string> topic_parts = utils->splitString(topicStr.c_str(), '/');
-		std::string device_id = topic_parts[topic_parts.size() - 2];
+		std::string channel_id = topic_parts[topic_parts.size() - 2];
 
-		// Parse the payload to get the control command
 		std::map<std::string, std::string> kv_map = utils->convertToKVMap(payloadStr.c_str());
 		bool target_state = (kv_map["STATE"] == "1" || kv_map["STATE"] == "ON");
 
-		Logger::log(DEBUG, GREEN "Device ID: " + device_id + RESET_COLOR);
+		Logger::log(DEBUG, GREEN "Channel ID: " + channel_id + RESET_COLOR);
 		Logger::log(DEBUG, GREEN "Target State: " + String(target_state) + RESET_COLOR);
 
-		if(config->controlDevice(device_id, target_state))
+		if(config->controlChannel(channel_id, target_state))
 		{
-			Logger::log(INFO, GREEN "Device controlled successfully: " + device_id + RESET_COLOR);
-			mqttclient->publish(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/state").c_str(), target_state ? "ON" : "OFF");
+			Logger::log(INFO, GREEN "Channel controlled successfully: " + channel_id + RESET_COLOR);
+			publishChannelState(channel_id, target_state);
 		}
 		else
 		{
-			Logger::log(ERROR, RED "Failed to control Device ID: " + device_id + RESET_COLOR);
+			Logger::log(ERROR, RED "Failed to control Channel ID: " + channel_id + RESET_COLOR);
 		}
 	}
-};
+}
+
+void MQTTManager::publishChannelState(const std::string& channel_id, bool state)
+{
+	std::string topic = "user/" + *user_id + "/node/" + node_mac + "/channel/" + channel_id + "/state";
+	std::string payload = state ? "ON" : "OFF";
+
+	if(mqttclient->publish(topic.c_str(), payload.c_str()))
+	{
+		Logger::log(INFO, GREEN "Channel state published successfully: " + channel_id + " - " + payload + RESET_COLOR);
+	}
+	else
+	{
+		Logger::log(ERROR, RED "Failed to publish channel state: " + channel_id + RESET_COLOR);
+	}
+}
 
 void MQTTManager::initializeMQTT()
 {
