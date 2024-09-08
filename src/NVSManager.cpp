@@ -5,6 +5,7 @@
 
 #include <Arduino.h>
 #include <Constants.hpp>
+#include <ChannelMap.hpp>
 #include <Logger.hpp>
 #include <NVSManager.hpp>
 #include <Utils.hpp>
