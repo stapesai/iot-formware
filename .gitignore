@@ -5,6 +5,5 @@ temp*
 **/.DS_Store
 generated_ble_qr_code.png
 .env
-get_prompt.py
 prompt.txt
 **/~**

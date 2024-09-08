@@ -3,6 +3,8 @@
 
 // Path: include/Constants.hpp
 
+#include <map>
+
 #ifndef CONSTANTS_HPP
 #define CONSTANTS_HPP
 #define STATUS_BUZZER 27
@@ -37,5 +39,24 @@
 #define BG_CYAN "\x1B[46m"
 #define BG_WHITE "\x1B[47m"
 #define BG_ORANGE "\x1B[48;5;208m"
+
+struct ChannelPins {
+    uint8_t inputPin;
+    uint8_t outputPin;
+};
+
+std::map<uint8_t, ChannelPins> channelMap = {
+    {1, {3, 4}},
+    {2, {5, 16}},
+    {3, {12, 17}},
+    {4, {14, 18}},
+    {5, {15, 19}},
+    {6, {32, 21}},
+    {7, {33, 22}},
+    {8, {34, 23}},
+    {9, {35, 25}},
+    {10, {36, 26}},
+    {11, {39, 27}}
+};
 
 #endif // CONSTANTS_HPP

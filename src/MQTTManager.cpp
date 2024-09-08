@@ -61,10 +61,10 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 		// Parse the payload to get the device id
 		std::map<std::string, std::string> kv_map = utils->convertToKVMap(payloadStr.c_str());
 		std::string device_id = kv_map["DEVICE_ID"];
-		std::string channel_number = kv_map["CHANNEL_NUMBER"];
+		uint8_t channel_number = std::stoi(kv_map["CHANNEL_NUMBER"]);
 
 		Logger::log(DEBUG, GREEN "Device ID: " + device_id + RESET_COLOR);
-		Logger::log(DEBUG, GREEN "Channel Number: " + channel_number + RESET_COLOR);
+		Logger::log(DEBUG, GREEN "Channel Number: " + String(channel_number) + RESET_COLOR);
 
 		// Register the device
 		if(config->registerNewDevice(device_id, channel_number))
@@ -108,28 +108,19 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 
 		// Parse the payload to get the control command
 		std::map<std::string, std::string> kv_map = utils->convertToKVMap(payloadStr.c_str());
-		std::string target_state = kv_map["STATE"];
+		bool target_state = (kv_map["STATE"] == "1" || kv_map["STATE"] == "ON");
 
 		Logger::log(DEBUG, GREEN "Device ID: " + device_id + RESET_COLOR);
-		Logger::log(DEBUG, GREEN "Target State: " + target_state + RESET_COLOR);
+		Logger::log(DEBUG, GREEN "Target State: " + String(target_state) + RESET_COLOR);
 
-		// Check if the target state is valid (0 or 1)
-		if(target_state == "0" || target_state == "1")
+		if(config->controlDevice(device_id, target_state))
 		{
-			// Control the device
-			if(config->controlDevice(device_id, target_state))
-			{
-				Logger::log(INFO, GREEN "Device controlled successfully: " + device_id + RESET_COLOR);
-				mqttclient->publish(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/state").c_str(), target_state.c_str());
-			}
-			else
-			{
-				Logger::log(ERROR, RED "Failed to control Device ID: " + device_id + RESET_COLOR);
-			}
+			Logger::log(INFO, GREEN "Device controlled successfully: " + device_id + RESET_COLOR);
+			mqttclient->publish(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/state").c_str(), target_state ? "ON" : "OFF");
 		}
 		else
 		{
-			Logger::log(ERROR, RED "Invalid target state: " + target_state + RESET_COLOR);
+			Logger::log(ERROR, RED "Failed to control Device ID: " + device_id + RESET_COLOR);
 		}
 	}
 };

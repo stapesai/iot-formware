@@ -24,6 +24,8 @@ private:
 	void setupBLE();
 	void setupMQTT();
 	void checkWiFiAndMQTT(unsigned long);
+	void initializeGPIO();
+	void handleButtons();
 
 	bool isConfigured;
 	unsigned long previousMillisWiFi;
@@ -73,12 +75,55 @@ void MainApp::setup()
 	}
 }
 
+void MainApp::initializeGPIO()
+{
+	for(const auto& channel : channelMap)
+	{
+		pinMode(channel.second.inputPin, INPUT_PULLUP);
+		pinMode(channel.second.outputPin, OUTPUT);
+		digitalWrite(channel.second.outputPin, LOW);
+	}
+	Logger::log(INFO, GREEN "GPIO pins initialized" RESET_COLOR);
+}
+
+// void MainApp::handleButtons() {
+//     static unsigned long lastDebounceTime[12] = {0};
+//     static int lastButtonState[12] = {HIGH};
+//     const unsigned long debounceDelay = 50;
+
+//     for (const auto& channel : channelMap) {
+//         int reading = digitalRead(channel.second.inputPin);
+
+//         if (reading != lastButtonState[channel.first]) {
+//             lastDebounceTime[channel.first] = millis();
+//         }
+
+//         if ((millis() - lastDebounceTime[channel.first]) > debounceDelay) {
+//             if (reading == LOW) {
+//                 bool newState = !digitalRead(channel.second.outputPin);
+//                 digitalWrite(channel.second.outputPin, newState);
+
+//                 std::string device_id = "device_" + std::to_string(channel.first);
+//                 mqttManager.mqttclient->publish(
+//                     ("user/" + config.getUserId() + "/node/" + utils.getMacAddr() + "/device/" + device_id + "/state").c_str(),
+//                     newState ? "ON" : "OFF"
+//                 );
+
+//                 Logger::log(INFO, GREEN "Button pressed: Channel " + std::to_string(channel.first) + " set to " + (newState ? "ON" : "OFF") + RESET_COLOR);
+//             }
+//         }
+
+//         lastButtonState[channel.first] = reading;
+//     }
+// }
+
 void MainApp::setupPins()
 {
 	pinMode(STATUS_BUZZER, OUTPUT);
 	pinMode(RESET_LED, OUTPUT);
 	pinMode(NVS_RESET_PIN, INPUT);
 	attachInterrupt(NVS_RESET_PIN, config.resetNVS, FALLING);
+	initializeGPIO();
 }
 
 void MainApp::setupNVS()
