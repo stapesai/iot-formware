@@ -1,3 +1,8 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+
+// Path: include/BLEManager.hpp
+
 #ifndef BLE_MANGER_HPP
 #define BLE_MANGER_HPP
 
