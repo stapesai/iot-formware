@@ -116,21 +116,10 @@ void MQTTManager::connectToMQTT()
 		mqttclient->subscribe(keep_alive_request_topic.c_str());
 		Logger::log(INFO, BLUE "Subscribed to topic: " + keep_alive_request_topic + RESET_COLOR);
 
-		// 2. Device registration request topic (user/<user_id>/node/<node_id>/device/register/request)
-		const std::string device_registration_request_topic = "user/" + *user_id + "/node/" + node_mac + "/device/register/request";
-		mqttclient->subscribe(device_registration_request_topic.c_str());
-		Logger::log(INFO, BLUE "Subscribed to topic: " + device_registration_request_topic + RESET_COLOR);
-
-		// 3. Device unregistration request topic (user/<user_id>/node/<node_id>/device/unregister/request)
-		const std::string device_unregistration_request_topic = "user/" + *user_id + "/node/" + node_mac + "/device/unregister/request";
-		mqttclient->subscribe(device_unregistration_request_topic.c_str());
-		Logger::log(INFO, BLUE "Subscribed to topic: " + device_unregistration_request_topic + RESET_COLOR);
-
-		// 4. Device control request topic (user/<user_id>/node/<node_id>/device/<device_id>/control/request)
-		// We get registered device ids from the NVS `REG_DEVICE_IDS` key (it can also be null) (`;` separated)
-		const std::string device_control_request_topic = "user/" + *user_id + "/node/" + node_mac + "/device/" + "+" + "/control";
-		mqttclient->subscribe(device_control_request_topic.c_str());
-		Logger::log(INFO, BLUE "Subscribed to topic: " + device_control_request_topic + RESET_COLOR);
+		// 2. Channel control request topic (user/<user_id>/node/<node_id>/channel/<channel_id>/control/request)
+		const std::string channel_control_request_topic = "user/" + *user_id + "/node/" + node_mac + "/channel/" + "+" + "/control";
+		mqttclient->subscribe(channel_control_request_topic.c_str());
+		Logger::log(INFO, BLUE "Subscribed to topic: " + channel_control_request_topic + RESET_COLOR);
 	}
 	else
 	{

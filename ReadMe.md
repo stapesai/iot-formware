@@ -37,7 +37,6 @@ python -m esptool ...
 ## ESP32 Pinout
 
 ```c
-
 ```
 
 ## STATUS_BUZZER ERROR CODES

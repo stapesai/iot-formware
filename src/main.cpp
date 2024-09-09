@@ -5,8 +5,8 @@
 
 #include <Arduino.h>
 #include <BLEManager.hpp>
-#include <Constants.hpp>
 #include <ChannelMap.hpp>
+#include <Constants.hpp>
 #include <Logger.hpp>
 #include <MQTTManager.hpp>
 #include <PubSubClient.h>
@@ -92,6 +92,8 @@ void MainApp::handleButtons()
 {
 	static unsigned long lastDebounceTime[12] = {0};
 	static int lastButtonState[12] = {HIGH};
+	static int buttonState[12] = {HIGH};
+	static bool channelState[12] = {false};
 	const unsigned long debounceDelay = 50;
 
 	for(const auto& channel : channelMap)
@@ -105,18 +107,24 @@ void MainApp::handleButtons()
 
 		if((millis() - lastDebounceTime[channel.first]) > debounceDelay)
 		{
-			if(reading == LOW)
+			if(reading != buttonState[channel.first])
 			{
-				bool newState = !digitalRead(channel.second.outputPin);
-				digitalWrite(channel.second.outputPin, newState);
+				buttonState[channel.first] = reading;
 
-				if(isConfigured && mqttClient.connected())
+				if(buttonState[channel.first] == LOW)
 				{
-					std::string channel_id = "channel_" + std::to_string(channel.first);
-					mqttManager.publishChannelState(channel_id, newState);
-				}
+					bool newState = !channelState[channel.first];
+					channelState[channel.first] = newState;
+					digitalWrite(channel.second.outputPin, newState ? HIGH : LOW);
 
-				Logger::log(INFO, GREEN "Button pressed: Channel " + std::to_string(channel.first) + " set to " + (newState ? "ON" : "OFF") + RESET_COLOR);
+					if(isConfigured && mqttClient.connected())
+					{
+						std::string channel_id = "channel_" + std::to_string(channel.first);
+						mqttManager.publishChannelState(channel_id, newState);
+					}
+
+					Logger::log(INFO, GREEN "Button pressed: Channel " + std::to_string(channel.first) + " set to " + (newState ? "ON" : "OFF") + RESET_COLOR);
+				}
 			}
 		}
 
