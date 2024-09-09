@@ -119,8 +119,8 @@ void MainApp::handleButtons()
 
 					if(isConfigured && mqttClient.connected())
 					{
-						std::string channel_id = "channel_" + std::to_string(channel.first);
-						mqttManager.publishChannelState(channel_id, newState);
+						int channel_number = channel.first;
+						mqttManager.publishChannelState(channel_number, newState);
 					}
 
 					Logger::log(INFO, GREEN "Button pressed: Channel " + std::to_string(channel.first) + " set to " + (newState ? "ON" : "OFF") + RESET_COLOR);

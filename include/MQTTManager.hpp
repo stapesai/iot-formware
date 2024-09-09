@@ -20,7 +20,7 @@ public:
 	void publish_keep_alive_message(unsigned long& keep_alive_counter);
 	void initializeMQTT();
 	void connectToMQTT();
-	void publishChannelState(const std::string& channel_id, bool state);
+	void publishChannelState(int channel_number, bool state);
 
 private:
 	PubSubClient* mqttclient;

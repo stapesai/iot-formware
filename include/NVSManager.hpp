@@ -96,7 +96,7 @@ public:
 		user_id = value;
 	}
 
-	bool controlChannel(const std::string& channel_id, bool target_state);
+	bool controlChannel(int channel_number, bool target_state);
 	static void resetNVS();
 	bool isNVSEmpty();
 	void writeConfig();

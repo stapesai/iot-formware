@@ -4,8 +4,8 @@
 // Path: src/NVSManager.cpp
 
 #include <Arduino.h>
-#include <Constants.hpp>
 #include <ChannelMap.hpp>
+#include <Constants.hpp>
 #include <Logger.hpp>
 #include <NVSManager.hpp>
 #include <Utils.hpp>
@@ -158,11 +158,8 @@ void NVSManager::readConfig()
 	nvs_close(nvs_handler);
 }
 
-bool NVSManager::controlChannel(const std::string& channel_id, bool state)
+bool NVSManager::controlChannel(int channel_number, bool state)
 {
-	// Extract the channel number from the channel_id string
-	int channel_number = std::stoi(channel_id.substr(channel_id.find_last_of("_") + 1));
-
 	auto it = channelMap.find(channel_number);
 	if(it == channelMap.end())
 	{
@@ -171,6 +168,7 @@ bool NVSManager::controlChannel(const std::string& channel_id, bool state)
 	}
 
 	digitalWrite(it->second.outputPin, state ? HIGH : LOW);
-	Logger::log(INFO, GREEN "Channel " + channel_id + " (pin " + std::to_string(it->second.outputPin) + ") set to " + (state ? "ON" : "OFF") + RESET_COLOR);
+	Logger::log(INFO,
+				GREEN "Channel " + std::to_string(channel_number) + " (pin " + std::to_string(it->second.outputPin) + ") set to " + (state ? "ON" : "OFF") + RESET_COLOR);
 	return true;
 }
