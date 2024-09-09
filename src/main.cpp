@@ -1,8 +1,11 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-// Path: src/main.cpp
-
+/*
+ * @file src/main.cpp
+ * @brief This file contains the main setup() and loop() functions
+ *  for the ESP32 application.
+ */
 #include <Arduino.h>
 #include <BLEManager.hpp>
 #include <ChannelMap.hpp>
@@ -34,7 +37,7 @@ private:
 	unsigned long previousMillisMQTT;
 	unsigned long keepAliveInterval;
 	unsigned long requiredInterval;
-	unsigned long keep_alive_counter;
+	unsigned long keepAliveCounter;
 
 	Utils utils;
 	NVSManager config;
@@ -50,7 +53,7 @@ MainApp::MainApp()
 	, previousMillisMQTT(0)
 	, keepAliveInterval(50000)
 	, requiredInterval(5000)
-	, keep_alive_counter(1)
+	, keepAliveCounter(1)
 	, isConfigured(false)
 	, mqttClient(wifiClient)
 	, mqttManager(&mqttClient, &config, &utils)
@@ -144,6 +147,7 @@ void MainApp::handleButtons()
 		lastButtonState[channel.first] = reading;
 	}
 }
+
 void MainApp::setupPins()
 {
 	pinMode(STATUS_BUZZER, OUTPUT);
@@ -201,8 +205,8 @@ void MainApp::checkWiFiAndMQTT(unsigned long currentMillis)
 			{
 				previousMillisMQTT = currentMillis;
 				Logger::log(INFO, MAGENTA "Sending keep alive message" RESET_COLOR);
-				mqttManager.publish_keep_alive_message(keep_alive_counter);
-				keep_alive_counter++;
+				mqttManager.publishKeepAliveMessage(keepAliveCounter);
+				keepAliveCounter++;
 			}
 
 			// It will check for incoming messages
@@ -213,7 +217,7 @@ void MainApp::checkWiFiAndMQTT(unsigned long currentMillis)
 			if(currentMillis - previousMillisMQTT >= requiredInterval)
 			{
 				previousMillisMQTT = currentMillis;
-				keep_alive_counter = 0;
+				keepAliveCounter = 0;
 				Logger::log(WARN, ORANGE "Reconnecting to MQTT..." RESET_COLOR);
 				mqttManager.connectToMQTT();
 			}
@@ -224,7 +228,7 @@ void MainApp::checkWiFiAndMQTT(unsigned long currentMillis)
 		if(currentMillis - previousMillisWiFi >= requiredInterval)
 		{
 			previousMillisWiFi = currentMillis;
-			keep_alive_counter = 0;
+			keepAliveCounter = 0;
 			Logger::log(WARN, ORANGE "Reconnecting to WiFi..." RESET_COLOR);
 			wifiManager.initialiseWiFi();
 		}

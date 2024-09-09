@@ -1,7 +1,11 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-// Path: include/Logger.hpp
+/*
+ * @file include/Logger.hpp
+ * @brief This file defines the Logger class for logging messages
+ *  with different log levels to the serial port.
+ */
 
 #ifndef LOGGER_HPP
 #define LOGGER_HPP

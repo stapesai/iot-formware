@@ -1,18 +1,21 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-// Path: src/Utils.cpp
+/*
+ * @file src/Utils.cpp
+ * @brief  This file contains the implementation of various
+ * utility functions used throughout the project.
+ */
 
 #include <Arduino.h>
 #include <Constants.hpp>
-#include <ChannelMap.hpp>
 #include <Utils.hpp>
+
 #include <nvs.h>
 #include <nvs_flash.h>
 
 std::string Utils::getMacAddr()
 {
-
 	std::string macAddress = WiFi.macAddress().c_str();
 
 	// Replace ':' with '_'
@@ -29,39 +32,39 @@ std::string Utils::getMacAddr()
 std::map<std::string, std::string> Utils::convertToKVMap(const std::string& str)
 {
 	char delim = ';';
-	char kv_delim = '=';
+	char kvDelim = '=';
 
-	std::map<std::string, std::string> kv_map;
+	std::map<std::string, std::string> kvMap;
 	std::stringstream ss(str);
 	std::string token;
 	while(std::getline(ss, token, delim))
 	{
-		size_t pos = token.find(kv_delim);
+		size_t pos = token.find(kvDelim);
 		if(pos != std::string::npos)
 		{
 			std::string key = token.substr(0, pos);
 			std::string value = token.substr(pos + 1);
-			kv_map[key] = value;
+			kvMap[key] = value;
 		}
 	}
-	return kv_map;
+	return kvMap;
 }
 
 // Function to convert key-value pairs to a string
-std::string Utils::convertToKVString(const std::map<std::string, std::string>& kv_map)
+std::string Utils::convertToKVString(const std::map<std::string, std::string>& kvMap)
 {
 	std::stringstream ss;
-	for(const auto& pair : kv_map)
+	for(const auto& pair : kvMap)
 	{
 		ss << pair.first << "=" << pair.second << ";";
 	}
 	// Remove the trailing semicolon if there is one
-	std::string kv_string = ss.str();
-	if(!kv_string.empty() && kv_string.back() == ';')
+	std::string kvString = ss.str();
+	if(!kvString.empty() && kvString.back() == ';')
 	{
-		kv_string.pop_back();
+		kvString.pop_back();
 	}
-	return kv_string;
+	return kvString;
 }
 
 // It is used to split a string into a vector of sub-strings based on a delimiter
@@ -103,7 +106,7 @@ void Utils::printConfig(const NVSManager& config)
 
 void Utils::restartDevice(unsigned long delayTime)
 {
-	Logger::log(INFO, YELLOW "Restarting device...");
+	Logger::log(INFO, YELLOW "Restarting device..." RESET_COLOR);
 	delay(delayTime);
 	esp_restart();
 }

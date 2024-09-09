@@ -1,8 +1,11 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-// Path: include/MQTTManager.hpp
-
+/*
+ * @file include/MQTTManager.hpp
+ * @brief This file defines the MQTTManager class, which handles
+ * all communication with the MQTT broker.
+ */
 #ifndef MQTT_MANAGER_HPP
 #define MQTT_MANAGER_HPP
 
@@ -17,22 +20,22 @@ class MQTTManager
 public:
 	MQTTManager(PubSubClient* client, NVSManager* config, Utils* utils);
 	void mqttCallback(char* topic, byte* payload, unsigned short int length);
-	void publish_keep_alive_message(unsigned long& keep_alive_counter);
+	void publishKeepAliveMessage(unsigned long& keepAliveCounter);
 	void initializeMQTT();
 	void connectToMQTT();
-	void publishChannelState(int channel_number, bool state, bool retained = true);
+	void publishChannelState(int channelNumber, bool state, bool retained = true);
 
 private:
 	PubSubClient* mqttclient;
 	NVSManager* config;
 	Utils* utils;
-	const std::string* mqtt_broker;
-	const std::string* mqtt_port;
-	const std::string* mqtt_username;
-	const std::string* mqtt_password;
-	const std::string* user_id;
-	const std::string node_mac;
-	const std::string keep_alive_topic;
+	const std::string* mqttBroker;
+	const std::string* mqttPort;
+	const std::string* mqttUsername;
+	const std::string* mqttPassword;
+	const std::string* userId;
+	const std::string nodeMac;
+	const std::string keepAliveTopic;
 };
 
 #endif // MQTT_MANAGER_HPP

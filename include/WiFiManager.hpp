@@ -1,7 +1,11 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-// Path: include/WiFiManager.hpp
+/*
+ * @file include/WiFiManager.hpp
+ * @brief This file contains the declaration of the WiFiManager class, 
+ *  which handles connecting the ESP32 to a WiFi network.
+ */
 
 #ifndef WIFI_MANAGER_HPP
 #define WIFI_MANAGER_HPP

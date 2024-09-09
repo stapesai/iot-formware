@@ -1,7 +1,11 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-// Path: src/ChannelMap.cpp
+/*
+ * @file src/ChannelMap.cpp
+ * @brief This file defines the channelMap, which maps channel
+ * numbers to their corresponding input and output GPIO pins.
+ */
 
 #include <ChannelMap.hpp>
 

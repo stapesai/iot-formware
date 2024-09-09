@@ -1,8 +1,10 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-// Path: src/WiFiManager.cpp
-
+/*
+ * @file src/WiFiManager.cpp
+ * @brief This file contains the implementation of the WiFiManager class.
+ */
 #include <Logger.hpp>
 #include <WiFiManager.hpp>
 
@@ -27,7 +29,6 @@ void WiFiManager::setupWiFi()
 
 void WiFiManager::connectWiFi()
 {
-
 	Logger::log(INFO, YELLOW "Connecting to WiFi..." RESET_COLOR);
 
 	WiFi.begin(config->getWiFiSSID().c_str(), config->getWiFiPassword().c_str());
@@ -55,7 +56,6 @@ void WiFiManager::printWiFiStatus()
 {
 	if(WiFi.status() == WL_CONNECTED)
 	{
-
 		Logger::log(INFO, GREEN "WiFi connected" RESET_COLOR);
 		Logger::log(INFO, BLUE "IP Address: " RESET_COLOR + WiFi.localIP().toString());
 	}

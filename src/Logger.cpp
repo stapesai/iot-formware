@@ -1,9 +1,13 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-// Path: src/Logger.cpp
+/*
+ * @file src/Logger.cpp
+ * @brief This file contains the implementation of the Logger class.
+ */
 
 #include <Logger.hpp>
+
 String colorCode;
 String bgColorCode;
 
@@ -29,7 +33,6 @@ void Logger::log(LogLevel level, const String& message)
 }
 
 void Logger::printPrefix(LogLevel level)
-
 {
 	String logLevelStr;
 	String colorCode;

@@ -1,7 +1,12 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-// Path: include/NVSManager.hpp
+/*
+ * @file include/NVSManager.hpp
+ * @brief This file contains the declaration of the NVSManager class, 
+ *  which handles reading and writing configuration data to the 
+ *  non-volatile storage (NVS) of the ESP32.
+ */
 
 #ifndef NVS_MANAGER_HPP
 #define NVS_MANAGER_HPP
@@ -18,18 +23,16 @@
 class NVSManager
 {
 private:
-	nvs_handle_t nvs_handler;
+	nvs_handle_t nvsHandler;
 	esp_err_t err;
-	// std::set<std::string> registeredDeviceIds;
-	// std::vector<std::pair<std::string, std::string>> registeredDevices;
 	std::array<std::string*, 8> fields;
-	std::string wifi_ssid;
-	std::string wifi_password;
-	std::string mqtt_broker;
-	std::string mqtt_port;
-	std::string mqtt_username;
-	std::string mqtt_password;
-	std::string user_id;
+	std::string wifiSsid;
+	std::string wifiPassword;
+	std::string mqttBroker;
+	std::string mqttPort;
+	std::string mqttUsername;
+	std::string mqttPassword;
+	std::string userId;
 
 	// Store the current state of each channel
 	std::map<int, bool> channelStates;
@@ -42,61 +45,61 @@ public:
 	// Getter methods
 	const std::string& getWiFiSSID() const
 	{
-		return wifi_ssid;
+		return wifiSsid;
 	}
 	const std::string& getWiFiPassword() const
 	{
-		return wifi_password;
+		return wifiPassword;
 	}
 	const std::string& getMQTTBroker() const
 	{
-		return mqtt_broker;
+		return mqttBroker;
 	}
 	const std::string& getMQTTPort() const
 	{
-		return mqtt_port;
+		return mqttPort;
 	}
 	const std::string& getMQTTUsername() const
 	{
-		return mqtt_username;
+		return mqttUsername;
 	}
 	const std::string& getMQTTPassword() const
 	{
-		return mqtt_password;
+		return mqttPassword;
 	}
 	const std::string& getUserId() const
 	{
-		return user_id;
+		return userId;
 	}
 
 	// Setter methods
 	void setWiFiSSID(const std::string& value)
 	{
-		wifi_ssid = value;
+		wifiSsid = value;
 	}
 	void setWiFiPassword(const std::string& value)
 	{
-		wifi_password = value;
+		wifiPassword = value;
 	}
 	void setMQTTBroker(const std::string& value)
 	{
-		mqtt_broker = value;
+		mqttBroker = value;
 	}
 	void setMQTTPort(const std::string& value)
 	{
-		mqtt_port = value;
+		mqttPort = value;
 	}
 	void setMQTTUsername(const std::string& value)
 	{
-		mqtt_username = value;
+		mqttUsername = value;
 	}
 	void setMQTTPassword(const std::string& value)
 	{
-		mqtt_password = value;
+		mqttPassword = value;
 	}
 	void setUserId(const std::string& value)
 	{
-		user_id = value;
+		userId = value;
 	}
 
 	static void resetNVS();
@@ -106,11 +109,11 @@ public:
 	void intialiseNVS();
 
 	void saveChannelStates();
-    void loadChannelStates();
-    void updateChannelState(int channel, bool state);
-    bool getChannelState(int channel) const;
+	void loadChannelStates();
+	void updateChannelState(int channel, bool state);
+	bool getChannelState(int channel) const;
 
-	bool controlChannel(int channel_number, bool target_state);
+	bool controlChannel(int channelNumber, bool targetState);
 };
 
 #endif // NVS_MANAGER_HPP

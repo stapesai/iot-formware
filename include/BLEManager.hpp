@@ -1,8 +1,15 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-// Path: include/BLEManager.hpp
-
+/*
+ * @file include/BLEManager.hpp
+ * @brief This file contains the declaration of the BLEManager class, which handles 
+ *        Bluetooth Low Energy (BLE) communication for the device.
+ * 
+ * The BLEManager class is responsible for initializing the BLE device, advertising 
+ * services, handling client connections and disconnections, and processing read 
+ * and write requests for BLE characteristics.
+ */
 #ifndef BLE_MANGER_HPP
 #define BLE_MANGER_HPP
 

@@ -1,9 +1,10 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-// Path: src/BLEManager.cpp
-// TODO: Add BLE security, Make device only visible to `JarvisHome` app.
-
+/*
+ * @file src/BLEManager.cpp
+ * @brief This file contains the implementation of the BLEManager class.
+ */
 #include <Arduino.h>
 #include <BLEManager.hpp>
 #include <Constants.hpp>
@@ -54,8 +55,8 @@ void BLEManager::handleConfigWrite(BLECharacteristic* pCharacteristic)
 	Logger::log(INFO, GREEN "Received configuration: " RESET_COLOR + value);
 
 	// Parse the key-value pairs
-	std::map<std::string, std::string> kv_map = utils.convertToKVMap(value);
-	Logger::log(INFO, YELLOW "Number of key-value pairs: " RESET_COLOR + String(kv_map.size()));
+	std::map<std::string, std::string> kvMap = utils.convertToKVMap(value);
+	Logger::log(INFO, YELLOW "Number of key-value pairs: " RESET_COLOR + String(kvMap.size()));
 
 	// Setters for configuration parameters
 	std::map<std::string, std::function<void(const std::string&)>> configSetters = {{"WIFI_SSID", [this](const std::string& v) { config.setWiFiSSID(v); }},
@@ -70,7 +71,7 @@ void BLEManager::handleConfigWrite(BLECharacteristic* pCharacteristic)
 	bool allKeysPresent = true;
 	for(const auto& setter : configSetters)
 	{
-		if(kv_map.find(setter.first) == kv_map.end())
+		if(kvMap.find(setter.first) == kvMap.end())
 		{
 			allKeysPresent = false;
 			break;
@@ -83,7 +84,7 @@ void BLEManager::handleConfigWrite(BLECharacteristic* pCharacteristic)
 		for(const auto& setter : configSetters)
 		{
 			const std::string& key = setter.first;
-			const std::string& value = kv_map[key];
+			const std::string& value = kvMap[key];
 			Logger::log(INFO, YELLOW "Setting config parameter " + String(key.c_str()) + " to " + String(value.c_str()) + RESET_COLOR);
 			setter.second(value);
 		}
