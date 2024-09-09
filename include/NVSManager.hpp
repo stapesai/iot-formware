@@ -106,9 +106,9 @@ public:
 	void intialiseNVS();
 
 	void saveChannelStates();
-    void loadChannelStates();
-    void updateChannelState(int channel, bool state);
-    bool getChannelState(int channel) const;
+	void loadChannelStates();
+	void updateChannelState(int channel, bool state);
+	bool getChannelState(int channel) const;
 
 	bool controlChannel(int channel_number, bool target_state);
 };

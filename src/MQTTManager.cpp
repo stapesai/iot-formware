@@ -80,17 +80,17 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 
 void MQTTManager::publishChannelState(int channel_number, bool state, bool retained)
 {
-    std::string topic = "user/" + *user_id + "/node/" + node_mac + "/channel/" + std::to_string(channel_number) + "/state";
-    std::string payload = state ? "ON" : "OFF";
+	std::string topic = "user/" + *user_id + "/node/" + node_mac + "/channel/" + std::to_string(channel_number) + "/state";
+	std::string payload = state ? "ON" : "OFF";
 
-    if (mqttclient->publish(topic.c_str(), payload.c_str(), retained))
-    {
-        Logger::log(INFO, GREEN "Channel state published successfully: " + std::to_string(channel_number) + " - " + payload + RESET_COLOR);
-    }
-    else
-    {
-        Logger::log(ERROR, RED "Failed to publish channel state: " + std::to_string(channel_number) + RESET_COLOR);
-    }
+	if(mqttclient->publish(topic.c_str(), payload.c_str(), retained))
+	{
+		Logger::log(INFO, GREEN "Channel state published successfully: " + std::to_string(channel_number) + " - " + payload + RESET_COLOR);
+	}
+	else
+	{
+		Logger::log(ERROR, RED "Failed to publish channel state: " + std::to_string(channel_number) + RESET_COLOR);
+	}
 }
 
 void MQTTManager::initializeMQTT()
