@@ -4,8 +4,8 @@
 // Path: src/NVSManager.cpp
 
 #include <Arduino.h>
-#include <ChannelMap.hpp>
 #include <Constants.hpp>
+#include <ChannelMap.hpp>
 #include <Logger.hpp>
 #include <NVSManager.hpp>
 #include <Utils.hpp>
@@ -14,6 +14,7 @@
 NVSManager::NVSManager()
 {
 	fields = {&wifi_ssid, &wifi_password, &mqtt_broker, &mqtt_port, &mqtt_username, &mqtt_password, &user_id};
+	channelStates.clear();
 }
 
 // Interrupt handler to reset the module
@@ -158,17 +159,77 @@ void NVSManager::readConfig()
 	nvs_close(nvs_handler);
 }
 
-bool NVSManager::controlChannel(int channel_number, bool state)
+void NVSManager::saveChannelStates()
 {
-	auto it = channelMap.find(channel_number);
-	if(it == channelMap.end())
-	{
-		Logger::log(ERROR, RED "Invalid channel number" RESET_COLOR);
-		return false;
-	}
+    if (nvs_open("storage", NVS_READWRITE, &nvs_handler) != ESP_OK) {
+        Logger::log(ERROR, RED "Error opening NVS handle for channel states" RESET_COLOR);
+        return;
+    }
 
-	digitalWrite(it->second.outputPin, state ? HIGH : LOW);
-	Logger::log(INFO,
-				GREEN "Channel " + std::to_string(channel_number) + " (pin " + std::to_string(it->second.outputPin) + ") set to " + (state ? "ON" : "OFF") + RESET_COLOR);
-	return true;
+    for (const auto& channel : channelMap) {
+        std::string key = "CH_" + std::to_string(channel.first);
+        bool state = channelStates[channel.first];
+        if (nvs_set_u8(nvs_handler, key.c_str(), state ? 1 : 0) != ESP_OK) {
+            Logger::log(ERROR, RED "Error writing channel state to NVS" RESET_COLOR);
+        }
+    }
+
+    if (nvs_commit(nvs_handler) == ESP_OK) {
+        Logger::log(INFO, GREEN "Channel states committed to NVS successfully" RESET_COLOR);
+    } else {
+        Logger::log(ERROR, RED "Error committing channel states to NVS" RESET_COLOR);
+    }
+    nvs_close(nvs_handler);
+}
+
+void NVSManager::loadChannelStates()
+{
+    if (nvs_open("storage", NVS_READONLY, &nvs_handler) != ESP_OK) {
+        Logger::log(ERROR, RED "Error opening NVS handle for channel states" RESET_COLOR);
+        return;
+    }
+
+    for (const auto& channel : channelMap) {
+        std::string key = "CH_" + std::to_string(channel.first);
+        uint8_t state;
+        if (nvs_get_u8(nvs_handler, key.c_str(), &state) == ESP_OK) {
+            channelStates[channel.first] = (state == 1);
+            digitalWrite(channel.second.outputPin, channelStates[channel.first] ? HIGH : LOW);
+            Logger::log(INFO, GREEN "Loaded channel " + std::to_string(channel.first) + " state: " + std::to_string(state) + RESET_COLOR);
+        } else {
+            channelStates[channel.first] = false;
+            Logger::log(WARN, YELLOW "Channel " + std::to_string(channel.first) + " state not found in NVS, defaulting to OFF" RESET_COLOR);
+        }
+    }
+
+    nvs_close(nvs_handler);
+}
+
+void NVSManager::updateChannelState(int channel, bool state)
+{
+    channelStates[channel] = state;
+    saveChannelStates();
+}
+
+bool NVSManager::getChannelState(int channel) const
+{
+    auto it = channelStates.find(channel);
+    if (it != channelStates.end()) {
+        return it->second;
+    }
+    return false; // Default to OFF if channel is not found
+}
+
+bool NVSManager::controlChannel(int channel_number, bool target_state)
+{
+    auto it = channelMap.find(channel_number);
+    if (it == channelMap.end()) {
+        Logger::log(ERROR, RED "Invalid channel number" RESET_COLOR);
+        return false;
+    }
+
+    digitalWrite(it->second.outputPin, target_state ? HIGH : LOW);
+    updateChannelState(channel_number, target_state);
+    Logger::log(INFO, GREEN "Channel " + std::to_string(channel_number) + " (pin " + std::to_string(it->second.outputPin) + ") set to " + (target_state ? "ON" : "OFF") + RESET_COLOR);
+    return true;
 }

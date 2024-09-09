@@ -27,6 +27,7 @@ private:
 	void checkWiFiAndMQTT(unsigned long);
 	void initializeGPIO();
 	void handleButtons();
+	void loadChannelStates();
 
 	bool isConfigured;
 	unsigned long previousMillisWiFi;
@@ -63,6 +64,7 @@ void MainApp::setup()
 	setupPins();
 	setupNVS();
 	initializeGPIO();
+	loadChannelStates();
 
 	if(isConfigured)
 	{
@@ -88,12 +90,25 @@ void MainApp::initializeGPIO()
 	Logger::log(INFO, GREEN "GPIO pins initialized" RESET_COLOR);
 }
 
+void MainApp::loadChannelStates()
+{
+	config.loadChannelStates();
+	// Publish initial states via MQTT
+	if(isConfigured && mqttClient.connected())
+	{
+		for(const auto& channel : channelMap)
+		{
+			bool state = config.getChannelState(channel.first);
+			mqttManager.publishChannelState(channel.first, state, true);
+		}
+	}
+}
+
 void MainApp::handleButtons()
 {
 	static unsigned long lastDebounceTime[12] = {0};
 	static int lastButtonState[12] = {HIGH};
 	static int buttonState[12] = {HIGH};
-	static bool channelState[12] = {false};
 	const unsigned long debounceDelay = 50;
 
 	for(const auto& channel : channelMap)
@@ -113,14 +128,12 @@ void MainApp::handleButtons()
 
 				if(buttonState[channel.first] == LOW)
 				{
-					bool newState = !channelState[channel.first];
-					channelState[channel.first] = newState;
-					digitalWrite(channel.second.outputPin, newState ? HIGH : LOW);
+					bool newState = !config.getChannelState(channel.first);
+					config.controlChannel(channel.first, newState);
 
 					if(isConfigured && mqttClient.connected())
 					{
-						int channel_number = channel.first;
-						mqttManager.publishChannelState(channel_number, newState);
+						mqttManager.publishChannelState(channel.first, newState, true);
 					}
 
 					Logger::log(INFO, GREEN "Button pressed: Channel " + std::to_string(channel.first) + " set to " + (newState ? "ON" : "OFF") + RESET_COLOR);
@@ -131,7 +144,6 @@ void MainApp::handleButtons()
 		lastButtonState[channel.first] = reading;
 	}
 }
-
 void MainApp::setupPins()
 {
 	pinMode(STATUS_BUZZER, OUTPUT);

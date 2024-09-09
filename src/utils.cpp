@@ -5,6 +5,7 @@
 
 #include <Arduino.h>
 #include <Constants.hpp>
+#include <ChannelMap.hpp>
 #include <Utils.hpp>
 #include <nvs.h>
 #include <nvs_flash.h>
