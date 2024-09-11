@@ -23,6 +23,8 @@ public:
 	void publishChannelState(int channel_number, bool state);
 
 private:
+	// void updateKeepAliveTopic();
+
 	PubSubClient* mqttclient;
 	NVSManager* config;
 	Utils* utils;
@@ -32,7 +34,7 @@ private:
 	const std::string* mqtt_password;
 	const std::string* user_id;
 	const std::string node_mac;
-	const std::string keep_alive_topic;
+	// std::string keep_alive_topic;
 };
 
 #endif // MQTT_MANAGER_HPP

@@ -16,16 +16,30 @@ MQTTManager::MQTTManager(PubSubClient* client, NVSManager* config, Utils* utils)
 	, mqtt_password(&config->getMQTTPassword())
 	, user_id(&config->getUserId())
 	, node_mac(utils->getMacAddr())
-	, keep_alive_topic("user/" + *user_id + "/node/" + node_mac + "/keepalive")
-{ }
+	// , keep_alive_topic("user/" + *user_id + "/node/" + node_mac + "/keepalive")
+{ 
+	// updateKeepAliveTopic();
+}
+
+// void MQTTManager::updateKeepAliveTopic()
+// {
+//     keep_alive_topic = "user/" + *user_id + "/node/" + node_mac + "/keepalive";
+// }
 
 void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
 {
+	// Ensure the keep_alive_topic is up-to-date
+    // updateKeepAliveTopic();
+
 	std::map<std::string, std::string> kv_map = {
-		{"ORIGIN", node_mac}, {"COUNTER", std::to_string(keep_alive_counter)}, {"UPTIME", std::to_string(millis() / 1000)} // uptime in seconds
+		{"ORIGIN", node_mac}, 
+		{"COUNTER", std::to_string(keep_alive_counter)}, 
+		{"UPTIME", std::to_string(millis() / 1000)} // uptime in seconds
 	};
 
 	std::string kv_string = utils->convertToKVString(kv_map);
+
+	const std::string keep_alive_topic = "user/" + *user_id + "/node/" + node_mac + "/keepalive";
 
 	if(mqttclient->publish(keep_alive_topic.c_str(), kv_string.c_str()))
 	{

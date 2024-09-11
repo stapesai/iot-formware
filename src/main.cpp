@@ -99,7 +99,7 @@ void MainApp::loadChannelStates()
 		for(const auto& channel : channelMap)
 		{
 			bool state = config.getChannelState(channel.first);
-			mqttManager.publishChannelState(channel.first, state, true);
+			mqttManager.publishChannelState(channel.first, state);
 		}
 	}
 }
@@ -133,7 +133,7 @@ void MainApp::handleButtons()
 
 					if(isConfigured && mqttClient.connected())
 					{
-						mqttManager.publishChannelState(channel.first, newState, true);
+						mqttManager.publishChannelState(channel.first, newState);
 					}
 
 					Logger::log(INFO, GREEN "Button pressed: Channel " + std::to_string(channel.first) + " set to " + (newState ? "ON" : "OFF") + RESET_COLOR);
