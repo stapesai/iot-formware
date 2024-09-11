@@ -27,7 +27,6 @@ void WiFiManager::setupWiFi()
 
 void WiFiManager::connectWiFi()
 {
-
 	Logger::log(INFO, YELLOW "Connecting to WiFi..." RESET_COLOR);
 
 	WiFi.begin(config->getWiFiSSID().c_str(), config->getWiFiPassword().c_str());

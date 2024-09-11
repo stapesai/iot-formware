@@ -10,12 +10,12 @@ from prompt_toolkit.styles import Style
 from prompt_toolkit.layout.dimension import Dimension
 from prompt_toolkit.application.current import get_app
 
-def list_files(folders):
+def list_files(folders, allowed_extensions):
     files = []
     for folder_path in folders:
         for root, _, filenames in os.walk(folder_path):
             for file in filenames:
-                if file.endswith('.cpp') or file.endswith('.hpp'):
+                if any(file.endswith(ext) for ext in allowed_extensions):
                     files.append(os.path.join(root, file))
     return files
 
@@ -86,10 +86,10 @@ def select_files(files):
 
     return [files[i] for i in sorted(selected_files)]
 
-def write_cpp_files_contents_to_text(folders, output_file):
-    files = list_files(folders)
+def write_files_contents_to_text(folders, allowed_extensions, output_file):
+    files = list_files(folders, allowed_extensions)
     if not files:
-        print("No C++ files found in the specified folders.")
+        print(f"No files with extensions {allowed_extensions} found in the specified folders.")
         return
 
     selected_files = select_files(files)
@@ -106,7 +106,9 @@ def write_cpp_files_contents_to_text(folders, output_file):
                 outfile.write("\n*/\n\n\n\n\n")  # Add some space between file contents
 
 if __name__ == "__main__":
-    folders = ["include", "src"]
+    FOLDERS = ["include", "src"]
+    ALLOWED_EXTENSIONS = [".cpp", ".hpp"]
     output_file = "prompt.txt"
-    write_cpp_files_contents_to_text(folders, output_file)
-    print(f"Contents of selected C++ files written to '{output_file}'")
+
+    write_files_contents_to_text(FOLDERS, ALLOWED_EXTENSIONS, output_file)
+    print(f"Contents of selected files written to '{output_file}'")

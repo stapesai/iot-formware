@@ -45,17 +45,21 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 	Logger::log(INFO, GREEN "Message arrived [" + topicStr + "]" RESET_COLOR);
 	Logger::log(INFO, GREEN "Payload: " + payloadStr + RESET_COLOR);
 
-	// Check if the topic is a keep alive request
+	// 1. Check if the topic is a keep alive request
 	if(topicStr.endsWith("/keepalive/request"))
 	{
 		// Publish the keep alive message
 		// FIXME: Use global keep alive counter
-		unsigned long temp = 0;
-		publish_keep_alive_message(temp);
-		Logger::log(INFO, GREEN "Keep alive request received" RESET_COLOR);
+		if (payloadStr == "GET_STATUS")
+		{
+			Logger::log(DEBUG, GREEN "Keep alive counter requested" RESET_COLOR);
+			unsigned long temp = 0;
+			publish_keep_alive_message(temp);
+			return;
+		}
 	}
 
-	// Check if the topic is a channel control request
+	// 2. Check if the topic is a channel control request
 	if(topicStr.endsWith("/control"))
 	{
 		std::vector<std::string> topic_parts = utils->splitString(topicStr.c_str(), '/');
@@ -76,14 +80,34 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 			Logger::log(ERROR, RED "Failed to control Channel Number: " + channel_number + RESET_COLOR);
 		}
 	}
+
+	// 3. Check if the topic is a channel state request
+	if(topicStr.endsWith("/state/request"))
+	{
+		if (payloadStr != "GET_STATE")
+		{
+			Logger::log(ERROR, RED "Invalid payload for channel state request" RESET_COLOR);
+			return;
+		}
+		
+		std::vector<std::string> topic_parts = utils->splitString(topicStr.c_str(), '/');
+		std::string channel_number = topic_parts[topic_parts.size() - 2];
+
+		bool state = config->getChannelState(std::stoi(channel_number));
+
+		Logger::log(DEBUG, GREEN "Channel Number: " + channel_number + RESET_COLOR);
+		Logger::log(DEBUG, GREEN "State: " + String(state) + RESET_COLOR);
+
+		publishChannelState(std::stoi(channel_number), state);
+	}
 }
 
-void MQTTManager::publishChannelState(int channel_number, bool state, bool retained)
+void MQTTManager::publishChannelState(int channel_number, bool state)
 {
 	std::string topic = "user/" + *user_id + "/node/" + node_mac + "/channel/" + std::to_string(channel_number) + "/state";
 	std::string payload = state ? "ON" : "OFF";
 
-	if(mqttclient->publish(topic.c_str(), payload.c_str(), retained))
+	if(mqttclient->publish(topic.c_str(), payload.c_str()))
 	{
 		Logger::log(INFO, GREEN "Channel state published successfully: " + std::to_string(channel_number) + " - " + payload + RESET_COLOR);
 	}
@@ -115,10 +139,15 @@ void MQTTManager::connectToMQTT()
 		mqttclient->subscribe(keep_alive_request_topic.c_str());
 		Logger::log(INFO, BLUE "Subscribed to topic: " + keep_alive_request_topic + RESET_COLOR);
 
-		// 2. Channel control request topic (user/<user_id>/node/<node_id>/channel/<channel_number>/control/request)
+		// 2. Channel control topic (user/<user_id>/node/<node_id>/channel/<channel_number>/control)
 		const std::string channel_control_request_topic = "user/" + *user_id + "/node/" + node_mac + "/channel/" + "+" + "/control";
 		mqttclient->subscribe(channel_control_request_topic.c_str());
 		Logger::log(INFO, BLUE "Subscribed to topic: " + channel_control_request_topic + RESET_COLOR);
+
+		// 3. Channel request state topic (user/<user_id>/node/<node_id>/channel/<channel_number>/state/request)
+		const std::string channel_state_request_topic = "user/" + *user_id + "/node/" + node_mac + "/channel/" + "+" + "/state/request";
+		mqttclient->subscribe(channel_state_request_topic.c_str());
+		Logger::log(INFO, BLUE "Subscribed to topic: " + channel_state_request_topic + RESET_COLOR);
 	}
 	else
 	{
