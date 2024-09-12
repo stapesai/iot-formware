@@ -16,8 +16,8 @@ MQTTManager::MQTTManager(PubSubClient* client, NVSManager* config, Utils* utils)
 	, mqtt_password(&config->getMQTTPassword())
 	, user_id(&config->getUserId())
 	, node_mac(utils->getMacAddr())
-	// , keep_alive_topic("user/" + *user_id + "/node/" + node_mac + "/keepalive")
-{ 
+// , keep_alive_topic("user/" + *user_id + "/node/" + node_mac + "/keepalive")
+{
 	// updateKeepAliveTopic();
 }
 
@@ -29,12 +29,10 @@ MQTTManager::MQTTManager(PubSubClient* client, NVSManager* config, Utils* utils)
 void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
 {
 	// Ensure the keep_alive_topic is up-to-date
-    // updateKeepAliveTopic();
+	// updateKeepAliveTopic();
 
 	std::map<std::string, std::string> kv_map = {
-		{"ORIGIN", node_mac}, 
-		{"COUNTER", std::to_string(keep_alive_counter)}, 
-		{"UPTIME", std::to_string(millis() / 1000)} // uptime in seconds
+		{"ORIGIN", node_mac}, {"COUNTER", std::to_string(keep_alive_counter)}, {"UPTIME", std::to_string(millis() / 1000)} // uptime in seconds
 	};
 
 	std::string kv_string = utils->convertToKVString(kv_map);
@@ -64,7 +62,7 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 	{
 		// Publish the keep alive message
 		// FIXME: Use global keep alive counter
-		if (payloadStr == "GET_STATUS")
+		if(payloadStr == "GET_STATUS")
 		{
 			Logger::log(DEBUG, GREEN "Keep alive counter requested" RESET_COLOR);
 			unsigned long temp = 0;
@@ -79,15 +77,32 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 		std::vector<std::string> topic_parts = utils->splitString(topicStr.c_str(), '/');
 		std::string channel_number = topic_parts[topic_parts.size() - 2];
 
+		if(topic_parts.size() < 5)
+		{
+			Logger::log(ERROR, RED "Invalid topic structure for channel control" RESET_COLOR);
+			return;
+		}
+
 		bool target_state = (payloadStr == "ON");
 
 		Logger::log(DEBUG, GREEN "Channel Number: " + channel_number + RESET_COLOR);
 		Logger::log(DEBUG, GREEN "Target State: " + String(target_state) + RESET_COLOR);
 
-		if(config->controlChannel(std::stoi(channel_number), target_state))
+		int channel_num;
+		try
+		{
+			channel_num = std::stoi(channel_number);
+		}
+		catch(const std::exception& e)
+		{
+			Logger::log(ERROR, RED "Invalid channel number: " + channel_number + RESET_COLOR);
+			return;
+		}
+
+		if(config->controlChannel(channel_num, target_state))
 		{
 			Logger::log(INFO, GREEN "Channel controlled successfully: " + channel_number + RESET_COLOR);
-			publishChannelState(std::stoi(channel_number), target_state);
+			publishChannelState(channel_num, target_state);
 		}
 		else
 		{
@@ -98,21 +113,37 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 	// 3. Check if the topic is a channel state request
 	if(topicStr.endsWith("/state/request"))
 	{
-		if (payloadStr != "GET_STATE")
+		if(payloadStr != "GET_STATE")
 		{
 			Logger::log(ERROR, RED "Invalid payload for channel state request" RESET_COLOR);
 			return;
 		}
-		
-		std::vector<std::string> topic_parts = utils->splitString(topicStr.c_str(), '/');
-		std::string channel_number = topic_parts[topic_parts.size() - 2];
 
-		bool state = config->getChannelState(std::stoi(channel_number));
+		std::vector<std::string> topic_parts = utils->splitString(topicStr.c_str(), '/');
+		if(topic_parts.size() < 5)
+		{
+			Logger::log(ERROR, RED "Invalid topic structure for channel state request" RESET_COLOR);
+			return;
+		}
+
+		std::string channel_number = topic_parts[topic_parts.size() - 3];
+		int channel_num;
+		try
+		{
+			channel_num = std::stoi(channel_number);
+		}
+		catch(const std::exception& e)
+		{
+			Logger::log(ERROR, RED "Invalid channel number: " + channel_number + RESET_COLOR);
+			return;
+		}
+
+		bool state = config->getChannelState(channel_num);
 
 		Logger::log(DEBUG, GREEN "Channel Number: " + channel_number + RESET_COLOR);
 		Logger::log(DEBUG, GREEN "State: " + String(state) + RESET_COLOR);
 
-		publishChannelState(std::stoi(channel_number), state);
+		publishChannelState(channel_num, state);
 	}
 }
 

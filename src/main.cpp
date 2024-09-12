@@ -94,14 +94,14 @@ void MainApp::loadChannelStates()
 {
 	config.loadChannelStates();
 	// Publish initial states via MQTT
-	if(isConfigured && mqttClient.connected())
-	{
-		for(const auto& channel : channelMap)
-		{
-			bool state = config.getChannelState(channel.first);
-			mqttManager.publishChannelState(channel.first, state);
-		}
-	}
+	// if(isConfigured && mqttClient.connected())
+	// {
+	// 	for(const auto& channel : channelMap)
+	// 	{
+	// 		bool state = config.getChannelState(channel.first);
+	// 		mqttManager.publishChannelState(channel.first, state);
+	// 	}
+	// }
 }
 
 void MainApp::handleButtons()
