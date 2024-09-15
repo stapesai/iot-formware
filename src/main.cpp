@@ -28,6 +28,7 @@ private:
 	void initializeGPIO();
 	void handleButtons();
 	void loadChannelStates();
+	void publishInitialStates();
 
 	bool isConfigured;
 	unsigned long previousMillisWiFi;
@@ -72,11 +73,35 @@ void MainApp::setup()
 		setupMQTT();
 		wifiManager.initialiseWiFi();
 		mqttManager.connectToMQTT();
+
+		// Check if WiFi and MQTT are connected
+		if(WiFi.status() == WL_CONNECTED && mqttClient.connected())
+		{
+			publishInitialStates();
+		}
+		else
+		{
+			Logger::log(WARN, ORANGE "WiFi or MQTT not connected" RESET_COLOR);
+		}
 	}
 	else
 	{
 		setupBLE();
 	}
+}
+
+void MainApp::publishInitialStates()
+{
+	unsigned long temp = 0;
+	mqttManager.publish_keep_alive_message(temp);
+
+    for(const auto& channel : channelMap)
+    {
+        bool state = config.getChannelState(channel.first);
+        mqttManager.publishChannelState(channel.first, state);
+		Logger::log(INFO, GREEN "Channel " + std::to_string(channel.first) + " state published" RESET_COLOR);
+    }
+    Logger::log(INFO, GREEN "All channel states published" RESET_COLOR);
 }
 
 void MainApp::initializeGPIO()
