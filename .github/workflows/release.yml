@@ -8,6 +8,7 @@ on:
 
 jobs:
   release:
+    permissions: write-all
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -30,8 +31,14 @@ jobs:
           release_name: Release ${{ github.ref }}
           body: |
             ## Flashing Instructions
-            ```bash
+            To flash the firmware to your ESP32 device, use the following command:
+            ```
             python3 -m esptool --chip esp32 write_flash 0x0 firmware-esp32.bin
+            ```
+
+            To open the serial monitor, use the following command:
+            ```
+            python3 -m esptool --chip esp32 --port /dev/ttyUSB0 --baud 115200
             ```
           draft: false
       - name: Upload Release Asset
