@@ -5,8 +5,8 @@
 
 #include <Arduino.h>
 #include <BLEManager.hpp>
-#include <Constants.hpp>
 #include <ChannelMap.hpp>
+#include <Constants.hpp>
 #include <Logger.hpp>
 #include <MQTTManager.hpp>
 #include <PubSubClient.h>
