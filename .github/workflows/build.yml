@@ -20,7 +20,7 @@ jobs:
       - name: Build ESP32 Firmware
         run: platformio run -e esp32
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: firmware
           path: .pio/build/esp32/firmware.bin
