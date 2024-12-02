@@ -3,24 +3,31 @@ name: Upload to MinIO
 
 on:
   release:
-    # types: [published]
+    types: [published]
 
 jobs:
   upload:
     runs-on: ubuntu-latest
     steps:
+      - name: Set Up Environment Variables
+        env:
+          RELEASE_URL: ${{ github.event.release.assets[0].browser_download_url }}
+        run: echo "Release URL is $RELEASE_URL"
+
       - name: Download Release Asset
-        uses: actions/download-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          name: firmware-esp32-${{ github.event.release.tag_name }}.bin
-          path: ./
+        run: |
+          curl -L -H "Authorization: token $GITHUB_TOKEN" \
+          -o firmware-esp32-${{ github.event.release.tag_name }}.bin \
+          "${{ github.event.release.assets[0].browser_download_url }}"
+
       - name: Install MinIO Client
         run: |
           curl -O https://dl.min.io/client/mc/release/linux-amd64/mc
           chmod +x mc
           sudo mv mc /usr/local/bin/mc
+
       - name: Configure MinIO
         env:
           MINIO_ENDPOINT: ${{ secrets.MINIO_ENDPOINT }}
@@ -29,7 +36,7 @@ jobs:
           MINIO_BUCKET: ${{ secrets.MINIO_BUCKET }}
         run: |
           mc alias set myminio $MINIO_ENDPOINT $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
+
       - name: Upload to MinIO
         run: |
           mc cp firmware-esp32-${{ github.event.release.tag_name }}.bin myminio/${MINIO_BUCKET}/
-        #   mc cp firmware-esp32-${{ github.event.release.tag_name }}.bin myminio/${MINIO_BUCKET}/firmware-esp32-latest.bin
