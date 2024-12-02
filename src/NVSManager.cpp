@@ -228,7 +228,7 @@ bool NVSManager::getChannelState(int channel) const
 	if(it != channelStates.end())
 	{
 		Logger::log(DEBUG, GREEN "Channel " + std::to_string(channel) + " state found: " + std::to_string(it->second) + RESET_COLOR);
-        return it->second;
+		return it->second;
 	}
 	Logger::log(WARN, YELLOW "Channel " + std::to_string(channel) + " state not found, defaulting to OFF" RESET_COLOR);
 	return false; // Default to OFF if channel is not found

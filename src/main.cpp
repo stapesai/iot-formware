@@ -95,13 +95,13 @@ void MainApp::publishInitialStates()
 	unsigned long temp = 0;
 	mqttManager.publish_keep_alive_message(temp);
 
-    for(const auto& channel : channelMap)
-    {
-        bool state = config.getChannelState(channel.first);
-        mqttManager.publishChannelState(channel.first, state);
+	for(const auto& channel : channelMap)
+	{
+		bool state = config.getChannelState(channel.first);
+		mqttManager.publishChannelState(channel.first, state);
 		Logger::log(INFO, GREEN "Channel " + std::to_string(channel.first) + " state published" RESET_COLOR);
-    }
-    Logger::log(INFO, GREEN "All channel states published" RESET_COLOR);
+	}
+	Logger::log(INFO, GREEN "All channel states published" RESET_COLOR);
 }
 
 void MainApp::initializeGPIO()
