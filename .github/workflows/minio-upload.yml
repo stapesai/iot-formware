@@ -3,7 +3,7 @@ name: Upload to MinIO
 
 on:
   release:
-    types: [published]
+    # types: [published]
 
 jobs:
   upload:
