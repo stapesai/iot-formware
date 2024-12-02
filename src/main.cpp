@@ -11,40 +11,7 @@
 #include <MQTTManager.hpp>
 #include <PubSubClient.h>
 #include <WiFiManager.hpp>
-
-class MainApp
-{
-public:
-	MainApp();
-	void setup();
-	void loop();
-
-private:
-	void setupPins();
-	void setupNVS();
-	void setupBLE();
-	void setupMQTT();
-	void checkWiFiAndMQTT(unsigned long);
-	void initializeGPIO();
-	void handleButtons();
-	void loadChannelStates();
-	void publishInitialStates();
-
-	bool isConfigured;
-	unsigned long previousMillisWiFi;
-	unsigned long previousMillisMQTT;
-	unsigned long keepAliveInterval;
-	unsigned long requiredInterval;
-	unsigned long keep_alive_counter;
-
-	Utils utils;
-	NVSManager config;
-	WiFiClient wifiClient;
-	PubSubClient mqttClient;
-	MQTTManager mqttManager;
-	BLEManager bleManager;
-	WiFiManager wifiManager;
-};
+#include <main.hpp>
 
 MainApp::MainApp()
 	: previousMillisWiFi(0)
