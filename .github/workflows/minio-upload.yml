@@ -12,15 +12,30 @@ jobs:
       - name: Set Up Environment Variables
         env:
           RELEASE_URL: ${{ github.event.release.assets[0].browser_download_url }}
-        run: echo "Release URL is $RELEASE_URL"
+          RELEASE_NAME: ${{ github.event.release.tag_name }}
+          MINIO_ENDPOINT: ${{ secrets.MINIO_ENDPOINT }}
+          MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
+          MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+          MINIO_BUCKET: ${{ secrets.MINIO_BUCKET }}
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          FIRMWARE_API_KEY: ${{ secrets.FIRMWARE_API_KEY }}
+        run: |
+          echo "Release URL is $RELEASE_URL"
+          echo "Release Name is $RELEASE_NAME"
+          echo "MinIO Endpoint is $MINIO_ENDPOINT"
+          echo "MinIO Access Key is ${MINIO_ACCESS_KEY:0:4}****${MINIO_ACCESS_KEY: -4}"
+          echo "MinIO Secret Key is ${MINIO_SECRET_KEY:0:4}****${MINIO_SECRET_KEY: -4}"
+          echo "MinIO Bucket is $MINIO_BUCKET"
+          echo "Backend URL is $BACKEND_URL"
+          echo "Firmware API Key is ${FIRMWARE_API_KEY:0:4}****${FIRMWARE_API_KEY: -4}"
 
       - name: Download Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           curl -L -H "Authorization: token $GITHUB_TOKEN" \
-          -o firmware-esp32-${{ github.event.release.tag_name }}.bin \
-          "${{ github.event.release.assets[0].browser_download_url }}"
+          -o firmware-esp32-$RELEASE_NAME.bin \
+          "$RELEASE_URL"
 
       - name: Install MinIO Client
         run: |
@@ -29,18 +44,37 @@ jobs:
           sudo mv mc /usr/local/bin/mc
 
       - name: Configure MinIO
-        env:
-          MINIO_ENDPOINT: ${{ secrets.MINIO_ENDPOINT }}
-          MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
-          MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
-          MINIO_BUCKET: ${{ secrets.MINIO_BUCKET }}
         run: |
           set +o history
           mc alias set myminio $MINIO_ENDPOINT $MINIO_ACCESS_KEY $MINIO_SECRET_KEY --api S3v4
           set -o history
 
       - name: Upload to MinIO
-        env:
-          MINIO_BUCKET: ${{ secrets.MINIO_BUCKET }}
         run: |
-          mc cp firmware-esp32-${{ github.event.release.tag_name }}.bin myminio/$MINIO_BUCKET/firmware-esp32-${{ github.event.release.tag_name }}.bin
+          mc cp firmware-esp32-$RELEASE_NAME.bin myminio/$MINIO_BUCKET/firmware-esp32-$RELEASE_NAME.bin
+
+      - name: Generate MD5 Hash
+        run: |
+          md5sum firmware-esp32-$RELEASE_NAME.bin | awk '{ print $1 }' > firmware-esp32-$RELEASE_NAME.md5
+
+      - name: Upload MD5 Hash to MinIO
+        run: |
+          mc cp firmware-esp32-$RELEASE_NAME.md5 myminio/$MINIO_BUCKET/firmware-esp32-$RELEASE_NAME.md5
+
+      - name: Update Backend Manifest
+        run: |
+          # Get MD5 from file
+          MD5_CHECKSUM=$(cat firmware-esp32-$RELEASE_NAME.md5)
+          
+          # Construct S3 path
+          S3_PATH="$MINIO_BUCKET/firmware-esp32-$RELEASE_NAME.bin"
+          
+          # Call backend API
+          curl -X POST "$BACKEND_URL/ota/create_release" \
+            -H "Content-Type: application/json" \
+            -H "X-API-Key: $FIRMWARE_API_KEY" \
+            -d '{
+              "version": "'"$RELEASE_NAME"'",
+              "s3_path": "'"$S3_PATH"'",
+              "md5_checksum": "'"$MD5_CHECKSUM"'"
+            }'
