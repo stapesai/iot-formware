@@ -43,7 +43,7 @@ void BLEManager::onConnect(BLEServer* pServer)
 
 void BLEManager::onDisconnect(BLEServer* pServer)
 {
-	Logger::log(INFO, YELLOW "Client disconnected" RESET_COLOR);
+	Logger::log(INFO, RED "Client disconnected" RESET_COLOR);
 	pAdvertising->start();
 }
 

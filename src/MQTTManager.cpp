@@ -16,7 +16,6 @@ MQTTManager::MQTTManager(PubSubClient* client, NVSManager* config, Utils* utils)
 	, mqtt_password(&config->getMQTTPassword())
 	, user_id(&config->getUserId())
 	, node_mac(utils->getMacAddr())
-	, keep_alive_topic("user/" + *user_id + "/node/" + node_mac + "/keepalive")
 { }
 
 void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
@@ -26,6 +25,8 @@ void MQTTManager::publish_keep_alive_message(unsigned long& keep_alive_counter)
 	};
 
 	std::string kv_string = utils->convertToKVString(kv_map);
+
+	const std::string keep_alive_topic = "user/" + *user_id + "/node/" + node_mac + "/keepalive";
 
 	if(mqttclient->publish(keep_alive_topic.c_str(), kv_string.c_str()))
 	{
@@ -45,85 +46,110 @@ void MQTTManager::mqttCallback(char* topic, byte* payload, unsigned short int le
 	Logger::log(INFO, GREEN "Message arrived [" + topicStr + "]" RESET_COLOR);
 	Logger::log(INFO, GREEN "Payload: " + payloadStr + RESET_COLOR);
 
-	// Check if the topic is a keep alive request
+	// 1. Check if the topic is a keep alive request
 	if(topicStr.endsWith("/keepalive/request"))
 	{
 		// Publish the keep alive message
 		// FIXME: Use global keep alive counter
-		unsigned long temp = 0;
-		publish_keep_alive_message(temp);
-		Logger::log(INFO, GREEN "Keep alive request received" RESET_COLOR);
-	}
-
-	// Check if the topic is a device registration request
-	if(topicStr.endsWith("/device/register/request"))
-	{
-		// Parse the payload to get the device id
-		std::map<std::string, std::string> kv_map = utils->convertToKVMap(payloadStr.c_str());
-		std::string device_id = kv_map["DEVICE_ID"];
-		uint8_t channel_number = std::stoi(kv_map["CHANNEL_NUMBER"]);
-
-		Logger::log(DEBUG, GREEN "Device ID: " + device_id + RESET_COLOR);
-		Logger::log(DEBUG, GREEN "Channel Number: " + String(channel_number) + RESET_COLOR);
-
-		// Register the device
-		if(config->registerNewDevice(device_id, channel_number))
+		if(payloadStr == "GET_STATUS")
 		{
-			Logger::log(INFO, GREEN "Device registered successfully: " + device_id + RESET_COLOR);
-			mqttclient->subscribe(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/control").c_str());
-			mqttclient->publish(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/register").c_str(), "REGISTERED");
-		}
-		else
-		{
-			Logger::log(ERROR, RED "Failed to register Device Id: " + device_id + RESET_COLOR);
+			Logger::log(DEBUG, GREEN "Keep alive counter requested" RESET_COLOR);
+			unsigned long temp = 0;
+			publish_keep_alive_message(temp);
+			return;
 		}
 	}
 
-	// Check if the topic is a device unregistration request
-	if(topicStr.endsWith("/device/unregister/request"))
-	{
-		// Parse the payload to get the device id
-		std::map<std::string, std::string> kv_map = utils->convertToKVMap(payloadStr.c_str());
-		std::string device_id = kv_map["DEVICE_ID"];
-
-		// Unregister the device
-		if(config->unregisterDevice(device_id))
-		{
-			Logger::log(INFO, GREEN "Device unregistered successfully: " + device_id + RESET_COLOR);
-			mqttclient->unsubscribe(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/control").c_str());
-			mqttclient->publish(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/unregister").c_str(), "UNREGISTERED");
-		}
-		else
-		{
-			Logger::log(ERROR, RED "Failed to unregister Device ID: " + device_id + RESET_COLOR);
-		}
-	}
-
-	// Check if the topic is a device control request
+	// 2. Check if the topic is a channel control request
 	if(topicStr.endsWith("/control"))
 	{
-		// Parse the topic to get the device id
 		std::vector<std::string> topic_parts = utils->splitString(topicStr.c_str(), '/');
-		std::string device_id = topic_parts[topic_parts.size() - 2];
+		std::string channel_number = topic_parts[topic_parts.size() - 2];
 
-		// Parse the payload to get the control command
-		std::map<std::string, std::string> kv_map = utils->convertToKVMap(payloadStr.c_str());
-		bool target_state = (kv_map["STATE"] == "1" || kv_map["STATE"] == "ON");
+		if(topic_parts.size() < 5)
+		{
+			Logger::log(ERROR, RED "Invalid topic structure for channel control" RESET_COLOR);
+			return;
+		}
 
-		Logger::log(DEBUG, GREEN "Device ID: " + device_id + RESET_COLOR);
+		bool target_state = (payloadStr == "ON");
+
+		Logger::log(DEBUG, GREEN "Channel Number: " + channel_number + RESET_COLOR);
 		Logger::log(DEBUG, GREEN "Target State: " + String(target_state) + RESET_COLOR);
 
-		if(config->controlDevice(device_id, target_state))
+		int channel_num;
+		try
 		{
-			Logger::log(INFO, GREEN "Device controlled successfully: " + device_id + RESET_COLOR);
-			mqttclient->publish(("user/" + *user_id + "/node/" + node_mac + "/device/" + device_id + "/state").c_str(), target_state ? "ON" : "OFF");
+			channel_num = std::stoi(channel_number);
+		}
+		catch(const std::exception& e)
+		{
+			Logger::log(ERROR, RED "Invalid channel number: " + channel_number + RESET_COLOR);
+			return;
+		}
+
+		if(config->controlChannel(channel_num, target_state))
+		{
+			Logger::log(INFO, GREEN "Channel controlled successfully: " + channel_number + RESET_COLOR);
+			publishChannelState(channel_num, target_state);
 		}
 		else
 		{
-			Logger::log(ERROR, RED "Failed to control Device ID: " + device_id + RESET_COLOR);
+			Logger::log(ERROR, RED "Failed to control Channel Number: " + channel_number + RESET_COLOR);
 		}
 	}
-};
+
+	// 3. Check if the topic is a channel state request
+	if(topicStr.endsWith("/state/request"))
+	{
+		if(payloadStr != "GET_STATE")
+		{
+			Logger::log(ERROR, RED "Invalid payload for channel state request" RESET_COLOR);
+			return;
+		}
+
+		std::vector<std::string> topic_parts = utils->splitString(topicStr.c_str(), '/');
+		if(topic_parts.size() < 5)
+		{
+			Logger::log(ERROR, RED "Invalid topic structure for channel state request" RESET_COLOR);
+			return;
+		}
+
+		std::string channel_number = topic_parts[topic_parts.size() - 3];
+		int channel_num;
+		try
+		{
+			channel_num = std::stoi(channel_number);
+		}
+		catch(const std::exception& e)
+		{
+			Logger::log(ERROR, RED "Invalid channel number: " + channel_number + RESET_COLOR);
+			return;
+		}
+
+		bool state = config->getChannelState(channel_num);
+
+		Logger::log(DEBUG, GREEN "Channel Number: " + channel_number + RESET_COLOR);
+		Logger::log(DEBUG, GREEN "State: " + String(state) + RESET_COLOR);
+
+		publishChannelState(channel_num, state);
+	}
+}
+
+void MQTTManager::publishChannelState(int channel_number, bool state)
+{
+	std::string topic = "user/" + *user_id + "/node/" + node_mac + "/channel/" + std::to_string(channel_number) + "/state";
+	std::string payload = state ? "ON" : "OFF";
+
+	if(mqttclient->publish(topic.c_str(), payload.c_str()))
+	{
+		Logger::log(INFO, GREEN "Channel state published successfully: " + std::to_string(channel_number) + " - " + payload + RESET_COLOR);
+	}
+	else
+	{
+		Logger::log(ERROR, RED "Failed to publish channel state: " + std::to_string(channel_number) + RESET_COLOR);
+	}
+}
 
 void MQTTManager::initializeMQTT()
 {
@@ -147,21 +173,15 @@ void MQTTManager::connectToMQTT()
 		mqttclient->subscribe(keep_alive_request_topic.c_str());
 		Logger::log(INFO, BLUE "Subscribed to topic: " + keep_alive_request_topic + RESET_COLOR);
 
-		// 2. Device registration request topic (user/<user_id>/node/<node_id>/device/register/request)
-		const std::string device_registration_request_topic = "user/" + *user_id + "/node/" + node_mac + "/device/register/request";
-		mqttclient->subscribe(device_registration_request_topic.c_str());
-		Logger::log(INFO, BLUE "Subscribed to topic: " + device_registration_request_topic + RESET_COLOR);
+		// 2. Channel control topic (user/<user_id>/node/<node_id>/channel/<channel_number>/control)
+		const std::string channel_control_request_topic = "user/" + *user_id + "/node/" + node_mac + "/channel/" + "+" + "/control";
+		mqttclient->subscribe(channel_control_request_topic.c_str());
+		Logger::log(INFO, BLUE "Subscribed to topic: " + channel_control_request_topic + RESET_COLOR);
 
-		// 3. Device unregistration request topic (user/<user_id>/node/<node_id>/device/unregister/request)
-		const std::string device_unregistration_request_topic = "user/" + *user_id + "/node/" + node_mac + "/device/unregister/request";
-		mqttclient->subscribe(device_unregistration_request_topic.c_str());
-		Logger::log(INFO, BLUE "Subscribed to topic: " + device_unregistration_request_topic + RESET_COLOR);
-
-		// 4. Device control request topic (user/<user_id>/node/<node_id>/device/<device_id>/control/request)
-		// We get registered device ids from the NVS `REG_DEVICE_IDS` key (it can also be null) (`;` separated)
-		const std::string device_control_request_topic = "user/" + *user_id + "/node/" + node_mac + "/device/" + "+" + "/control";
-		mqttclient->subscribe(device_control_request_topic.c_str());
-		Logger::log(INFO, BLUE "Subscribed to topic: " + device_control_request_topic + RESET_COLOR);
+		// 3. Channel request state topic (user/<user_id>/node/<node_id>/channel/<channel_number>/state/request)
+		const std::string channel_state_request_topic = "user/" + *user_id + "/node/" + node_mac + "/channel/" + "+" + "/state/request";
+		mqttclient->subscribe(channel_state_request_topic.c_str());
+		Logger::log(INFO, BLUE "Subscribed to topic: " + channel_state_request_topic + RESET_COLOR);
 	}
 	else
 	{

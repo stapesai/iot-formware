@@ -4,6 +4,7 @@
 // Path: src/Utils.cpp
 
 #include <Arduino.h>
+#include <ChannelMap.hpp>
 #include <Constants.hpp>
 #include <Utils.hpp>
 #include <nvs.h>

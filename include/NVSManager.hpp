@@ -31,6 +31,9 @@ private:
 	std::string mqtt_password;
 	std::string user_id;
 
+	// Store the current state of each channel
+	std::map<int, bool> channelStates;
+
 	const char* keys[8] = {"WIFI_SSID", "WIFI_PASSWORD", "MQTT_BROKER", "MQTT_PORT", "MQTT_USERNAME", "MQTT_PASSWORD", "USER_ID"};
 
 public:
@@ -96,16 +99,18 @@ public:
 		user_id = value;
 	}
 
-	bool registerNewDevice(const std::string& device_id, uint8_t channel_number);
-	bool unregisterDevice(const std::string& device_id);
-	std::string getChannelNumber(const std::string& device_id);
-	bool controlDevice(const std::string& device_id, bool target_state);
-
 	static void resetNVS();
 	bool isNVSEmpty();
 	void writeConfig();
 	void readConfig();
 	void intialiseNVS();
+
+	void saveChannelStates();
+	void loadChannelStates();
+	void updateChannelState(int channel, bool state);
+	bool getChannelState(int channel) const;
+
+	bool controlChannel(int channel_number, bool target_state);
 };
 
 #endif // NVS_MANAGER_HPP

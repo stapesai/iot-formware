@@ -14,6 +14,7 @@
 NVSManager::NVSManager()
 {
 	fields = {&wifi_ssid, &wifi_password, &mqtt_broker, &mqtt_port, &mqtt_username, &mqtt_password, &user_id};
+	channelStates.clear();
 }
 
 // Interrupt handler to reset the module
@@ -158,168 +159,83 @@ void NVSManager::readConfig()
 	nvs_close(nvs_handler);
 }
 
-bool NVSManager::registerNewDevice(const std::string& device_id, uint8_t channel_number)
+void NVSManager::saveChannelStates()
 {
-	// Check both device_id and channel_number are not empty
-	if(device_id.empty() || channel_number < 1 || channel_number > 11)
-	{
-		Logger::log(ERROR, RED "Device ID or channel number is empty" RESET_COLOR);
-		return false;
-	}
-
-	// Make a new key-value pair in NVS with KEY=device_id and VALUE=channel_number
-	nvs_handle_t nvs_handler;
 	if(nvs_open("storage", NVS_READWRITE, &nvs_handler) != ESP_OK)
 	{
-		Logger::log(ERROR, RED "Error opening NVS handle" RESET_COLOR);
-		return false;
+		Logger::log(ERROR, RED "Error opening NVS handle for channel states" RESET_COLOR);
+		return;
 	}
 
-	// If the key already exists, return false
-	// size_t required_size;
-	// if(nvs_get_str(nvs_handler, device_id.c_str(), NULL, &required_size) == ESP_OK)
-	// {
-	// 	Logger::log(ERROR, RED "Device ID already exists in NVS: " + String(device_id.c_str()) + RESET_COLOR);
-	// 	return false;
-	// }
-
-	// If the key does not exist, write the key-value pair
-	if(nvs_set_u8(nvs_handler, device_id.c_str(), channel_number) != ESP_OK)
+	for(const auto& channel : channelMap)
 	{
-		Logger::log(ERROR, RED "Error writing to NVS" RESET_COLOR);
-		nvs_close(nvs_handler);
-		return false;
+		std::string key = "CH_" + std::to_string(channel.first);
+		bool state = channelStates[channel.first];
+		if(nvs_set_u8(nvs_handler, key.c_str(), state ? 1 : 0) != ESP_OK)
+		{
+			Logger::log(ERROR, RED "Error writing channel state to NVS" RESET_COLOR);
+		}
 	}
 
-	// Commit the changes
 	if(nvs_commit(nvs_handler) == ESP_OK)
 	{
-		Logger::log(INFO, GREEN "NVS committed successfully" RESET_COLOR);
+		Logger::log(INFO, GREEN "Channel states committed to NVS successfully" RESET_COLOR);
 	}
 	else
 	{
-		Logger::log(ERROR, RED "Error committing NVS changes" RESET_COLOR);
-		nvs_close(nvs_handler);
-		return false;
+		Logger::log(ERROR, RED "Error committing channel states to NVS" RESET_COLOR);
 	}
-
-	// Close the NVS handle and return true
 	nvs_close(nvs_handler);
-	return true;
 }
 
-bool NVSManager::unregisterDevice(const std::string& device_id)
+void NVSManager::loadChannelStates()
 {
-	// Check both device_id is empty
-	if(device_id.empty())
-	{
-		Logger::log(ERROR, RED "Device ID or channel number is empty" RESET_COLOR);
-		return false;
-	}
-	// Remove the key-value pair from NVS with KEY=device_id
-	nvs_handle_t nvs_handler;
-	if(nvs_open("storage", NVS_READWRITE, &nvs_handler) != ESP_OK)
-	{
-		Logger::log(ERROR, RED "Error opening NVS handle" RESET_COLOR);
-		return false;
-	}
-
-	// If the key does not exist, return false
-	size_t required_size;
-	if(nvs_get_str(nvs_handler, device_id.c_str(), NULL, &required_size) != ESP_OK)
-	{
-		Logger::log(ERROR, RED "Device ID does not exist in NVS: " + String(device_id.c_str()) + RESET_COLOR);
-		return false;
-	}
-
-	// If the key exists, erase the key
-	if(nvs_erase_key(nvs_handler, device_id.c_str()) != ESP_OK)
-	{
-		Logger::log(ERROR, RED "Error erasing key from NVS" RESET_COLOR);
-		return false;
-	}
-
-	// Commit the changes
-	if(nvs_commit(nvs_handler) == ESP_OK)
-	{
-		Logger::log(INFO, GREEN "NVS committed successfully" RESET_COLOR);
-	}
-	else
-	{
-		Logger::log(ERROR, RED "Error committing NVS changes" RESET_COLOR);
-		return false;
-	}
-
-	// Close the NVS handle and return true
-	nvs_close(nvs_handler);
-	return true;
-}
-
-std::string NVSManager::getChannelNumber(const std::string& device_id)
-{
-	nvs_handle_t nvs_handler;
 	if(nvs_open("storage", NVS_READONLY, &nvs_handler) != ESP_OK)
 	{
-		Logger::log(ERROR, RED "Error opening NVS handle" RESET_COLOR);
-		return ""; // Return empty string if NVS open fails
+		Logger::log(ERROR, RED "Error opening NVS handle for channel states" RESET_COLOR);
+		return;
 	}
 
-	size_t required_size;
-	esp_err_t err = nvs_get_str(nvs_handler, device_id.c_str(), nullptr, &required_size);
-	if(err != ESP_OK)
+	for(const auto& channel : channelMap)
 	{
-		Logger::log(ERROR, RED "Error reading size for key '%s'\n" + device_id + RESET_COLOR + esp_err_to_name(err));
-		nvs_close(nvs_handler);
-		return ""; // Return empty string if key size read fails
-	}
-
-	// Allocate memory for value
-	char* value = (char*)malloc(required_size);
-	if(value == nullptr)
-	{
-		Logger::log(ERROR, RED "Error allocating memory for key '%s'\n" + device_id + RESET_COLOR);
-		nvs_close(nvs_handler);
-		return ""; // Return empty string if memory allocation fails
-	}
-
-	// Read the value
-	err = nvs_get_str(nvs_handler, device_id.c_str(), value, &required_size);
-	if(err == ESP_OK)
-	{
-		std::string result(value);
-		Logger::log(DEBUG, GREEN "Read from NVS: " + device_id + " = " + result + RESET_COLOR);
-		free(value); // Free allocated memory
-		nvs_close(nvs_handler);
-		return result; // Return the value as a string
-	}
-	else
-	{
-		Logger::log(ERROR, RED "Error reading value for key '%s': %s\n" + device_id + RESET_COLOR + esp_err_to_name(err));
-		free(value); // Free allocated memory
-		nvs_close(nvs_handler);
-		return ""; // Return empty string if value read fails
-	}
-}
-
-bool NVSManager::controlDevice(const std::string& device_id, bool state)
-{
-	nvs_handle_t nvs_handler;
-	if(nvs_open("storage", NVS_READONLY, &nvs_handler) != ESP_OK)
-	{
-		Logger::log(ERROR, RED "Error opening NVS handle" RESET_COLOR);
-		return false;
-	}
-
-	uint8_t channel_number;
-	if(nvs_get_u8(nvs_handler, device_id.c_str(), &channel_number) != ESP_OK)
-	{
-		Logger::log(ERROR, RED "Device not found" RESET_COLOR);
-		nvs_close(nvs_handler);
-		return false;
+		std::string key = "CH_" + std::to_string(channel.first);
+		uint8_t state;
+		if(nvs_get_u8(nvs_handler, key.c_str(), &state) == ESP_OK)
+		{
+			channelStates[channel.first] = (state == 1);
+			digitalWrite(channel.second.outputPin, channelStates[channel.first] ? HIGH : LOW);
+			Logger::log(INFO, GREEN "Loaded channel " + std::to_string(channel.first) + " state: " + std::to_string(state) + RESET_COLOR);
+		}
+		else
+		{
+			channelStates[channel.first] = false;
+			Logger::log(WARN, YELLOW "Channel " + std::to_string(channel.first) + " state not found in NVS, defaulting to OFF" RESET_COLOR);
+		}
 	}
 
 	nvs_close(nvs_handler);
+}
 
+void NVSManager::updateChannelState(int channel, bool state)
+{
+	channelStates[channel] = state;
+	saveChannelStates();
+}
+
+bool NVSManager::getChannelState(int channel) const
+{
+	auto it = channelStates.find(channel);
+	if(it != channelStates.end())
+	{
+		Logger::log(DEBUG, GREEN "Channel " + std::to_string(channel) + " state found: " + std::to_string(it->second) + RESET_COLOR);
+		return it->second;
+	}
+	Logger::log(WARN, YELLOW "Channel " + std::to_string(channel) + " state not found, defaulting to OFF" RESET_COLOR);
+	return false; // Default to OFF if channel is not found
+}
+
+bool NVSManager::controlChannel(int channel_number, bool target_state)
+{
 	auto it = channelMap.find(channel_number);
 	if(it == channelMap.end())
 	{
@@ -327,7 +243,10 @@ bool NVSManager::controlDevice(const std::string& device_id, bool state)
 		return false;
 	}
 
-	digitalWrite(it->second.outputPin, state ? HIGH : LOW);
-	Logger::log(INFO, GREEN "Device " + device_id + " (channel " + std::to_string(channel_number) + ") set to " + (state ? "ON" : "OFF") + RESET_COLOR);
+	digitalWrite(it->second.outputPin, target_state ? HIGH : LOW);
+	updateChannelState(channel_number, target_state);
+	Logger::log(INFO,
+				GREEN "Channel " + std::to_string(channel_number) + " (pin " + std::to_string(it->second.outputPin) + ") set to " + (target_state ? "ON" : "OFF") +
+					RESET_COLOR);
 	return true;
 }
