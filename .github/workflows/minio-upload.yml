@@ -40,5 +40,7 @@ jobs:
           set -o history
 
       - name: Upload to MinIO
+        env:
+          MINIO_BUCKET: ${{ secrets.MINIO_BUCKET }}
         run: |
-          mc cp firmware-esp32-${{ github.event.release.tag_name }}.bin myminio/${MINIO_BUCKET}/
+          mc cp firmware-esp32-${{ github.event.release.tag_name }}.bin myminio/$MINIO_BUCKET/firmware-esp32-${{ github.event.release.tag_name }}.bin
